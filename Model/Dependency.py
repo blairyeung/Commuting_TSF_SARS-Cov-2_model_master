@@ -5,6 +5,9 @@ import Parameters
 
 code_to_name = dict()
 county_data = np.zeros((Parameters.num_county, 3), dtype=int)
+matrix_by_class = np.array(dtype=np.array)
+matrix_by_class.resize((2, 4))
+
 
 def get_dependency_path():
     path = os.getcwd()[:-5] + 'Model Dependencies/'
@@ -16,7 +19,6 @@ def read_matrix():
         matrix: 16 * 16 float-valued np.array
         matrix_by_class: 2 * 4 np.array-valued list
     """
-    matrix_by_class = []
     read_path = get_dependency_path() + 'Matrix_IO/Matrix_by_Category/'
     for category in Parameters.matrix_categories:
         for contact in Parameters.matrix_contact:
