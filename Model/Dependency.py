@@ -5,10 +5,12 @@ import Parameters
 
 code_to_name = dict()
 county_data = np.zeros((Parameters.num_county, 3), dtype=int)
+matrix_by_class = [[], []]
 
 def get_dependency_path():
     path = os.getcwd()[:-5] + 'Model Dependencies/'
     return path
+
 
 def read_matrix():
     # TODO: Read the matrices in the form of 2D np.array, and put them in a 2D list.
@@ -16,13 +18,25 @@ def read_matrix():
         matrix: 16 * 16 float-valued np.array
         matrix_by_class: 2 * 4 np.array-valued list
     """
-    matrix_by_class = []
     read_path = get_dependency_path() + 'Matrix_IO/Matrix_by_Category/'
     for category in Parameters.matrix_categories:
         for contact in Parameters.matrix_contact:
+            matrix = np.zeros((Parameters.matrix_size, Parameters.matrix_size), dtype=float)
             matrix_path = read_path + category + '/' + contact + '/' + Parameters.matrix_country_ISO + '.csv'
-            print(matrix_path)
+            with open(matrix_path) as file:
+                contents = file.read()
+            lines = contents.split('\n')
+            for i in range(1, len(lines) - 1):
+                elements = lines[i].split(',')[1:]
+                for j in range(Parameters.matrix_size):
+                    matrix[i-1][j] = float(elements[j])
+                print(matrix)
+            file.close()
+            cate_ind = Parameters.matrix_categories.index(category)
+            cont_ind = Parameters.matrix_contact.index(contact)
+            matrix_by_class[cate_ind][cont_ind] = matrix
     return
+
 
 def read_county_data():
     """
@@ -35,10 +49,11 @@ def read_county_data():
     with open(read_path) as file:
         contents = file.read()
     lines = contents.split('\n')
-    for line in range(1, len(lines)-1):
+    for line in range(1, len(lines) - 1):
         elements = lines[line].split(',')
-        county_data[line-1] = [elements[0], elements[5], elements[4]]
+        county_data[line - 1] = [elements[0], elements[5], elements[4]]
         code_to_name[elements[0]] = elements[1]
     return
 
-read_county_data()
+read_matrix()
+
