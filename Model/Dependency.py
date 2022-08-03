@@ -3,6 +3,8 @@ import numpy as np
 
 import Parameters
 
+code_to_name = dict()
+county_data = np.zeros((Parameters.num_county, 3), dtype=int)
 
 def get_dependency_path():
     path = os.getcwd()[:-5] + 'Model Dependencies/'
@@ -25,9 +27,19 @@ def read_matrix():
 def read_county_data():
     # TODO: Read the data of each county in 2D np.array
     """
-        county_data: 520 * 4 float-valued np.array
+        county_data: 520 * 3 float-valued np.array
+        county_data[.][0] is the county code
+        county_data[.][1] is the district code
+        county_data[.][2] is the population code
     """
-    county_data = np.array([520, 4])
+    read_path = get_dependency_path() + 'GeoCode.csv'
+    with open(read_path) as file:
+        contents = file.read()
+    lines = contents.split('\n')
+    for line in range(1, len(lines)-1):
+        elements = lines[line].split(',')
+        county_data[line-1] = [elements[0], elements[5], elements[4]]
+        code_to_name[elements[0]] = elements[1]
     return
 
-read_matrix()
+read_county_data()
