@@ -5,7 +5,7 @@ import Parameters
 
 code_to_name = dict()
 county_data = np.zeros((Parameters.num_county, 3), dtype=int)
-matrix_by_class = [[], []]
+matrix_by_class = [[None] * 4, [None] * 4]
 
 def get_dependency_path():
     path = os.getcwd()[:-5] + 'Model Dependencies/'
@@ -53,7 +53,9 @@ def read_county_data():
         elements = lines[line].split(',')
         county_data[line - 1] = [elements[0], elements[5], elements[4]]
         code_to_name[elements[0]] = elements[1]
+    file.close()
     return
 
 read_matrix()
+read_county_data()
 
