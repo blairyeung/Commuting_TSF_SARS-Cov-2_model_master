@@ -25,12 +25,11 @@ def read_matrix():
     return
 
 def read_county_data():
-    # TODO: Read the data of each county in 2D np.array
     """
         county_data: 520 * 3 float-valued np.array
-        county_data[.][0] is the county code
-        county_data[.][1] is the district code
-        county_data[.][2] is the population code
+        county_data[0:520][0] is the county code
+        county_dstata[0:520][1] is the district code
+        county_data[0:520][2] is the population code
     """
     read_path = get_dependency_path() + 'GeoCode.csv'
     with open(read_path) as file:
