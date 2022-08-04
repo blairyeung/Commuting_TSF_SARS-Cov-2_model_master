@@ -18,7 +18,7 @@ phu_to_code = dict()
 code_to_index = dict()
 
 band_to_population = dict()
-date_to_cases_by_phu = []
+date_to_cases_by_phu = dict()
 
 
 def get_dependency_path():
@@ -125,6 +125,13 @@ def read_age():
 
 
 def read_cases():
+    # TODO: Read the file 'All case trends data.csv' to a dictionary in the following form
+    """
+        date_to_cases_by_phu = {'Eastern Ontario Health Unit': sub_arary = np.array, ... }
+        where sub_arary is a one-dimensional array, in the form of
+        sub_arary = [0.7, ...] where each entry is the ratio of infection
+    :return:
+    """
     read_path = get_dependency_path() + 'All case trends data.csv'
     with open(read_path) as file:
         contents = file.read()
