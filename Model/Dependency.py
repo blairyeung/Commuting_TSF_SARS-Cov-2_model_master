@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 import numpy as np
 
@@ -6,11 +7,11 @@ import Parameters
 county_data = np.zeros((Parameters.num_county, 3), dtype=int)
 commute_matrix = np.zeros((Parameters.num_county, Parameters.num_county), dtype=int)
 
+total_days = 0
 
 age_to_population = list()
 county_codes = list()
 matrix_by_class = [[None] * 4, [None] * 4]
-
 
 code_to_name = dict()
 code_to_phu = dict()
@@ -19,6 +20,7 @@ code_to_index = dict()
 
 band_to_population = dict()
 date_to_cases_by_phu = dict()
+date_to_vaccines_by_age = np.zeros((0, 9, 3))
 
 
 def get_dependency_path():
@@ -36,6 +38,7 @@ def read_files():
     read_commute_matrix()
     read_age()
     read_cases()
+    read_vaccine()
 
 
 def read_matrix():
@@ -54,7 +57,7 @@ def read_matrix():
             for i in range(1, len(lines) - 1):
                 elements = lines[i].split(',')[1:]
                 for j in range(Parameters.matrix_size):
-                    matrix[i-1][j] = float(elements[j])
+                    matrix[i - 1][j] = float(elements[j])
             file.close()
             cate_ind = Parameters.matrix_categories.index(category)
             cont_ind = Parameters.matrix_contact.index(contact)
@@ -89,7 +92,7 @@ def read_phu():
         contents = file.read()
     lines = contents.split('\n')
     for line in range(1, len(lines) - 1):
-        elements = [lines[line][:lines[line].index(',')], lines[line][lines[line].index(',')+1:]]
+        elements = [lines[line][:lines[line].index(',')], lines[line][lines[line].index(',') + 1:]]
         code_to_phu[int(elements[0])] = elements[1]
         if elements[1] not in phu_to_code:
             phu_to_code[elements[1]] = [elements[0]]
@@ -125,23 +128,107 @@ def read_age():
 
 
 def read_cases():
-    # TODO: Read the file 'All case trends data.csv' to a dictionary in the following form
     """
-        date_to_cases_by_phu = {'Eastern Ontario Health Unit': sub_arary = np.array, ... }
-        where sub_arary is a one-dimensional array, in the form of
-        sub_arary = [0.7, ...] where each entry is the ratio of infection
-    :return:
+           date_to_cases_by_phu = {'Eastern Ontario Health Unit': sub_arary = np.array, ... }
+           where sub_arary is a one-dimensional array, in the form of
+           sub_arary = [0.7, ...] where each entry is the ratio of infection
+       :return:
     """
     read_path = get_dependency_path() + 'All case trends data.csv'
     with open(read_path) as file:
         contents = file.read()
     lines = contents.split('\n')
+
+    find_max_date()
+
     for line in range(1, len(lines) - 1):
         elements = lines[line].split(',')
-        print(elements)
+        string = elements[0]
+        this_day = datetime.strptime(string, '%d-%b-%y')
+        after_outbreak = (this_day - Parameters.first_day).days
+        phu = elements[1]
+        if phu == 'Ontario':
+            pass
+        else:
+            if phu not in date_to_cases_by_phu:
+                date_to_cases_by_phu[phu] = [0] * total_days
+            else:
+                if elements[7] == '-':
+                    date_to_cases_by_phu[phu][after_outbreak] = 0
+                else:
+                    date_to_cases_by_phu[phu][after_outbreak] = float(elements[7])
     file.close()
     return
 
 
+def read_vaccine():
+    # TODO: Read the file in a 2D array
+    read_path = get_dependency_path() + 'vaccines_by_age.csv'
+    with open(read_path) as file:
+        contents = file.read()
+    lines = contents.split('\n')
+
+    find_max_date()
+
+    global date_to_vaccines_by_age
+    date_to_vaccines_by_age = np.zeros((total_days, 9, 3))
+    for line in range(1, len(lines) - 1):
+        elements = lines[line].split(',')
+        string = elements[0]
+        this_day = datetime.strptime(string, '%m/%d/%Y')
+        after_outbreak = (this_day - Parameters.first_day).days
+        band = elements[1]
+
+        for i in [7, 8, 9]:
+            if elements[i] == '':
+                elements[i] = 0
+
+        if band in Parameters.vaccine_age_band:
+            date_to_vaccines_by_age[after_outbreak-1][Parameters.vaccine_age_band.index(band)] = [float(elements[7]),
+                                                                                            float(elements[8]),
+                                                                                            float(elements[9])]
+    file.close()
+
+    if min(len(lines) - 1, total_days) != total_days:
+        for i in range(total_days, len(lines) - 1):
+            date_to_vaccines_by_age[i][Parameters.vaccine_age_band.index(band)] = \
+                date_to_vaccines_by_age[total_days][Parameters.vaccine_age_band.index(band)]
+    return
+
+
+def find_max_date():
+    read_path = get_dependency_path() + 'All case trends data.csv'
+    with open(read_path) as file:
+        contents = file.read()
+    lines = contents.split('\n')
+    global total_days
+
+    # First we count the number of total days:
+    max_size = 0
+    for line in range(1, len(lines) - 1):
+        elements = lines[line].split(',')
+        string = elements[0]
+        this_day = datetime.strptime(string, '%d-%b-%y')
+        after_outbreak = (this_day - Parameters.first_day).days
+        max_size = max(after_outbreak, max_size)
+
+    total_days = max_size
+
+    file.close()
+
+    read_path = get_dependency_path() + 'vaccines_by_age.csv'
+    with open(read_path) as file:
+        contents = file.read()
+    lines = contents.split('\n')
+    max_size = 0
+    for line in range(1, len(lines) - 1):
+        elements = lines[line].split(',')
+        string = elements[0]
+        this_day = datetime.strptime(string, '%m/%d/%Y')
+        after_outbreak = (this_day - Parameters.first_day).days
+        max_size = max(after_outbreak, max_size)
+
+    total_days = max(max_size, total_days)
+
+
 read_files()
-print(phu_to_code)
