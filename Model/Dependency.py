@@ -4,11 +4,17 @@ import numpy as np
 import Parameters
 
 county_data = np.zeros((Parameters.num_county, 3), dtype=int)
-matrix_by_class = [[None] * 4, [None] * 4]
+commute_matrix = np.zeros((Parameters.num_county, Parameters.num_county), dtype=int)
 
+county_codes = list()
+matrix_by_class = [[None] * 4, [None] * 4]
 
 code_to_name = dict()
 code_to_phu = dict()
+code_to_index = dict()
+
+age_to_population = list()
+band_to_population = dict()
 
 
 def get_dependency_path():
@@ -47,10 +53,10 @@ def read_county_data():
     """
         county_data: 520 * 3 float-valued np.array
         county_data[0:520][0] is the county code
-        county_dstata[0:520][1] is the district code
+        county_data[0:520][1] is the district code
         county_data[0:520][2] is the population code
     """
-    read_path = get_dependency_path() + 'GeoCode.csv'
+    read_path = get_dependency_path() + 'Ontario_county_data.csv'
     with open(read_path) as file:
         contents = file.read()
     lines = contents.split('\n')
@@ -58,6 +64,8 @@ def read_county_data():
         elements = lines[line].split(',')
         county_data[line - 1] = [elements[0], elements[5], elements[4]]
         code_to_name[elements[0]] = elements[1]
+        county_codes.append(elements[0])
+        code_to_index[elements[0]] = line - 1
     file.close()
     return
 
@@ -75,9 +83,32 @@ def read_phu():
 
 
 def read_commute_matrix():
+    read_path = get_dependency_path() + 'Ontario_commute.csv'
+    with open(read_path) as file:
+        contents = file.read()
+    lines = contents.split('\n')
+    for line in range(1, len(lines) - 1):
+        elements = lines[line].split(',')
+        commute_matrix[code_to_index[elements[0]]][code_to_index[elements[2]]] = int(elements[6])
+    file.close()
+    return
+
+
+def read_age():
+    read_path = get_dependency_path() + 'population_by_age.csv'
+    with open(read_path) as file:
+        contents = file.read()
+    lines = contents.split('\n')
+    for line in range(1, len(lines) - 1):
+        elements = lines[line].split(',')
+        age_to_population.append(float(elements[1]))
+        band_to_population[elements[0]] = float(elements[1])
+    file.close()
     return
 
 
 read_matrix()
 read_county_data()
 read_phu()
+read_commute_matrix()
+read_age()
