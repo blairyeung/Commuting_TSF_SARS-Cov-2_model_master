@@ -4,8 +4,6 @@
 
 ver = '1.0'
 
-
-
 """
     Matrix constants
 """
@@ -20,6 +18,7 @@ matrix_country_ISO = 'CA'
 province_name = 'Ontario'
 num_phu = 34
 num_county = 528
+num_district = 49
 
 """
     Epidemiological constants

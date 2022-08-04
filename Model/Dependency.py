@@ -3,17 +3,23 @@ import numpy as np
 
 import Parameters
 
-code_to_name = dict()
 county_data = np.zeros((Parameters.num_county, 3), dtype=int)
 matrix_by_class = [[None] * 4, [None] * 4]
 
+
+code_to_name = dict()
+code_to_phu = dict()
+
+
 def get_dependency_path():
+    """
+    :return: path of the dependency files
+    """
     path = os.getcwd()[:-5] + 'Model Dependencies/'
     return path
 
 
 def read_matrix():
-    # TODO: Read the matrices in the form of 2D np.array, and put them in a 2D list.
     """
         matrix: 16 * 16 float-valued np.array
         matrix_by_class: 2 * 4 np.array-valued list
@@ -30,7 +36,6 @@ def read_matrix():
                 elements = lines[i].split(',')[1:]
                 for j in range(Parameters.matrix_size):
                     matrix[i-1][j] = float(elements[j])
-                print(matrix)
             file.close()
             cate_ind = Parameters.matrix_categories.index(category)
             cont_ind = Parameters.matrix_contact.index(contact)
@@ -56,6 +61,19 @@ def read_county_data():
     file.close()
     return
 
+
+def read_phu():
+    read_path = get_dependency_path() + 'district_to_phu.csv'
+    with open(read_path) as file:
+        contents = file.read()
+    lines = contents.split('\n')
+    for line in range(1, len(lines) - 1):
+        elements = lines[line].split(',')
+        code_to_phu[int(elements[0])] = elements[1]
+    file.close()
+    return
+
+
 read_matrix()
 read_county_data()
-
+read_phu()
