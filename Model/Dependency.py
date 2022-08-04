@@ -2,6 +2,7 @@ from datetime import datetime
 import os
 import numpy as np
 
+import Gaussian
 import Parameters
 
 county_data = np.zeros((Parameters.num_county, 3), dtype=int)
@@ -20,7 +21,7 @@ code_to_index = dict()
 
 band_to_population = dict()
 date_to_cases_by_phu = dict()
-date_to_vaccines_by_age = np.zeros((0, 9, 3))
+date_to_vaccines_by_age = np.zeros((0, 3, 9))
 
 
 def get_dependency_path():
@@ -39,6 +40,8 @@ def read_files():
     read_age()
     read_cases()
     read_vaccine()
+    differentiate(date_to_vaccines_by_age)
+    reshape_vaccine()
 
 
 def read_matrix():
@@ -171,7 +174,7 @@ def read_vaccine():
     find_max_date()
 
     global date_to_vaccines_by_age
-    date_to_vaccines_by_age = np.zeros((total_days, 9, 3))
+    date_to_vaccines_by_age = np.zeros((total_days, 3, 9))
     for line in range(1, len(lines) - 1):
         elements = lines[line].split(',')
         string = elements[0]
@@ -184,15 +187,43 @@ def read_vaccine():
                 elements[i] = 0
 
         if band in Parameters.vaccine_age_band:
-            date_to_vaccines_by_age[after_outbreak-1][Parameters.vaccine_age_band.index(band)] = [float(elements[7]),
-                                                                                            float(elements[8]),
-                                                                                            float(elements[9])]
+            date_to_vaccines_by_age[after_outbreak-1][0][Parameters.vaccine_age_band.index(band)] = float(elements[7])
+            date_to_vaccines_by_age[after_outbreak-1][1][Parameters.vaccine_age_band.index(band)] = float(elements[8])
+            date_to_vaccines_by_age[after_outbreak-1][2][Parameters.vaccine_age_band.index(band)] = float(elements[9])
+
     file.close()
 
     if min(len(lines) - 1, total_days) != total_days:
         for i in range(total_days, len(lines) - 1):
-            date_to_vaccines_by_age[i][Parameters.vaccine_age_band.index(band)] = \
-                date_to_vaccines_by_age[total_days][Parameters.vaccine_age_band.index(band)]
+            date_to_vaccines_by_age[i] = date_to_vaccines_by_age[total_days]
+    return
+
+
+def reshape_vaccine():
+    """
+    reshape the 10-years age band into 5-years age band
+    :return:
+    """
+
+    global date_to_vaccines_by_age
+    reshaped = np.zeros((total_days, 3, 16))
+
+    # TODO: Do something
+    for date in range(total_days):
+        for dose in [0, 1, 2]:
+            lst = date_to_vaccines_by_age[date][dose]
+            # Gaussian.age_dog_algo(lst)
+
+    date_to_vaccines_by_age = reshaped
+    return
+
+
+def differentiate(arr):
+    """
+        Find the increment of a time-series data
+    :param arr:
+    :return:
+    """
     return
 
 
