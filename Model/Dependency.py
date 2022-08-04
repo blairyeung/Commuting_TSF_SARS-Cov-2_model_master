@@ -6,15 +6,19 @@ import Parameters
 county_data = np.zeros((Parameters.num_county, 3), dtype=int)
 commute_matrix = np.zeros((Parameters.num_county, Parameters.num_county), dtype=int)
 
+
+age_to_population = list()
 county_codes = list()
 matrix_by_class = [[None] * 4, [None] * 4]
 
+
 code_to_name = dict()
 code_to_phu = dict()
+phu_to_code = dict()
 code_to_index = dict()
 
-age_to_population = list()
 band_to_population = dict()
+date_to_cases_by_phu = []
 
 
 def get_dependency_path():
@@ -23,6 +27,15 @@ def get_dependency_path():
     """
     path = os.getcwd()[:-5] + 'Model Dependencies/'
     return path
+
+
+def read_files():
+    read_matrix()
+    read_county_data()
+    read_phu()
+    read_commute_matrix()
+    read_age()
+    read_cases()
 
 
 def read_matrix():
@@ -78,6 +91,10 @@ def read_phu():
     for line in range(1, len(lines) - 1):
         elements = [lines[line][:lines[line].index(',')], lines[line][lines[line].index(',')+1:]]
         code_to_phu[int(elements[0])] = elements[1]
+        if elements[1] not in phu_to_code:
+            phu_to_code[elements[1]] = [elements[0]]
+        else:
+            phu_to_code[elements[1]].append(elements[0])
     file.close()
     return
 
@@ -107,9 +124,17 @@ def read_age():
     return
 
 
-read_matrix()
-read_county_data()
-read_phu()
-read_commute_matrix()
-read_age()
-print(code_to_phu)
+def read_cases():
+    read_path = get_dependency_path() + 'All case trends data.csv'
+    with open(read_path) as file:
+        contents = file.read()
+    lines = contents.split('\n')
+    for line in range(1, len(lines) - 1):
+        elements = lines[line].split(',')
+        print(elements)
+    file.close()
+    return
+
+
+read_files()
+print(phu_to_code)
