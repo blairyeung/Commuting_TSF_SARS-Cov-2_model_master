@@ -74,6 +74,10 @@ def read_phu():
     return
 
 
+def read_commute_matrix():
+    return
+
+
 read_matrix()
 read_county_data()
 read_phu()
