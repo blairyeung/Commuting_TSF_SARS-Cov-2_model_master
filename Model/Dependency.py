@@ -76,7 +76,7 @@ def read_phu():
         contents = file.read()
     lines = contents.split('\n')
     for line in range(1, len(lines) - 1):
-        elements = lines[line].split(',')
+        elements = [lines[line][:lines[line].index(',')], lines[line][lines[line].index(',')+1:]]
         code_to_phu[int(elements[0])] = elements[1]
     file.close()
     return
@@ -112,3 +112,4 @@ read_county_data()
 read_phu()
 read_commute_matrix()
 read_age()
+print(code_to_phu)
