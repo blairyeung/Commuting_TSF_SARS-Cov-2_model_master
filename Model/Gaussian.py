@@ -9,7 +9,7 @@ def difference_of_gaussian(lst):
     """
     simga_1 = 0.01
     sigma_2 = 0.8
-    age_bands = [5, 12, 18, 29, 39, 49, 59, 69, 79, 89]
+    age_bands = [5, 12, 18, 30, 40, 50, 60, 70, 80, 90]
 
     for age in range(100):
         cuml = 0
