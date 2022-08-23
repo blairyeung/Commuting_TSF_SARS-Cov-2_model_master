@@ -40,8 +40,8 @@ def read_files():
     read_age()
     read_cases()
     read_vaccine()
-    differentiate(date_to_vaccines_by_age)
     reshape_vaccine()
+    differentiate()
 
 
 def read_matrix():
@@ -211,25 +211,38 @@ def reshape_vaccine():
     global date_to_vaccines_by_age
     reshaped = np.zeros((total_days, 3, 16))
 
-    # TODO: Send the original array to Gaussian.difference_of_gaussian and it will return the correct shape
     for date in range(total_days):
         for dose in [0, 1, 2]:
             lst = date_to_vaccines_by_age[date][dose]
-            print(lst)
+            # print(lst)
             lst = Gaussian.age_dog_algo(lst)
-            reshaped[dose] = lst
-            print(lst)
+            reshaped[date][dose] = lst
+            # print(dose, lst)
 
     date_to_vaccines_by_age = reshaped
     return
 
 
-def differentiate(arr):
+def differentiate():
     """
-        Find the increment of a time-series data
-    :param arr:
+    Find the increment of a time-series data
     :return:
     """
+
+    global date_to_vaccines_by_age
+    differentiated = np.zeros((total_days, 3, 16))
+    for dose in [0, 1, 2]:
+        for age in range(Parameters.matrix_size):
+            yesterday_cuml = 0.0
+            for date in range(total_days):
+                today_cuml = date_to_vaccines_by_age[date][dose][age]
+                delta = today_cuml - yesterday_cuml
+                date_to_vaccines_by_age[date][dose][age] = delta
+                yesterday_cuml = today_cuml
+
+    date_to_vaccines_by_age = differentiated
+    return
+
     return
 
 
