@@ -8,7 +8,6 @@ def difference_of_gaussian(lst):
         Perform difference of Gaussian ()
         :param lst:
         :return:
-        TODO: Return it in 16 array
     """
     sigma_1 = 10
     sigma_2 = 30

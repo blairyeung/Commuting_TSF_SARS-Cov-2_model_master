@@ -165,7 +165,6 @@ def read_cases():
 
 
 def read_vaccine():
-    # TODO: Read the file in a 2D array
     read_path = get_dependency_path() + 'vaccines_by_age.csv'
     with open(read_path) as file:
         contents = file.read()
