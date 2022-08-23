@@ -134,7 +134,7 @@ def read_cases():
     """
            date_to_cases_by_phu = {'Eastern Ontario Health Unit': sub_arary = np.array, ... }
            where sub_arary is a one-dimensional array, in the form of
-           sub_arary = [0.7, ...] where each entry is the ratio of infection
+           sub_array = [0.7, ...] where each entry is the ratio of infection
        :return:
     """
     read_path = get_dependency_path() + 'All case trends data.csv'
