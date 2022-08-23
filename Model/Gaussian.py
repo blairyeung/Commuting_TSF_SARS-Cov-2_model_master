@@ -1,17 +1,21 @@
 import math
 
+import Parameters
+
 
 def difference_of_gaussian(lst):
     """
         Perform difference of Gaussian ()
         :param lst:
         :return:
+        TODO: Return it in 16 array
     """
-    simga_1 = 1
-    sigma_2 = 0.8
+    sigma_1 = 10
+    sigma_2 = 30
     age_bands = [5, 12, 18, 30, 40, 50, 60, 70, 80, 90]
-    cont_dist = [0] * 100
-    for age in range(100):
+    cont_dist = [0] * 90
+    discr_dist = [0] * Parameters.matrix_size
+    for age in range(90):
         cuml = 0
         for mu in range(len(age_bands)-1):
             val = lst[mu]
@@ -19,29 +23,47 @@ def difference_of_gaussian(lst):
             diff = age - mean
             beta = 1.0
             sqrtpi = math.sqrt(math.pi)
-            add = (beta * math.e ** (- (diff ** 2.0) / (2.0 * (simga_1 ** 2.0)))) / (simga_1 * sqrtpi) * val
-            # minus = - (beta * math.e ** (- (diff ** 2.0) / (2.0 * (sigma_2 ** 2.0)))) / (sigma_2 * sqrtpi) * val
+            add = (beta * math.e ** (- (diff ** 2.0) / (2.0 * (sigma_1 ** 2.0)))) / (sigma_1 * sqrtpi) * val
+            minus = - (beta * math.e ** (- (diff ** 2.0) / (2.0 * (sigma_2 ** 2.0)))) / (sigma_2 * sqrtpi) * val
             minus = 0
             cuml += (add + minus)
         cont_dist[age] = cuml
 
-    tot_unormalized = sum(cont_dist)
-    tot_org = sum(lst)
-    for age in range(100):
-        cont_dist[age] * (tot_unormalized / tot_org)
-    print(cont_dist)
-    return
+    for age in range(90):
+        cont_dist[age] = cont_dist[age] * 6.7
+
+    matrix_16_bands = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 90]
+    for i in range(Parameters.matrix_size):
+        discr_dist[i] = integrate(cont_dist, matrix_16_bands[i], matrix_16_bands[i+1])
+
+    # Compensation for the last entry for not having a right approximation
+    discr_dist[15] *= 1.24
+
+    for i in discr_dist:
+        # print(i)
+        pass
+
+    return discr_dist
 
 
-def integrate(begin: int, end: int):
-    return
+def integrate(lst: list, begin: int, end: int):
+    tot = sum(lst[begin:end]) / (end - begin)
+    return tot
 
 
 def age_dog_algo(lst):
     if sum(lst) == 0:
         return [0.0] * 16
     else:
-        cont_dist = difference_of_gaussian(lst)
-    return
+        return difference_of_gaussian(lst)
 
-age_dog_algo([0, 1, 0, 1, 0, 0, 0 ,0 ,0])
+age_dog_algo([0.9999
+, 0.9999
+, 0.9999
+, 0.9999
+, 0.9999
+, 0.9999
+, 0.9999
+, 0.9999
+, 0.9999
+])
