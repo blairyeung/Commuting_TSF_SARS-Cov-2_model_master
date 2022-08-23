@@ -187,9 +187,9 @@ def read_vaccine():
                 elements[i] = 0
 
         if band in Parameters.vaccine_age_band:
-            date_to_vaccines_by_age[after_outbreak-1][0][Parameters.vaccine_age_band.index(band)] = float(elements[7])
-            date_to_vaccines_by_age[after_outbreak-1][1][Parameters.vaccine_age_band.index(band)] = float(elements[8])
-            date_to_vaccines_by_age[after_outbreak-1][2][Parameters.vaccine_age_band.index(band)] = float(elements[9])
+            date_to_vaccines_by_age[after_outbreak-1][0][Parameters.vaccine_age_band.index(band)] = float(elements[2])
+            date_to_vaccines_by_age[after_outbreak-1][1][Parameters.vaccine_age_band.index(band)] = float(elements[3])
+            date_to_vaccines_by_age[after_outbreak-1][2][Parameters.vaccine_age_band.index(band)] = float(elements[4])
 
     file.close()
 
@@ -212,7 +212,7 @@ def reshape_vaccine():
     for date in range(total_days):
         for dose in [0, 1, 2]:
             lst = date_to_vaccines_by_age[date][dose]
-            # Gaussian.age_dog_algo(lst)
+            Gaussian.age_dog_algo(lst)
 
     date_to_vaccines_by_age = reshaped
     return
