@@ -157,7 +157,7 @@ def read_cases():
                 date_to_cases_by_phu[phu] = [0] * total_days
             else:
                 if elements[7] == '-':
-                    date_to_cases_by_phu[phu][after_outbreak] = 0
+                    date_to_cases_by_phu[phu][after_outbreak] = 0.0
                 else:
                     date_to_cases_by_phu[phu][after_outbreak] = float(elements[7])
     file.close()
@@ -213,10 +213,8 @@ def reshape_vaccine():
     for date in range(total_days):
         for dose in [0, 1, 2]:
             lst = date_to_vaccines_by_age[date][dose]
-            # print(lst)
             lst = Gaussian.age_dog_algo(lst)
             reshaped[date][dose] = lst
-            # print(dose, lst)
 
     date_to_vaccines_by_age = reshaped
     return
@@ -229,7 +227,7 @@ def differentiate():
     """
 
     global date_to_vaccines_by_age
-    differentiated = np.zeros((total_days, 3, 16))
+    vaccine_differentiated = np.zeros((total_days, 3, 16))
     for dose in [0, 1, 2]:
         for age in range(Parameters.matrix_size):
             yesterday_cuml = 0.0
@@ -239,7 +237,22 @@ def differentiate():
                 date_to_vaccines_by_age[date][dose][age] = delta
                 yesterday_cuml = today_cuml
 
-    date_to_vaccines_by_age = differentiated
+    date_to_vaccines_by_age = vaccine_differentiated
+
+    global date_to_cases_by_phu
+
+    cases_differentiated = dict()
+    for phu in date_to_cases_by_phu:
+        phu_data = date_to_cases_by_phu[phu]
+        yesterday_cuml = 0.0
+        for date in range(total_days):
+            today_cuml = phu_data[date]
+            delta = today_cuml - yesterday_cuml
+            phu_data[date] = delta
+            yesterday_cuml = today_cuml
+
+    date_to_cases_by_phu = cases_differentiated
+
     return
 
     return
