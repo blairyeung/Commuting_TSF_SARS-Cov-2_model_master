@@ -255,9 +255,6 @@ def differentiate():
 
     return
 
-    return
-
-
 def find_max_date():
     read_path = get_dependency_path() + 'All case trends data.csv'
     with open(read_path) as file:
