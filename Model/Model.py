@@ -26,29 +26,30 @@ class ModelData:
         """
             Initialize the tensors
             shape=(x, y, z)
+            Here, it should be (528 * y * 16)
             x = number of counties
             y = number of days to forecast + dates elapsed since Covid outbreak
             z = 16 age bands
         """
         self._initialize_dependencies()
         self._time_series_len = self.dependency.total_days + forecast_days
+        x = len(self.dependency.county_data)
+        y = self._time_series_len
+        z = 16
 
-        x = self._time_series_len
-        y = 16
-
-        print(self._time_series_len)
-        self._time_series_infected = np.zeros(shape=(x, y), dtype=int)
-        self._time_series_exposed = np.zeros(shape=(x, y), dtype=int)
-        self._time_series_active_cases = np.zeros(shape=(x, y), dtype=int)
-        self._time_series_clinical_cases = np.zeros(shape=(x, y), dtype=int)
-        self._time_series_sub_clinical_cases = np.zeros(shape=(x, y), dtype=int)
-        self._time_series_recovered = np.zeros(shape=(x, y), dtype=int)
-        self._time_series_deaths = np.zeros(shape=(x, y), dtype=int)
+        # print(self._time_series_len)
+        self._time_series_infected = np.zeros(shape=(x, y, z), dtype=int)
+        self._time_series_exposed = np.zeros(shape=(x, y, z), dtype=int)
+        self._time_series_active_cases = np.zeros(shape=(x, y, z), dtype=int)
+        self._time_series_clinical_cases = np.zeros(shape=(x, y, z), dtype=int)
+        self._time_series_sub_clinical_cases = np.zeros(shape=(x, y, z), dtype=int)
+        self._time_series_recovered = np.zeros(shape=(x, y, z), dtype=int)
+        self._time_series_deaths = np.zeros(shape=(x, y, z), dtype=int)
 
     def _initialize_dependencies(self):
         self.dependency = Dependency.Dependency()
         # self.dependency.read_files()
-        print(self.dependency.county_data)
+        # print(self.dependency.county_data)
 
 
 class Model:
