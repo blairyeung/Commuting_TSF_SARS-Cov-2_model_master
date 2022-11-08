@@ -30,7 +30,7 @@ class Model:
         kernel = Parameters.EXP2ACT_CONVOLUTION_KERNEL
         kernel = kernel.reshape((kernel.shape[0], 1))
         kernel_size = kernel.shape[0]
-        rslt = np.sum( np.multiply(self._time_series_active_cases[date-kernel_size:date],
+        rslt = np.sum(np.multiply(self._time_series_active_cases[date-kernel_size:date],
                                    kernel), axis=0)
 
         self._time_series_active_cases[date] = rslt
