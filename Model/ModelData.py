@@ -50,7 +50,7 @@ class ModelData:
         self._time_series_deaths = np.zeros(shape=(x, y, z), dtype=int)
 
     def exposed_to_cases(self, date):
-        kernel = Parameters.E2I_CONVOLUTION_KERNEL
+        kernel = Parameters.E2I_CONVOLUTION_KERNELh
         self._time_series_active_cases[date] = self._time_series_exposed[date - 3]
         self._time_series_clinical_cases[date] = np.multiply(self._time_series_active_cases[date],
                                                              Parameters.clinical_rate)

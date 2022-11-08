@@ -1,6 +1,9 @@
 """
     Version
 """
+from scipy.stats import gamma
+import matplotlib.pyplot as plt
+import numpy as np
 import datetime
 
 ver = '1.0'
@@ -48,12 +51,14 @@ vaccine_age_band = ['05-11yrs', '12-17yrs', '18-29yrs', '30-39yrs', '40-49yrs', 
 """
     Convolution kernels
 """
-E2I_CONVOLUTION_KERNEL = []
-E2I_CONVOLUTION_KERNEL = []
-E2I_CONVOLUTION_KERNEL = []
-E2I_CONVOLUTION_KERNEL = []
-E2I_CONVOLUTION_KERNEL = []
-E2I_CONVOLUTION_KERNEL = []
-E2I_CONVOLUTION_KERNEL = []
+
+x = np.linspace(0, 40, 100)
+E2I_CONVOLUTION_KERNEL = gamma.pdf(x, a=5, scale=3)
+I2D_CONVOLUTION_KERNEL = []
 
 
+if __name__ == '__main__':
+    print(x)
+    print(E2I_CONVOLUTION_KERNEL)
+    plt.plot(x, E2I_CONVOLUTION_KERNEL)
+    plt.show()
