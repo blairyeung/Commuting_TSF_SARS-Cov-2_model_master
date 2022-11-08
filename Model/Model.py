@@ -32,13 +32,12 @@ class Model:
     def _model_transition(self):
         self._exposed_to_cases(self.date)
         self._infected_to_hospitalization(self.date)
+        self._hospitalized_to_icu(self.date)
         self._infected_to_removed(self.date)
-        self._hospitalization_to_removed(self.date)
-        self._icu_to_removed(self.date)
-        self._exposed_to_cases(self.date)
 
     def _exposed_to_cases(self, date):
-        kernel = Parameters.EXP2ACT_CONVOLUTION_KERNEL
+        ratio = np.ones(shape=(16, ), dtype=float)
+        kernel = np.multiply(Parameters.EXP2ACT_CONVOLUTION_KERNEL, ratio)
         kernel = kernel.reshape((kernel.shape[0], 1))
         kernel_size = kernel.shape[0]
         rslt = np.sum(np.multiply(self._time_series_active_cases[date - kernel_size:date],
@@ -50,8 +49,23 @@ class Model:
         self._time_series_clinical_cases[date] = np.multiply(rslt,
                                                              Parameters.subclinical_rate)
 
-    def _infected_to_hospitalization(self, date):
-        kernel = Parameters.INF2HOS_CONVOLUTION_KERNEL
+    def _infected_to_hospitalized(self, date):
+        ratio = np.zeros(shape=(16, ), dtype=float)
+        kernel = np.multiply(Parameters.INF2HOS_CONVOLUTION_KERNEL, ratio)
+        kernel = kernel.reshape((kernel.shape[0], 1))
+        kernel_size = kernel.shape[0]
+        rslt = np.sum(np.multiply(self._time_series_active_cases[date - kernel_size:date],
+                                  kernel), axis=0)
+
+        self._time_series_active_cases[date] = rslt
+        self._time_series_clinical_cases[date] = np.multiply(rslt,
+                                                             Parameters.clinical_rate)
+        self._time_series_clinical_cases[date] = np.multiply(rslt,
+                                                             Parameters.subclinical_rate)
+
+    def _hospitalized_to_icu(self, date):
+        ratio = np.zeros(shape=(16, ), dtype=float)
+        kernel = np.multiply(Parameters.HOS2ICU_CONVOLUTION_KERNEL, ratio)
         kernel = kernel.reshape((kernel.shape[0], 1))
         kernel_size = kernel.shape[0]
         rslt = np.sum(np.multiply(self._time_series_active_cases[date - kernel_size:date],
@@ -64,13 +78,66 @@ class Model:
                                                              Parameters.subclinical_rate)
 
     def _infected_to_removed(self, date):
-        pass
+        self._subclinical_to_removed(date)
+        self._clinical_to_removed(date)
+        self._hospitalized_to_removed(date)
+        self._icu_to_removed(date)
 
-    def _hospitalization_to_removed(self, date):
-        pass
+    def _subclinical_to_removed(self, date):
+        kernel = Parameters
+        kernel = kernel.reshape((kernel.shape[0], 1))
+        kernel_size = kernel.shape[0]
+        rslt = np.sum(np.multiply(self._time_series_active_cases[date - kernel_size:date],
+                                  kernel), axis=0)
+
+        self._time_series_active_cases[date] = rslt
+        self._time_series_clinical_cases[date] = np.multiply(rslt,
+                                                             Parameters.clinical_rate)
+        self._time_series_clinical_cases[date] = np.multiply(rslt,
+                                                             Parameters.subclinical_rate)
+
+    def _clinical_to_removed(self, date):
+        kernel = Parameters
+        kernel = kernel.reshape((kernel.shape[0], 1))
+        kernel_size = kernel.shape[0]
+        rslt = np.sum(np.multiply(self._time_series_active_cases[date - kernel_size:date],
+                                  kernel), axis=0)
+
+        self._time_series_active_cases[date] = rslt
+        self._time_series_clinical_cases[date] = np.multiply(rslt,
+                                                             Parameters.clinical_rate)
+        self._time_series_clinical_cases[date] = np.multiply(rslt,
+                                                             Parameters.subclinical_rate)
+
+    def _hospitalized_to_removed(self, date):
+        kernel = Parameters
+        kernel = kernel.reshape((kernel.shape[0], 1))
+        kernel_size = kernel.shape[0]
+        rslt = np.sum(np.multiply(self._time_series_active_cases[date - kernel_size:date],
+                                  kernel), axis=0)
+
+        self._time_series_active_cases[date] = rslt
+        self._time_series_clinical_cases[date] = np.multiply(rslt,
+                                                             Parameters.clinical_rate)
+        self._time_series_clinical_cases[date] = np.multiply(rslt,
+                                                             Parameters.subclinical_rate)
 
     def _icu_to_removed(self, date):
-        pass
+        """
+        :param date:
+        :return:
+        """
+        kernel = Parameters.ICU2DEA_CONVOLUTION_KERNEL
+        kernel = kernel.reshape((kernel.shape[0], 1))
+        kernel_size = kernel.shape[0]
+        rslt = np.sum(np.multiply(self._time_series_active_cases[date - kernel_size:date],
+                                  kernel), axis=0)
+
+        self._time_series_active_cases[date] = rslt
+        self._time_series_clinical_cases[date] = np.multiply(rslt,
+                                                             Parameters.clinical_rate)
+        self._time_series_clinical_cases[date] = np.multiply(rslt,
+                                                             Parameters.subclinical_rate)
 
     def _initialize_dependencies(self):
         self.dependency = Dependency.Dependency()
