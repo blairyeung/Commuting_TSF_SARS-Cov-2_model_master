@@ -4,10 +4,12 @@ import Dependency as Dependency
 import ModelData
 import Parameters
 
-class Model:
 
+class Model:
     dependency = None
     _model_data = None
+
+    date = 0
 
     def __init__(self, forecast_days=1000):
         self._initialize_dependencies()
@@ -19,19 +21,28 @@ class Model:
         """
         Firstly, we convert the number of newly infected cases to active cases
         """
+        self.date += 1
         self._model_data
-        # TODO: Run one cycle
+        self._model_transition()
         return
 
     def _get_new_cases(self, cases, contact_type=(0, 0)):
         return np.dot(self._model_data.dependency.matrix_by_class[contact_type[0]][contact_type[1]], cases)
 
-    def exposed_to_cases(self, date):
+    def _model_transition(self):
+        self._exposed_to_cases(self.date)
+        self._infected_to_hospitalization(self.date)
+        self._infected_to_removed(self.date)
+        self._hospitalization_to_removed(self.date)
+        self._icu_to_removed(self.date)
+        self._exposed_to_cases(self.date)
+
+    def _exposed_to_cases(self, date):
         kernel = Parameters.EXP2ACT_CONVOLUTION_KERNEL
         kernel = kernel.reshape((kernel.shape[0], 1))
         kernel_size = kernel.shape[0]
-        rslt = np.sum(np.multiply(self._time_series_active_cases[date-kernel_size:date],
-                                   kernel), axis=0)
+        rslt = np.sum(np.multiply(self._time_series_active_cases[date - kernel_size:date],
+                                  kernel), axis=0)
 
         self._time_series_active_cases[date] = rslt
         self._time_series_clinical_cases[date] = np.multiply(rslt,
@@ -39,26 +50,27 @@ class Model:
         self._time_series_clinical_cases[date] = np.multiply(rslt,
                                                              Parameters.subclinical_rate)
 
-    def infected_to_hospitalization(self, date):
+    def _infected_to_hospitalization(self, date):
+        kernel = Parameters.INF2HOS_CONVOLUTION_KERNEL
+        kernel = kernel.reshape((kernel.shape[0], 1))
+        kernel_size = kernel.shape[0]
+        rslt = np.sum(np.multiply(self._time_series_active_cases[date - kernel_size:date],
+                                  kernel), axis=0)
+
+        self._time_series_active_cases[date] = rslt
+        self._time_series_clinical_cases[date] = np.multiply(rslt,
+                                                             Parameters.clinical_rate)
+        self._time_series_clinical_cases[date] = np.multiply(rslt,
+                                                             Parameters.subclinical_rate)
+
+    def _infected_to_removed(self, date):
         pass
 
-    def infected_to_removed(self, date):
+    def _hospitalization_to_removed(self, date):
         pass
 
-    def hospitalization_to_removed(self, date):
+    def _icu_to_removed(self, date):
         pass
-
-    def icu_to_removed(self, date):
-        pass
-
-    def icu_to_removed(self, date):
-        """
-        :param date:
-        :return:
-        """
-        self._time_series_deaths[date] = np.convolve()
-        self._time_series_recovered[date] = np.convolve()
-
 
     def _initialize_dependencies(self):
         self.dependency = Dependency.Dependency()
