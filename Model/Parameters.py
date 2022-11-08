@@ -2,7 +2,7 @@
     Version
 """
 from scipy.stats import gamma
-from scipy.stats import norm
+from Util import norm
 import matplotlib.pyplot as plt
 import numpy as np
 import datetime
@@ -55,13 +55,36 @@ vaccine_age_band = ['05-11yrs', '12-17yrs', '18-29yrs', '30-39yrs', '40-49yrs', 
     Convolution kernels
 """
 
+"""
+    These kernels are for 
+"""
+
 kernel_size_1 = np.linspace(0, 12, 12)
-E2C_CONVOLUTION_KERNEL = util.normalize(gamma.pdf(kernel_size_1, a=1.2, scale=4))
-C2P_CONVOLUTION_KERNEL = util.normalize(gamma.pdf(kernel_size_1, a=1.2, scale=4))
-C2S_CONVOLUTION_KERNEL = util.normalize(gamma.pdf(kernel_size_1, a=1.2, scale=4))
+EXP2ACT_CONVOLUTION_KERNEL = util.normalize(gamma.pdf(kernel_size_1, a=1.2, scale=4))
+ACT2CLI_CONVOLUTION_KERNEL = util.normalize(gamma.pdf(kernel_size_1, a=1.2, scale=4))
+ACT2SUB_CONVOLUTION_KERNEL = util.normalize(gamma.pdf(kernel_size_1, a=1.2, scale=4))
+
+"""
+    These kernels are for
+"""
 
 kernel_size_2 = np.linspace(0, 25, 25)
-S2R_CONVOLUTION_KERNEL = util.normalize(gamma.pdf(kernel_size_2, a=1.6, scale=4))
+SUB2REC_CONVOLUTION_KERNEL = util.normalize(gamma.pdf(kernel_size_2, a=1.6, scale=4))
+
+"""
+    These kernels are for hospitalization, ICU, and deaths
+"""
+
+
+# TODO: Need to multiply all of the hospitalization, ICU, deaths distribution with P(HOSP), P(ICU), P(CFR)
+
+
+kernel_size_3 = np.linspace(0, 30, 30)
+INF2HOS_CONVOLUTION_KERNEL = util.normalize(norm(kernel_size_3, mean=7.5, scale=1))
+HOS2ICU_CONVOLUTION_KERNEL = util.normalize(norm(kernel_size_3, mean=11-7.5, scale=1))
+
+kernel_size_4 = np.linspace(0, 50, 50)
+ICU2DEA_CONVOLUTION_KERNEL = util.normalize(gamma.pdf(kernel_size_4, a=2.5, scale=1.9))
 
 
 def find_mean(v):
@@ -72,9 +95,10 @@ def find_mean(v):
             print(i, len(v))
             break
 
+
 if __name__ == '__main__':
     print(kernel_size_2)
-    print(S2R_CONVOLUTION_KERNEL)
-    find_mean(S2R_CONVOLUTION_KERNEL)
-    plt.plot(kernel_size_2, S2R_CONVOLUTION_KERNEL)
+    print(ACT2DEA_CONVOLUTION_KERNEL)
+    find_mean(ACT2DEA_CONVOLUTION_KERNEL)
+    plt.plot(kernel_size_4, ACT2DEA_CONVOLUTION_KERNEL)
     plt.show()
