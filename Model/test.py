@@ -14,5 +14,7 @@ conved = np.multiply(conv, kernel)
 # conved = convolve2d(conv, kernel)[:10]
 print(conved)
 conv_rslt = np.sum(conved, axis=0)
+
+ttt = np.sum(np.multiply(conv, kernel), axis=0)
 print(conv_rslt)
 print()

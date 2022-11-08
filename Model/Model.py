@@ -28,12 +28,15 @@ class Model:
 
     def exposed_to_cases(self, date):
         kernel = Parameters.EXP2ACT_CONVOLUTION_KERNEL
-        convolution_rslt = np.convolve(self._time_series_active_cases[date-10:date], kernel)
-        new_cases = np.sum(convolution_rslt)
-        self._time_series_active_cases[date] = new_cases
-        self._time_series_clinical_cases[date] = np.multiply(self._time_series_active_cases[date],
+        kernel = kernel.reshape((kernel.shape[0], 1))
+        kernel_size = kernel.shape[0]
+        rslt = np.sum( np.multiply(self._time_series_active_cases[date-kernel_size:date],
+                                   kernel), axis=0)
+
+        self._time_series_active_cases[date] = rslt
+        self._time_series_clinical_cases[date] = np.multiply(rslt,
                                                              Parameters.clinical_rate)
-        self._time_series_clinical_cases[date] = np.multiply(self._time_series_active_cases[date],
+        self._time_series_clinical_cases[date] = np.multiply(rslt,
                                                              Parameters.subclinical_rate)
 
     def infected_to_hospitalization(self, date):
