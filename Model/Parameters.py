@@ -61,6 +61,7 @@ vaccine_age_band = ['05-11yrs', '12-17yrs', '18-29yrs', '30-39yrs', '40-49yrs', 
 
 kernel_size_1 = np.linspace(0, 12, 12)
 EXP2ACT_CONVOLUTION_KERNEL = normalize(gamma.pdf(kernel_size_1, a=1.2, scale=4))
+# EXP2ACT_CONVOLUTION_KERNEL = EXP2ACT.reshape(shape=(len(kernel_size_1), 1))
 ACT2CLI_CONVOLUTION_KERNEL = normalize(gamma.pdf(kernel_size_1, a=1.2, scale=4))
 ACT2SUB_CONVOLUTION_KERNEL = normalize(gamma.pdf(kernel_size_1, a=1.2, scale=4))
 

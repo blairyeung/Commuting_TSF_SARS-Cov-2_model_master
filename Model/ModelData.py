@@ -49,33 +49,6 @@ class ModelData:
         self._time_series_recovered = np.zeros(shape=(x, y, z), dtype=int)
         self._time_series_deaths = np.zeros(shape=(x, y, z), dtype=int)
 
-    def exposed_to_cases(self, date):
-        kernel = Parameters.E2I_CONVOLUTION_KERNELh
-        self._time_series_active_cases[date] = self._time_series_exposed[date - 3]
-        self._time_series_clinical_cases[date] = np.multiply(self._time_series_active_cases[date],
-                                                             Parameters.clinical_rate)
-        self._time_series_clinical_cases[date] = np.multiply(self._time_series_active_cases[date],
-                                                             Parameters.subclinical_rate)
-
-    def infected_to_hospitalization(self, date):
-        pass
-
-    def infected_to_removed(self, date):
-        pass
-
-    def hospitalization_to_removed(self, date):
-        pass
-
-    def icu_to_removed(self, date):
-        pass
-
-    def icu_to_removed(self, date):
-        """
-        :param date:
-        :return:
-        """
-        self._time_series_deaths[date] = np.convolve()
-        self._time_series_recovered[date] = np.convolve()
 
 
 
