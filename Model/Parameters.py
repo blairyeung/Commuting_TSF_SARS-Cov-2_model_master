@@ -22,6 +22,7 @@ matrix_country_ISO = 'CA'
 """
     Geo constants
 """
+
 province_name = 'Ontario'
 num_phu = 34
 num_county = 528
@@ -34,7 +35,7 @@ num_district = 49
 first_day = datetime.datetime(2020, 1, 15)
 
 # susceptibility
-sup_by_age = []
+sup_by_age = np.array([1, 2])
 # clinical ratio
 clinical_rate = []
 # subclinical ratio
@@ -61,7 +62,6 @@ vaccine_age_band = ['05-11yrs', '12-17yrs', '18-29yrs', '30-39yrs', '40-49yrs', 
 
 kernel_size_1 = np.linspace(0, 12, 12)
 EXP2ACT_CONVOLUTION_KERNEL = normalize(gamma.pdf(kernel_size_1, a=1.2, scale=4))
-# EXP2ACT_CONVOLUTION_KERNEL = EXP2ACT.reshape(shape=(len(kernel_size_1), 1))
 ACT2CLI_CONVOLUTION_KERNEL = normalize(gamma.pdf(kernel_size_1, a=1.2, scale=4))
 ACT2SUB_CONVOLUTION_KERNEL = normalize(gamma.pdf(kernel_size_1, a=1.2, scale=4))
 

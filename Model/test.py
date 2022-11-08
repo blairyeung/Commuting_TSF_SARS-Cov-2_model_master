@@ -1,7 +1,15 @@
 import numpy as np
 import Parameters
 from scipy.signal import convolve2d
+from Model import Model
 
+
+for i in range(100):
+    pass
+    m = Model()
+    m.run_one_cycle()
+
+"""
 date = 98
 test = np.ones(shape=(100, 16))
 kernel = Parameters.EXP2ACT_CONVOLUTION_KERNEL
@@ -18,3 +26,4 @@ conv_rslt = np.sum(conved, axis=0)
 ttt = np.sum(np.multiply(conv, kernel), axis=0)
 print(conv_rslt)
 print()
+"""

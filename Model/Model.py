@@ -1,7 +1,7 @@
 import math
 import numpy as np
 import Dependency as Dependency
-import ModelData
+from ModelData import ModelData
 import Parameters
 
 
