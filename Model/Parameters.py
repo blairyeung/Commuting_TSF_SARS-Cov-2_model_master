@@ -2,11 +2,14 @@
     Version
 """
 from scipy.stats import gamma
+from scipy.stats import norm
 import matplotlib.pyplot as plt
 import numpy as np
 import datetime
+import Util as util
 
 ver = '1.0'
+
 
 """
     Matrix constants
@@ -52,13 +55,26 @@ vaccine_age_band = ['05-11yrs', '12-17yrs', '18-29yrs', '30-39yrs', '40-49yrs', 
     Convolution kernels
 """
 
-x = np.linspace(0, 40, 100)
-E2I_CONVOLUTION_KERNEL = gamma.pdf(x, a=5, scale=3)
-I2D_CONVOLUTION_KERNEL = []
+kernel_size_1 = np.linspace(0, 12, 12)
+E2C_CONVOLUTION_KERNEL = util.normalize(gamma.pdf(kernel_size_1, a=1.2, scale=4))
+C2P_CONVOLUTION_KERNEL = util.normalize(gamma.pdf(kernel_size_1, a=1.2, scale=4))
+C2S_CONVOLUTION_KERNEL = util.normalize(gamma.pdf(kernel_size_1, a=1.2, scale=4))
 
+kernel_size_2 = np.linspace(0, 25, 25)
+S2R_CONVOLUTION_KERNEL = util.normalize(gamma.pdf(kernel_size_2, a=1.6, scale=4))
+
+
+def find_mean(v):
+    tot = 0
+    for i in range(len(v)):
+        tot += v[i]
+        if tot >= 0.5:
+            print(i, len(v))
+            break
 
 if __name__ == '__main__':
-    print(x)
-    print(E2I_CONVOLUTION_KERNEL)
-    plt.plot(x, E2I_CONVOLUTION_KERNEL)
+    print(kernel_size_2)
+    print(S2R_CONVOLUTION_KERNEL)
+    find_mean(S2R_CONVOLUTION_KERNEL)
+    plt.plot(kernel_size_2, S2R_CONVOLUTION_KERNEL)
     plt.show()
