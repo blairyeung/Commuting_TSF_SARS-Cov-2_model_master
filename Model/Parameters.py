@@ -29,6 +29,10 @@ first_day = datetime.datetime(2020, 1, 15)
 
 # susceptibility
 sup_by_age = []
+# clinical ratio
+clinical_rate = []
+# subclinical ratio
+subclinical_rate = []
 # fatality rate (calculated)
 cfr_by_age = []
 # critical rate

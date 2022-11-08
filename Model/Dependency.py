@@ -1,6 +1,6 @@
 from datetime import datetime
-import os
 import numpy as np
+import os
 
 import Gaussian
 import Parameters
@@ -47,6 +47,9 @@ class Dependency:
         print(self.date_to_cases_by_phu)
         for i in range(len(self.date_to_cases_by_phu.keys())):
             print(i)
+            # print(list(self.date_to_cases_by_phu.keys()))
+            # print(list(self.date_to_cases_by_phu.keys())[i])
+            # print(list(self.phu_to_code.keys())[i])
 
     def read_matrix(self):
         """
