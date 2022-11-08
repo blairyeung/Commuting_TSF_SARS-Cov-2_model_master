@@ -14,41 +14,49 @@ ver = '1.0'
 """
     Matrix constants
 """
-matrix_size = 16
-matrix_categories = ['urban', 'rural']
-matrix_contact = ['home', 'school', 'work', 'others']
-matrix_country_ISO = 'CA'
+MATRIX_SIZE = 16
+MATRIX_CATEGORIES = ['urban', 'rural']
+MATRIX_CONTACT_TYPE = ['home', 'school', 'work', 'others']
+MATRIX_COUNTRY_ISO = 'CA'
 
 """
     Geo constants
 """
 
 province_name = 'Ontario'
-num_phu = 34
-num_county = 528
-num_district = 49
+NO_PHU = 34
+NO_COUNTY = 528
+NO_DISTRICT = 49
 
 """
     Epidemiological constants
 """
 
-first_day = datetime.datetime(2020, 1, 15)
+OUTBREAK_FIRST_DAY = datetime.datetime(2020, 1, 15)
+
+"""
+    Age-specific parameters, all 16 entries long
+"""
 
 # susceptibility
-sup_by_age = np.array([1, 2])
+SUSP_BY_AGE = np.array([1, 2])
 # clinical ratio
-clinical_rate = []
+CLINICAL_BY_AGE = []
 # subclinical ratio
-subclinical_rate = []
+SUBCLINICAL_BY_AGE = []
 # fatality rate (calculated)
-cfr_by_age = []
+CFR_BY_AGE = []
 # critical rate
-crit_by_age = []
+CRIT_BY_AGE = []
+# Work force
+LABOUR_FORCE_BY_AGE = np.array([0, 0, 0.010693183, 0.032079549, 0.083009492, 0.106146399, 0.106351741,
+                                0.105920522, 0.103210008, 0.098220198, 0.10624907, 0.098138062, 0.065560558,
+                                0.042213176, 0.025934691, 0.016273351, 0])
 
 """
     Vaccine constants
 """
-vaccine_age_band = ['05-11yrs', '12-17yrs', '18-29yrs', '30-39yrs', '40-49yrs', '50-59yrs', '60-69yrs', '70-79yrs',
+VACCINE_AGE_BANDS = ['05-11yrs', '12-17yrs', '18-29yrs', '30-39yrs', '40-49yrs', '50-59yrs', '60-69yrs', '70-79yrs',
                     '80+']
 
 

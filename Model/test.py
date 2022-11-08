@@ -3,11 +3,26 @@ import Parameters
 from scipy.signal import convolve2d
 from Model import Model
 
+ratio = np.ones(shape=(16,), dtype=float)
+ratio = np.reshape(ratio, newshape=(16, 1))
+kernel = np.reshape(Parameters.EXP2ACT_CONVOLUTION_KERNEL, newshape=(12, 1))
+kernel = np.matmul(ratio, np.transpose(kernel))
+print(kernel)
+print(kernel.shape)
 
+
+rslt = np.sum(np.multiply(np.ones(shape=(16, 12)),
+                                  kernel), axis=1)
+
+print(rslt)
+
+"""
 for i in range(100):
     pass
     m = Model()
     m.run_one_cycle()
+
+"""
 
 """
 date = 98

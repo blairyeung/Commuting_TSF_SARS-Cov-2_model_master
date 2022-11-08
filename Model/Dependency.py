@@ -6,8 +6,8 @@ import Gaussian
 import Parameters
 
 class Dependency:
-    county_data = np.zeros((Parameters.num_county, 3), dtype=int)
-    commute_matrix = np.zeros((Parameters.num_county, Parameters.num_county), dtype=int)
+    county_data = np.zeros((Parameters.NO_COUNTY, 3), dtype=int)
+    commute_matrix = np.zeros((Parameters.NO_COUNTY, Parameters.NO_COUNTY), dtype=int)
 
     total_days = 0
 
@@ -57,20 +57,20 @@ class Dependency:
             matrix_by_class: 2 * 4 np.array-valued list
         """
         read_path = self.get_dependency_path() + 'Matrix_IO/Matrix_by_Category/'
-        for category in Parameters.matrix_categories:
-            for contact in Parameters.matrix_contact:
-                matrix = np.zeros((Parameters.matrix_size, Parameters.matrix_size), dtype=float)
-                matrix_path = read_path + category + '/' + contact + '/' + Parameters.matrix_country_ISO + '.csv'
+        for category in Parameters.MATRIX_CATEGORIES:
+            for contact in Parameters.MATRIX_CONTACT_TYPE:
+                matrix = np.zeros((Parameters.MATRIX_SIZE, Parameters.MATRIX_SIZE), dtype=float)
+                matrix_path = read_path + category + '/' + contact + '/' + Parameters.MATRIX_COUNTRY_ISO + '.csv'
                 with open(matrix_path) as file:
                     contents = file.read()
                 lines = contents.split('\n')
                 for i in range(1, len(lines) - 1):
                     elements = lines[i].split(',')[1:]
-                    for j in range(Parameters.matrix_size):
+                    for j in range(Parameters.MATRIX_SIZE):
                         matrix[i - 1][j] = float(elements[j])
                 file.close()
-                cate_ind = Parameters.matrix_categories.index(category)
-                cont_ind = Parameters.matrix_contact.index(contact)
+                cate_ind = Parameters.MATRIX_CATEGORIES.index(category)
+                cont_ind = Parameters.MATRIX_CONTACT_TYPE.index(contact)
                 self.matrix_by_class[cate_ind][cont_ind] = matrix
         return
 
@@ -150,7 +150,7 @@ class Dependency:
             elements = lines[line].split(',')
             string = elements[0]
             this_day = datetime.strptime(string, '%d-%b-%y')
-            after_outbreak = (this_day - Parameters.first_day).days
+            after_outbreak = (this_day - Parameters.OUTBREAK_FIRST_DAY).days
             phu = elements[1]
             if phu == 'Ontario':
                 pass
@@ -179,22 +179,22 @@ class Dependency:
             elements = lines[line].split(',')
             string = elements[0]
             this_day = datetime.strptime(string, '%m/%d/%Y')
-            after_outbreak = (this_day - Parameters.first_day).days
+            after_outbreak = (this_day - Parameters.OUTBREAK_FIRST_DAY).days
             band = elements[1]
 
             for i in [7, 8, 9]:
                 if elements[i] == '':
                     elements[i] = 0
 
-            if band in Parameters.vaccine_age_band:
+            if band in Parameters.VACCINE_AGE_BANDSS:
                 for i in [7, 8, 9]:
                     if elements[i] == '':
                         elements[i] = 0
-                self.date_to_vaccines_by_age[after_outbreak - 1][0][Parameters.vaccine_age_band.index(band)] = float(
+                self.date_to_vaccines_by_age[after_outbreak - 1][0][Parameters.VACCINE_AGE_BANDS.index(band)] = float(
                     elements[7])
-                self.date_to_vaccines_by_age[after_outbreak - 1][1][Parameters.vaccine_age_band.index(band)] = float(
+                self.date_to_vaccines_by_age[after_outbreak - 1][1][Parameters.VACCINE_AGE_BANDS.index(band)] = float(
                     elements[8])
-                self.date_to_vaccines_by_age[after_outbreak - 1][2][Parameters.vaccine_age_band.index(band)] = float(
+                self.date_to_vaccines_by_age[after_outbreak - 1][2][Parameters.VACCINE_AGE_BANDS.index(band)] = float(
                     elements[9])
 
         file.close()
@@ -231,7 +231,7 @@ class Dependency:
         # global date_to_vaccines_by_age
         vaccine_differentiated = np.zeros((self.total_days, 3, 16))
         for dose in [0, 1, 2]:
-            for age in range(Parameters.matrix_size):
+            for age in range(Parameters.MATRIX_SIZE):
                 yesterday_cuml = 0.0
                 for date in range(self.total_days):
                     today_cuml = self.date_to_vaccines_by_age[date][dose][age]
@@ -270,7 +270,7 @@ class Dependency:
             elements = lines[line].split(',')
             string = elements[0]
             this_day = datetime.strptime(string, '%d-%b-%y')
-            after_outbreak = (this_day - Parameters.first_day).days
+            after_outbreak = (this_day - Parameters.OUTBREAK_FIRST_DAY).days
             max_size = max(after_outbreak, max_size)
 
         self.total_days = max_size
@@ -286,7 +286,7 @@ class Dependency:
             elements = lines[line].split(',')
             string = elements[0]
             this_day = datetime.strptime(string, '%m/%d/%Y')
-            after_outbreak = (this_day - Parameters.first_day).days
+            after_outbreak = (this_day - Parameters.OUTBREAK_FIRST_DAY).days
             max_size = max(after_outbreak, max_size)
 
         self.total_days = max(max_size, self.total_days)
