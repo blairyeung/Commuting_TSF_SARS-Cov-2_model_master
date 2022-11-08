@@ -43,3 +43,17 @@ crit_by_age = []
 """
 vaccine_age_band = ['05-11yrs', '12-17yrs', '18-29yrs', '30-39yrs', '40-49yrs', '50-59yrs', '60-69yrs', '70-79yrs',
                     '80+']
+
+
+"""
+    Convolution kernels
+"""
+E2I_CONVOLUTION_KERNEL = []
+E2I_CONVOLUTION_KERNEL = []
+E2I_CONVOLUTION_KERNEL = []
+E2I_CONVOLUTION_KERNEL = []
+E2I_CONVOLUTION_KERNEL = []
+E2I_CONVOLUTION_KERNEL = []
+E2I_CONVOLUTION_KERNEL = []
+
+
