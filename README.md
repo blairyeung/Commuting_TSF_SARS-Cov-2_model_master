@@ -56,7 +56,7 @@ a modelling study. Lancet Infect Dis 2020; published online Dec 23. https://doi.
 # 2. 模型结构
 模型结构介绍: https://github.com/blairyeung/Commuting_TSF_SARS-Cov-2_model_master/blob/main/beamer.pdf \
 ## 2.1 State转换
-![](Figure 1.png)
+![Figure 1.png](Figure 1.png)
 **Algorithm 1:** Transition from exposed individuals to infected individuals
 ![img_4.png](img_4.png)
 使用矩阵乘法及哈达玛积计算新增病例数量。\
