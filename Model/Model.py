@@ -37,7 +37,7 @@ class Model:
         self._infected_to_removed(self.date)
 
     def _exposed_to_cases(self, date):
-        ratio = np.zeros(shape=(16, 1), dtype=float)
+        ratio = np.ones(shape=(16, 1), dtype=float)
 
         raw_kernel = Parameters.EXP2ACT_CONVOLUTION_KERNEL
         kernel = np.matmul(ratio, np.transpose(raw_kernel.reshape((raw_kernel.shape[0], 1))))

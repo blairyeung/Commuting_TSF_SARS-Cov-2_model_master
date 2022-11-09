@@ -12,7 +12,7 @@ def difference_of_gaussian(lst):
     sigma_2 = 30
     age_bands = [5, 12, 18, 30, 40, 50, 60, 70, 80, 90]
     cont_dist = [0] * 90
-    discr_dist = [0] * Parameters.matrix_size
+    discr_dist = [0] * Parameters.MATRIX_SIZE
     for age in range(90):
         cuml = 0
         for mu in range(len(age_bands)-1):
@@ -31,7 +31,7 @@ def difference_of_gaussian(lst):
         cont_dist[age] = cont_dist[age] * 6.7
 
     matrix_16_bands = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 90]
-    for i in range(Parameters.matrix_size):
+    for i in range(Parameters.MATRIX_SIZE):
         discr_dist[i] = integrate(cont_dist, matrix_16_bands[i], matrix_16_bands[i+1])
 
     # Compensation for the last entry for not having a right approximation
