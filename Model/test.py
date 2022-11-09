@@ -49,7 +49,13 @@ test = np.random.randint(20, size=(100, 16))
 ratio = np.ones(shape=(16, 1), dtype=float)
 
 raw_kernel = Parameters.EXP2ACT_CONVOLUTION_KERNEL
-kernel = np.matmul(ratio, np.transpose(raw_kernel.reshape((raw_kernel.shape[0], 1))))
+transposed = np.transpose(raw_kernel.reshape((raw_kernel.shape[0], 1)))
+
+print(raw_kernel, raw_kernel.shape)
+print(transposed, transposed.shape)
+print(ratio, ratio.shape)
+
+kernel = np.matmul(ratio, transposed)
 kernel_size = kernel.shape[0]
 
 data = np.flip(test[date - kernel_size:date], axis=0)

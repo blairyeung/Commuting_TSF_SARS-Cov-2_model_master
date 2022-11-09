@@ -16,13 +16,26 @@ class Dependency:
     matrix_by_class = [[None] * 4, [None] * 4]
 
     code_to_name = dict()
-    code_to_phu = dict()
-    phu_to_code = dict()
+    district_to_phu = dict()
+    phu_to_district = dict()
     code_to_index = dict()
+    county_to_district = dict()
+    district_to_county = dict()
 
     band_to_population = dict()
-    date_to_cases_by_phu = dict()
+    date_to_incidence_rate_by_phu = dict()
+    date_to_hospitalization_rate_by_phu = dict()
+    date_to_death_rate_by_phu = dict()
     date_to_vaccines_by_age = np.zeros((0, 3, 9))
+
+
+    date_to_no_cases_by_county = dict()
+    date_to_no_cases_by_county = dict()
+    date_to_no_cases_by_county = dict()
+    date_to_no_cases_by_county = dict()
+
+    population_by_phu = dict()
+    population_by_district = dict()
 
     def __init__(self):
         self.read_files()
@@ -43,13 +56,12 @@ class Dependency:
         self.read_cases()
         self.read_vaccine()
         self.reshape_vaccine()
-        self.differentiate()
-        print(self.date_to_cases_by_phu)
-        for i in range(len(self.date_to_cases_by_phu.keys())):
-            print(i)
-            # print(list(self.date_to_cases_by_phu.keys()))
-            # print(list(self.date_to_cases_by_phu.keys())[i])
-            # print(list(self.phu_to_code.keys())[i])
+        """
+            Do not differentiate cases
+        """
+        # self.differentiate()
+        self.code_district_linking()
+        self.compute_phu_population()
 
     def read_matrix(self):
         """
@@ -79,7 +91,7 @@ class Dependency:
             county_data: 520 * 3 float-valued np.array
             county_data[0:520][0] is the county code
             county_data[0:520][1] is the district code
-            county_data[0:520][2] is the population code
+            county_data[0:520][2] is the population
         """
         read_path = self.get_dependency_path() + 'Ontario_county_data.csv'
         with open(read_path) as file:
@@ -89,7 +101,7 @@ class Dependency:
             elements = lines[line].split(',')
             self.county_data[line - 1] = [elements[0], elements[5], elements[4]]
             self.code_to_name[elements[0]] = elements[1]
-            self.county_codes.append(elements[0])
+            self.county_codes.append(int(elements[0]))
             self.code_to_index[elements[0]] = line - 1
         file.close()
         return
@@ -101,11 +113,11 @@ class Dependency:
         lines = contents.split('\n')
         for line in range(1, len(lines) - 1):
             elements = [lines[line][:lines[line].index(',')], lines[line][lines[line].index(',') + 1:]]
-            self.code_to_phu[int(elements[0])] = elements[1]
-            if elements[1] not in self.phu_to_code:
-                self.phu_to_code[elements[1]] = [elements[0]]
+            self.district_to_phu[int(elements[0])] = elements[1]
+            if elements[1] not in self.phu_to_district:
+                self.phu_to_district[elements[1]] = [int(elements[0])]
             else:
-                self.phu_to_code[elements[1]].append(elements[0])
+                self.phu_to_district[elements[1]].append(int(elements[0]))
         file.close()
         return
 
@@ -134,7 +146,7 @@ class Dependency:
 
     def read_cases(self):
         """
-               date_to_cases_by_phu = {'Eastern Ontario Health Unit': sub_arary = np.array, ... }
+               date_to_incidence_rate_by_phu = {'Eastern Ontario Health Unit': sub_arary = np.array, ... }
                where sub_arary is a one-dimensional array, in the form of
                sub_array = [0.7, ...] where each entry is the ratio of infection
            :return:
@@ -155,13 +167,20 @@ class Dependency:
             if phu == 'Ontario':
                 pass
             else:
-                if phu not in self.date_to_cases_by_phu:
-                    self.date_to_cases_by_phu[phu] = [0] * self.total_days
+                if phu not in self.date_to_incidence_rate_by_phu:
+                    self.date_to_incidence_rate_by_phu[phu] = np.zeros(shape=(self.total_days, ), dtype=float)
+                    self.date_to_hospitalization_rate_by_phu[phu] = np.zeros(shape=(self.total_days, ), dtype=float)
+                    self.date_to_death_rate_by_phu[phu] = np.zeros(shape=(self.total_days, ), dtype=float)
                 else:
                     if elements[7] == '-':
-                        self.date_to_cases_by_phu[phu][after_outbreak] = 0.0
+                        self.date_to_incidence_rate_by_phu[phu][after_outbreak] = 0.0
+                        self.date_to_hospitalization_rate_by_phu[phu][after_outbreak] = 0.0
+                        self.date_to_death_rate_by_phu[phu][after_outbreak] = 0.0
                     else:
-                        self.date_to_cases_by_phu[phu][after_outbreak] = float(elements[7])
+                        self.date_to_incidence_rate_by_phu[phu][after_outbreak] = float(elements[7])
+                        self.date_to_hospitalization_rate_by_phu[phu][after_outbreak] = float(elements[9])
+                        self.date_to_death_rate_by_phu[phu][after_outbreak] = float(elements[11])
+
         file.close()
         return
 
@@ -186,7 +205,7 @@ class Dependency:
                 if elements[i] == '':
                     elements[i] = 0
 
-            if band in Parameters.VACCINE_AGE_BANDSS:
+            if band in Parameters.VACCINE_AGE_BANDS:
                 for i in [7, 8, 9]:
                     if elements[i] == '':
                         elements[i] = 0
@@ -230,7 +249,8 @@ class Dependency:
 
         # global date_to_vaccines_by_age
         vaccine_differentiated = np.zeros((self.total_days, 3, 16))
-        for dose in [0, 1, 2]:
+        """
+                for dose in [0, 1, 2]:
             for age in range(Parameters.MATRIX_SIZE):
                 yesterday_cuml = 0.0
                 for date in range(self.total_days):
@@ -239,13 +259,17 @@ class Dependency:
                     self.date_to_vaccines_by_age[date][dose][age] = delta
                     yesterday_cuml = today_cuml
 
+        """
+        for i in range(self.total_days - 1):
+            vaccine_differentiated = np.subtract(self.date_to_vaccines_by_age[i+1] - self.date_to_vaccines_by_age[i])
         self.date_to_vaccines_by_age = vaccine_differentiated
 
-        # global date_to_cases_by_phu
+        # global date_to_incidence_rate_by_phu
 
-        cases_differentiated = dict()
-        for phu in self.date_to_cases_by_phu:
-            phu_data = self.date_to_cases_by_phu[phu]
+        """
+                cases_differentiated = dict()
+        for phu in self.date_to_incidence_rate_by_phu:
+            phu_data = self.date_to_incidence_rate_by_phu[phu]
             yesterday_cuml = 0.0
             for date in range(self.total_days):
                 today_cuml = phu_data[date]
@@ -253,7 +277,8 @@ class Dependency:
                 phu_data[date] = delta
                 yesterday_cuml = today_cuml
 
-        date_to_cases_by_phu = cases_differentiated
+        self.date_to_incidence_rate_by_phu = cases_differentiated
+        """
 
         return
 
@@ -291,7 +316,32 @@ class Dependency:
 
         self.total_days = max(max_size, self.total_days)
 
+    def code_district_linking(self):
+        for i in self.county_data:
+            county = i[0]
+            district = i[1]
+            population = i[2]
+            if district not in self.district_to_county:
+                self.district_to_county[district] = list()
+                self.population_by_district[district] = 0
+            else:
+                pass
+            self.district_to_county[district].append(county)
+            self.population_by_district[district] += population
+            self.county_to_district[county] = district
+    def compute_phu_population(self):
+        for i in self.phu_to_district.keys():
+            districts = self.phu_to_district[i]
+            self.population_by_phu[i] = 0
+            for d in districts:
+                self.population_by_phu[i] += self.population_by_district[d]
+
+    def compute_num_cases(self):
+        return
+
 
 if __name__ == '__main__':
     dependency = Dependency()
-    dependency.read_files()
+    # dependency.read_files()
+    # dependency.compute_phu_population()
+    pass

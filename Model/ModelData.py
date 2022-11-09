@@ -50,5 +50,5 @@ class ModelData:
         self._time_series_deaths = np.zeros(shape=(x, y, z), dtype=int)
 
 
-
-
+if __name__ == '__main__':
+    pass
