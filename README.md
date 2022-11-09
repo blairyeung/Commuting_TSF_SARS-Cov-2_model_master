@@ -47,7 +47,9 @@ a modelling study. Lancet Infect Dis 2020; published online Dec 23. https://doi.
 * Source: 时间序列预测
 
 下面这三张截图是前supervisor Davies NG的类似论文中使用的参数。
-一些参数可以直接套用，但还有一些由于不是age-specific，需要我们再去自己查。
+一些参数可以直接套用，但还有一些由于不是age-specific，需要我们再去自己查
+### **论文在这里**： https://doi.org/10.1016/S1473-3099(20)30984-1
+
 ![img.png](img.png)
 ![img_1.png](img_1.png)
 ![img_2.png](img_2.png)
