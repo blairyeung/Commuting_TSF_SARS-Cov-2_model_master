@@ -48,3 +48,5 @@ a modelling study. Lancet Infect Dis 2020; published online Dec 23. https://doi.
 * ![img.png](img.png)
 * ![img_1.png](img_1.png)
 * ![img_2.png](img_2.png)
+# 2. 模型结构
+模型结构介绍: 
