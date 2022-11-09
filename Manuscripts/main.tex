@@ -1,0 +1,183 @@
+\documentclass[12pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{lineno}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{enumitem}
+\usepackage{setspace}
+\usepackage{calrsfs}
+\usepackage{pgfplots}
+\usepackage[affil-it]{authblk}
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{cancel}
+\usepackage{manyfoot}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{hyperref}
+\usepackage{tcolorbox}
+\usepackage[english]{babel}
+\usepackage{amsthm}
+\usepackage{soul}
+\usepackage[charter,cal=cmcal]{mathdesign} % Specify font for serif family
+\usepackage{avant} % Specify avant font for sans serif family
+\usepackage{mathtools} % Replaces amsmath
+\usepackage{sectsty} % Specify section formatting
+	\sectionfont{\sffamily\color{DarkBlue}}
+	\subsectionfont{\sffamily\color{LightBlue}}
+	\subsubsectionfont{\small\sffamily}
+
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+\newcommand{\La}{\mathcal{L}}
+\newcommand{\Lb}{\pazocal{L}}
+\newcommand{\la}{\mathcal{l}}
+\newcommand{\lb}{\pazocal{l}}
+\newcommand{\M}{\pazocal{M}}
+\newcommand{\Ha}{\mathcal{H}}
+\newcommand{\Hb}{\pazocal{H}}
+\newcommand{\Pa}{\mathcal{P}}
+\newcommand{\Pb}{\pazocal{P}}
+
+% Reference
+\definecolor{wine_red}{RGB}{178, 8, 56}
+% Emphasizing term
+\definecolor{lan_red}{RGB}{238, 46, 36}
+\definecolor{ReD}{RGB}{255,0,0}
+% Emphasizing number
+\definecolor{violet}{RGB}{133, 12, 112}
+% Comments and footnotes
+\definecolor{sea_blue}{RGB}{0, 84, 158}
+% Axlers
+\definecolor{axler_yellow}{RGB}{255, 250, 198}
+\definecolor{background}{RGB}{251, 252, 240}
+\definecolor{light_blue}{RGB}{235, 240, 252}
+
+
+
+\hypersetup{
+    colorlinks = true,
+    linkcolor = wine_red
+}
+
+\newcommand{\R}{\mathbb R}
+\newcommand{\C}{\mathbb C}
+\newcommand{\Q}{\mathbb Q}
+\newcommand{\F}{\mathbb F}
+\newcommand{\N}{\mathbb N}
+\newcommand{\Z}{\mathbb Z}
+\newcommand{\imply}[0]{\Rightarrow}
+\newcommand{\emphasize}[1]{\textcolor{ReD}{\textbf{\hl{#1}}}}
+\newcommand{\important}[1]{{\textbf{\hl{#1}}}}
+\newcommand{\num}[1]{\textcolor{violet}{\emph{\textbf{#1}}}}
+\newcommand{\foot}[1]{{\footnote{\textcolor{sea_blue}{#1}}}}
+\newcommand{\leftb}{\left(}
+\newcommand{\rightb}{\right)}
+\newcommand{\inner}[2]{$\langle${$#1$},{$#2$}$\rangle$}
+\newcommand{\innereq}[2]{\langle{#1},{#2}\rangle}
+\newcommand{\innerproduct}[1]{$\langle${$#1$}$\rangle$}
+\newcommand{\innerproducteq}[1]{\langle{#1}\rangle}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\abs}[1]{|#1|}
+\newcommand{\braket}[1]{\left\{ {#1} \right\}}
+\newcommand{\qedwhite}{\hfill \ensuremath{\Box}}
+\newcommand{\compart}{{\color{lan_red}\rule{\linewidth}{0.5mm}}} 
+\newcommand{\set}[1]{\left\{ #1 \right\}}
+\newcommand{\vect}[1]{\left( #1 \right)}
+
+\newcommand{\dimension}{\text{dim}}
+\newcommand{\nullspace}{\text{null}}
+\newcommand{\range}{\text{range}}
+\newcommand{\operator}[1]{#1 \in \Lb(V)}
+\newcommand{\operatorspace}[2]{#1 \in \Lb(#2)}
+\newcommand{\V}{\R^n}
+
+\pagestyle{fancy}
+\fancyhead[L]{Blair Yang}
+\fancyhead[R]{Supplementary Materials}
+
+\usepackage{xcolor} % required to defined colours
+	\definecolor{DarkBlue}{HTML}{25355A}
+	\definecolor{LightBlue}{HTML}{007FA3}
+	\definecolor{Yellow}{HTML}{A37500}
+	\definecolor{Red}{HTML}{A3002E}
+	\definecolor{Skyblue}{HTML}{007FA3}
+	\definecolor{Background_red}{HTML}{F6E5EA}
+	\definecolor{bgyellow}{HTML}{F2ECD9}
+	\definecolor{darkyellow}{HTML}{A07300}
+	\definecolor{lan_purple}{HTML}{850C70}
+	
+% \usepackage[sfdefault]{carlito}
+% \usepackage{fontspec}
+% \setmainfont{Arial}
+
+\newcommand{\urlref}{\hl{[REF]}}
+\newcommand{\pendingref}{\textbf{\hl{[REF]}}$ \ $}
+\newcommand{\unknownref}{\textcolor{ReD}{\textbf{\hl{[REF]}}}$ \ $}
+\newcommand{\pendingdata}{\textbf{\hl{$<$DATA$>$}}$ \ $}
+\newcommand{\unknowndata}{\textcolor{ReD}{\textbf{\hl{$<$DATA$>$}}}$ \ $}
+
+\title{Supplementary Materials}
+\author{Blair Yang}
+\date{August 2022}
+
+
+\begin{document}
+
+\section*{Style}
+\urlref $ \ \ \ $Pending reference, with the following URL\\
+\pendingref $ \ \ $ Pending reference, with the following URL\\
+\unknownref $ \ \ $ Pending reference, with un-specified topic (need to find relevant papers)\\
+\pendingdata $ \ \ $ Pending data, need to be filled with data from the cited papers\\
+\unknowndata $ \ \ $ Pending data, need to be find relevant paper with such data
+
+\section{Methodology (supplementary material)}
+\subsection{Data acquisition}
+
+\subsubsection{Epidemiological data}
+
+We acquired the time-series data of COVID-19 cases, deaths, and vaccination data in the 26 Public health units (PHU) since January 2020 from Ontario public health. \cite{ref1} The original data was stratified into \pendingdata age bands (\pendingdata).
+
+\subsubsection{Vaccine data}
+
+We acquired the provincial time-series vaccination data in Ontario from Ontario public health, covering the percentage population who has taken first does, second dose, and third does. We assumed a uniform distribution of the vaccination population ratio for every PHU. 
+
+\subsubsection{Labour force data}
+
+We used the labour force age distribution of Canada from \pendingref \emphasize{(2016 Census)} in year \pendingdata and the employment rate in August 2022 \pendingdata by statistics Canada \pendingref. 
+
+\subsubsection{Commute data}
+
+The commuting data in Ontario was excerpted from the 2016 demographic census. We assumed a constant age distribution. 
+
+
+\subsection{Data Calibration}
+
+\subsubsection{Age-specific data calibration}
+
+Due to the different dimensionality of the contact matrix in Canada (16 age-bands with 5-years sensitivity) and the Ontario epidemiological data (6 age-bands with 10-years sensitivity), we augmentation all of the age-specific data using difference of Gaussians (DoG), the estimated percentage population with certain characteristic (i.e, cases, deaths, vaccinated) with an integer-valued age $i$ is estimated to be:
+\begin{gather}
+    \mu_{i} = \Gamma_{\sigma_1, \sigma} (i) = \frac{e^{-\frac{i^2}{2 \sigma_1^2}}}{\sigma_1 \sqrt{2\pi}} I - \frac{e^{-\frac{i^2}{2 \sigma_2^2}}}{\sigma_2 \sqrt{2\pi}} I = \sum_{\mu \in I} \frac{e^{-\frac{(i - \mu_1)^2}{2 \sigma_1^2}}}{\sigma_1 \sqrt{2\pi}} \mu_2 - \frac{e^{-\frac{(i - \mu_1)^2}{2 \sigma_2^2}}}{\sigma_2 \sqrt{2\pi}} \mu_2
+\end{gather}
+Where $i$ is a positive integer which denotes to the age of distribution, I denotes to the set of the raw age distribution with a 10-years age sensitivity, $\sigma_1, \sigma_2$ denotes to two positive constants, $\mu = \vect   {\mu_1, \mu_2}$ is a tuple with the median age of the age band and percentage distribution at 1st and 2nd entry, respectively. We then integrated the age of each six age bands. 
+
+\subsubsection{Prevalence calibration}
+
+\hl{Source} suggested that there are significant underascertainment of the number of cases and deaths of COVID-19 in Canada. \cite{ref2} \cite{ref3} We calculated the average of the underascertainment ratio of \pendingdata and assumed the number to be constant throughout the pandemic.
+
+\subsubsection{Vaccine immunity level estimation}
+
+\hl{Source} suggested that the waning effect of COVID-19 vaccine efficacy.
+
+\bibliographystyle{plain}
+
+\begin{thebibliography}{99}
+\bibitem{ref1}{Public Health Ontario. Ontario COVID-19 Data Tool. Datasets - ontario data catalogue. Retrieved August 21, 2022, from https://data.ontario.ca/en/dataset?groups=2019-novel-coronavirus}
+
+\bibitem{ref2}{Bolotin, S., Tran, V., Deeks, S. L., Peci, A., Brown, K. A., Buchan, S. A., Ogbulafor, K., Ramoutar, T., Nguyen, M., Thakkar, R., DelaCruz, R., Mustfa, R., Maregmen, J., Woods, O., Krasna, T., Cronin, K., Osman, S., Joh, E., $\&$amp; Allen, V. G. (2021). Assessment of population infection with SARS-COV-2 in Ontario, Canada, March to June 2020. Eurosurveillance, 26(50). https://doi.org/10.2807/1560-7917.es.2021.26.50.2001559}
+
+\bibitem{ref3}{Anand, S. S., Arnold, C., Bangdiwala, S. I., Bolotin, S., Bowdish, D., Chanchlani, R., de Souza, R. J., Desai, D., Kandasamy, S., Khan, F., Khan, Z., Langlois, M.-A., Limbachia, J., Lear, S. A., Loeb, M., Loh, L., Manoharan, B., Nakka, K., Pelchat, M., … Wahi, G. (2022). Seropositivity and risk factors for SARS-COV-2 infection in a South Asian community in Ontario: A cross-sectional analysis of a prospective cohort study. CMAJ Open, 10(3). https://doi.org/10.9778/cmajo.20220031 }
+\end{thebibliography}
+
+\end{document}

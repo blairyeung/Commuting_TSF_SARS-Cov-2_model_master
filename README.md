@@ -90,4 +90,4 @@ a modelling study. Lancet Infect Dis 2020; published online Dec 23. https://doi.
 若我们定义 年龄小于20岁的个体不会转变为病例，大于60岁的个体有50%概率转变为病例，此时ratio为: \
 [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0.5, 0.5, 0.5, 0.5]\
 \
-其他各个state之间的转换均采用类似算法，但各自的概率分布（raw_kernel)和
+其他各个state之间的转换均采用类似算法，但各自的概率分布（raw_kernel)和转换概率（ratio）不同。
