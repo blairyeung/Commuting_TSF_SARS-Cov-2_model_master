@@ -45,9 +45,12 @@ a modelling study. Lancet Infect Dis 2020; published online Dec 23. https://doi.
 **365 * 3**: 3年 \
 **6**: 6个mobility种类（工作，通勤，娱乐，公园，商店，其他） 
 * Source: 时间序列预测
-* ![img.png](img.png)
-* ![img_1.png](img_1.png)
-* ![img_2.png](img_2.png)
+
+下面这三张截图是前supervisor Davies NG的类似论文中使用的参数。
+一些参数可以直接套用，但还有一些由于不是age-specific，需要我们再去自己查。
+![img.png](img.png)
+![img_1.png](img_1.png)
+![img_2.png](img_2.png)
 # 2. 模型结构
 模型结构介绍: https://github.com/blairyeung/Commuting_TSF_SARS-Cov-2_model_master/blob/main/beamer.pdf \
 ## 2.1 State转换
