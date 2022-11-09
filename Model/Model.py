@@ -38,11 +38,13 @@ class Model:
 
     def _exposed_to_cases(self, date):
         ratio = np.zeros(shape=(16, 1), dtype=float)
-        kernel = np.matmul(ratio, np.transpose(Parameters.EXP2ACT_CONVOLUTION_KERNEL))
-        # kernel = kernel.reshape((kernel.shape[0], 1))
+
+        raw_kernel = Parameters.EXP2ACT_CONVOLUTION_KERNEL
+        kernel = np.matmul(ratio, np.transpose(raw_kernel.reshape((raw_kernel.shape[0], 1))))
         kernel_size = kernel.shape[0]
-        rslt = np.sum(np.multiply(self._time_series_active_cases[date - kernel_size:date],
-                                  kernel), axis=1)
+
+        data = np.flip(self._time_series_active_cases[date - kernel_size:date], axis=0)
+        rslt = np.sum(np.multiply(data, kernel), axis=1)
 
         self._time_series_active_cases[date] = rslt
         self._time_series_clinical_cases[date] = np.multiply(rslt,

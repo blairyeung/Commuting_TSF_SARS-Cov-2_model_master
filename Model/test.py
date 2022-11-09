@@ -10,7 +10,6 @@ kernel = np.matmul(ratio, np.transpose(kernel))
 print(kernel)
 print(kernel.shape)
 
-
 rslt = np.sum(np.multiply(np.ones(shape=(16, 12)),
                                   kernel), axis=1)
 

@@ -41,13 +41,16 @@ OUTBREAK_FIRST_DAY = datetime.datetime(2020, 1, 15)
 # susceptibility
 SUSP_BY_AGE = np.array([1, 2])
 # clinical ratio
-CLINICAL_BY_AGE = []
+CLINICAL_BY_AGE = np.ones(shape=(16, 1), dtype=float)
 # subclinical ratio
-SUBCLINICAL_BY_AGE = []
-# fatality rate (calculated)
-CFR_BY_AGE = []
+SUBCLINICAL_BY_AGE = np.zeros(shape=(16, 1), dtype=float)
 # critical rate
-CRIT_BY_AGE = []
+CRIT_BY_AGE = np.zeros(shape=(16, 1), dtype=float)
+# fatality rate (calculated)
+CFR_BY_AGE = np.zeros(shape=(16, 1), dtype=float)
+# fatality rate (calculated)
+EFFICACY_BY_AGE = np.zeros(shape=(16, 1), dtype=float)
+
 # Work force
 LABOUR_FORCE_BY_AGE = np.array([0, 0, 0.010693183, 0.032079549, 0.083009492, 0.106146399, 0.106351741,
                                 0.105920522, 0.103210008, 0.098220198, 0.10624907, 0.098138062, 0.065560558,
