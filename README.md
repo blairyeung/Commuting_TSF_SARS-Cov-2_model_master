@@ -6,7 +6,7 @@ we will use DOG to upsample/downsample it back to 16 age bands.
 ## 1.1 常数项 （非时序类型数据）
 ### 1.1.1 ***TODO:*** 每个年龄段新冠患者的无症状比例
 * Shape : (16, ), dtype = float
-* Source: Paper
+* Source: **还没找到**
 ### 1.1.2 ***TODO:*** 每个年龄段新冠患者的住院比例 (need calibration)
 * Shape : (16, ), dtype = float
 * Source: Davies NG, Barnard RC, Jarvis CI, et al. Association of tiered restrictions
@@ -14,13 +14,13 @@ and a second lockdown with COVID-19 deaths and hospital admissions in England:
 a modelling study. Lancet Infect Dis 2020; published online Dec 23. https://doi.org/10.1016/S1473-3099(20)30984-1.
 ### 1.1.3 ***TODO:*** 每个年龄段新冠患者的死亡率
 * Shape : (16, ), dtype = float
-* Source: Paper
+* Source: **还没找到**
 ### 1.1.4 ***TODO:*** 每个年龄段新冠患者的死亡率
 * Shape : (16, ), dtype = float
-* Source: Paper
+* Source: **还没找到**
 ### 1.1.5 ***TODO:*** 每个年龄段新冠疫苗接种者的疫苗有效率
 * Shape : (16, ), dtype = float
-* Source: Paper
+* Source: **还没找到**
 
 ## 1.2 时序数据
 ### 1.2.1 每个公共卫生局，每个年龄段，在过去2年（至2020年2月15日）每天的新增新冠确诊，死亡数
