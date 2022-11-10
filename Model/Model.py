@@ -53,10 +53,9 @@ class Model:
             rslt = np.sum(np.multiply(data, kernel), axis=0)
             self._model_data._time_series_active_cases[i][date] = rslt
             self._model_data._time_series_clinical_cases[i][date] = np.multiply(rslt,
-                                                                 Parameters.CLINICAL_BY_AGE)
+                                                                                Parameters.CLINICAL_BY_AGE)
             self._model_data._time_series_clinical_cases[i][date] = np.multiply(rslt,
-                                                                 Parameters.SUBCLINICAL_BY_AGE)
-
+                                                                                Parameters.SUBCLINICAL_BY_AGE)
 
     def _infected_to_hospitalized(self, date):
         ratio = np.zeros(shape=(16, 1), dtype=float)
@@ -148,7 +147,6 @@ class Model:
                                                              Parameters.clinical_rate)
         self._time_series_clinical_cases[date] = np.multiply(rslt,
                                                              Parameters.subclinical_rate)
-
 
     def _synthesize_matrix(self, contact_type=0, contact_pattern='day'):
         matrices = self.dependency.matrix_by_class
