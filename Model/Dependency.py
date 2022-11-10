@@ -363,16 +363,16 @@ class Dependency:
 
             incidences = self.date_to_incidence_rate_by_phu[phu].reshape(self.total_days, 1)
             cases_ratio = Parameters.ONT_CASE_DISTRIBUTION.reshape(16, 1)
-            self.date_to_cases_by_county[i] = np.matmul(incidences, cases_ratio.T) * population / 10000.0
+            self.date_to_cases_by_county[i] = np.matmul(incidences, cases_ratio.T) * population / 100000.0
 
             hospitalizations = self.date_to_hospitalization_rate_by_phu[phu].reshape(self.total_days, 1)
             hospitalization_ratio = Parameters.ONT_HOSP_DISTRIBUTION.reshape(16, 1)
             self.date_to_hospitalizations_by_county[i] = np.matmul(hospitalizations, hospitalization_ratio.T) * \
-                                                         population / 10000.0
+                                                         population / 100000.0
 
             deaths = self.date_to_death_rate_by_phu[phu].reshape(self.total_days, 1)
             deaths_ratio = Parameters.ONT_DEATH_DISTRIBUTION.reshape(16, 1)
-            self.date_to_deaths_by_county[i] = np.matmul(deaths, deaths_ratio.T) * population / 10000.0
+            self.date_to_deaths_by_county[i] = np.matmul(deaths, deaths_ratio.T) * population / 100000.0
 
 
 if __name__ == '__main__':
