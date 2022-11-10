@@ -14,7 +14,7 @@ class Model:
     def __init__(self, forecast_days=1000):
         self._initialize_dependencies()
         self._model_data = ModelData(forecast_days, self.dependency, True)
-        self.date = self.dependency.total_days
+        self.date = self.dependency.total_days - 1
         # TODO: Initialize
         return
 
@@ -38,12 +38,14 @@ class Model:
         # self._hospitalized_to_icu(self.date)
         # self._infected_to_removed(self.date)
 
-
     def _susceptible_to_exposed(self, date):
         for i in range(Parameters.NO_COUNTY):
             exposed_cases = self._model_data.time_series_exposed[i][date]
             active_transmissible = self._model_data.time_series_clinical_cases[i][date]
-            self._get_new_cases(exposed_cases + active_transmissible)
+            # TODO: Replace this with self._model_data.time_series_immunity[i][date] after update
+            immunity_level = np.zeros(shape=(16, ))
+            immunity_coeff = np.ones(shape=(16, )) - immunity_level
+            self._get_new_cases(np.multiply(exposed_cases + active_transmissible, immunity_coeff))
 
     def _exposed_to_cases(self, date):
         ratio = np.ones(shape=(16, 1), dtype=float)
@@ -62,9 +64,9 @@ class Model:
             rslt = np.sum(np.multiply(data, kernel), axis=0)
             self._model_data.time_series_active_cases[i][date] = rslt
             self._model_data.time_series_clinical_cases[i][date] = np.multiply(rslt,
-                                                                                Parameters.CLINICAL_BY_AGE)
+                                                                               Parameters.CLINICAL_BY_AGE)
             self._model_data.time_series_clinical_cases[i][date] = np.multiply(rslt,
-                                                                                Parameters.SUBCLINICAL_BY_AGE)
+                                                                               Parameters.SUBCLINICAL_BY_AGE)
 
     def _infected_to_hospitalized(self, date):
         ratio = np.zeros(shape=(16, 1), dtype=float)
@@ -173,7 +175,7 @@ if __name__ == '__main__':
     m = Model(forecast_days=100)
     m._synthesize_matrix()
 
-    for i in range(99):
+    for i in range(100):
         m.run_one_cycle()
 
     pass

@@ -32,6 +32,7 @@ class Dependency:
     date_to_cases_by_county = None
     date_to_hospitalizations_by_county = None
     date_to_deaths_by_county = None
+    date_to_vaccines_by_county = None
 
     population_by_phu = dict()
     population_by_district = dict()
@@ -352,7 +353,8 @@ class Dependency:
         self.date_to_cases_by_county = np.zeros(shape=(Parameters.NO_COUNTY, self.total_days, 16), dtype=float)
         self.date_to_hospitalizations_by_county = np.zeros(shape=(Parameters.NO_COUNTY, self.total_days, 16), dtype=float)
         self.date_to_deaths_by_county = np.zeros(shape=(Parameters.NO_COUNTY, self.total_days, 16), dtype=float)
-        print(self.date_to_incidence_rate_by_phu.keys())
+        self.date_to_vaccines_by_county = np.zeros(shape=(Parameters.NO_COUNTY, self.total_days, 3, 16), dtype=float)
+        # print(self.date_to_incidence_rate_by_phu.keys())
         for i in range(len(self.county_data)):
             county = self.county_data[i][0]
             district = self.county_data[i][1]
@@ -373,6 +375,9 @@ class Dependency:
             deaths = self.date_to_death_rate_by_phu[phu].reshape(self.total_days, 1)
             deaths_ratio = Parameters.ONT_DEATH_DISTRIBUTION.reshape(16, 1)
             self.date_to_deaths_by_county[i] = np.matmul(deaths, deaths_ratio.T) * population / 100000.0
+
+            vaccinated = self.date_to_vaccines_by_county[i] = ((population / 100.0) * self.date_to_vaccines_by_age)
+
 
 
 if __name__ == '__main__':

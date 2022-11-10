@@ -23,7 +23,10 @@ class ModelData:
     time_series_ICU = None
     time_series_recovered = None
     time_series_deaths = None
+
     time_series_immunized = None
+    time_series_vaccinated = None
+    time_series_vaccine_immunity = None
 
     time_series_immunity = None
 
@@ -78,8 +81,7 @@ class ModelData:
 
         self.time_series_exposed = copy.deepcopy(self.time_series_active_cases)
 
-        self.time_series_sub_clinical_cases = np.subtract(self.time_series_active_cases,
-                                                       self.time_series_clinical_cases)
+        self.time_series_sub_clinical_cases = self.time_series_active_cases - self.time_series_clinical_cases
 
         self.time_series_deaths = np.concatenate([self.dependency.date_to_deaths_by_county,
                                                    np.zeros(shape=(x, y, z))], axis=1)
@@ -92,3 +94,15 @@ class ModelData:
 
         self.time_series_vaccinated = np.concatenate([self.dependency.date_to_vaccines_by_age,
                                                  np.zeros(shape=(y, 3, z))], axis=0)
+
+        # self.time_series_immunized = self.time_series_active_cases + 0.9 * self.time_series_vaccinated
+
+    def _compute_immunity(self):
+        """
+        TODO: Find the vaccine efficacy and immunity waning function from papers, and
+        TODO: calcualte the immunity from the vaccination and cases data
+        This is hard and trciky!
+        :return:
+        """
+
+        return None
