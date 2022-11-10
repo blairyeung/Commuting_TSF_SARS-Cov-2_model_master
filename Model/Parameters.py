@@ -10,7 +10,19 @@ import datetime
 
 ver = '1.0'
 
+def find_mean(v):
+    tot = 0
+    for i in range(len(v)):
+        tot += v[i]
+        if tot >= 0.5:
+            print(i, len(v))
+            break
 
+def get_bayes(lst):
+    bayes = np.zeros(shape=lst.shape)
+    for i in range(lst.shape[0]):
+        bayes[i] = 1 / lst[i]
+    return bayes
 """
     Matrix constants
 """
@@ -59,16 +71,23 @@ ONT_DEATH_DISTRIBUTION = np.array([0, 0, 0.010693183, 0.032079549, 0.083009492, 
 
 # susceptibility
 SUSP_BY_AGE = np.array([1, 2])
-# clinical ratio
-CLINICAL_BY_AGE = np.ones(shape=(16, 1), dtype=float)
 # subclinical ratio
-SUBCLINICAL_BY_AGE = np.zeros(shape=(16, 1), dtype=float)
+SUBCLINICAL_BY_AGE = np.array([0.750, 0.712, 0.683, 0.650, 0.616, 0.583, 0.550, 0.517, 0.483, 0.450, 0.417, 0.383,
+                            0.350, 0.317, 0.283, 0.250])
+# clinical ratio
+CLINICAL_BY_AGE = np.subtract(np.ones(shape=(16, ), dtype=float), SUBCLINICAL_BY_AGE)
 # critical rate
-CRIT_BY_AGE = np.zeros(shape=(16, 1), dtype=float)
+CRIT_BY_AGE = np.zeros(shape=(16,), dtype=float)
 # fatality rate (calculated)
-CFR_BY_AGE = np.zeros(shape=(16, 1), dtype=float)
+CFR_BY_AGE = np.zeros(shape=(16,), dtype=float)
 # fatality rate (calculated)
-EFFICACY_BY_AGE = np.zeros(shape=(16, 1), dtype=float)
+EFFICACY_BY_AGE = np.zeros(shape=(16,), dtype=float)
+
+"""
+    Bayes
+"""
+
+BAYES_CLINICAL_BY_AGE = get_bayes(CLINICAL_BY_AGE)
 
 # Work force
 LABOUR_FORCE_BY_AGE = np.array([0, 0, 0.010693183, 0.032079549, 0.083009492, 0.106146399, 0.106351741,
@@ -102,13 +121,11 @@ ACT2SUB_CONVOLUTION_KERNEL = normalize(gamma.pdf(kernel_size_1, a=1.2, scale=4))
 kernel_size_2 = np.linspace(0, 25, 25)
 SUB2REC_CONVOLUTION_KERNEL = normalize(gamma.pdf(kernel_size_2, a=1.6, scale=4))
 
-"""
+""" 
     These kernels are for hospitalization, ICU, and deaths
 """
 
-
 # TODO: Need to multiply all of the hospitalization, ICU, deaths distribution with P(HOSP), P(ICU), P(CFR)
-
 
 kernel_size_3 = np.linspace(0, 15, 15)
 INF2HOS_CONVOLUTION_KERNEL = normalize(norm(kernel_size_3, mean=7.5, scale=1))
@@ -116,15 +133,6 @@ HOS2ICU_CONVOLUTION_KERNEL = normalize(norm(kernel_size_3, mean=11-7.5, scale=1)
 
 kernel_size_4 = np.linspace(0, 15, 15)
 ICU2DEA_CONVOLUTION_KERNEL = normalize(gamma.pdf(kernel_size_4, a=2.5, scale=1.9))
-
-
-def find_mean(v):
-    tot = 0
-    for i in range(len(v)):
-        tot += v[i]
-        if tot >= 0.5:
-            print(i, len(v))
-            break
 
 
 if __name__ == '__main__':

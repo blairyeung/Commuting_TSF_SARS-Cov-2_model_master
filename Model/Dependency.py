@@ -377,6 +377,4 @@ class Dependency:
 
 if __name__ == '__main__':
     dependency = Dependency()
-    # dependency.read_files()
-    # dependency.compute_phu_population()
     pass
