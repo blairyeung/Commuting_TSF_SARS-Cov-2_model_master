@@ -46,15 +46,14 @@ class Model:
         kernel_size = kernel.shape[0]
 
         for i in range(Parameters.NO_COUNTY):
-            county_data = self._model_data._time_series_active_cases[i]
+            county_data = self._model_data.time_series_active_cases[i]
             data = county_data[date - kernel_size:date]
             data = data[::-1]
-            # mat = np.multiply(data, kernel)
             rslt = np.sum(np.multiply(data, kernel), axis=0)
-            self._model_data._time_series_active_cases[i][date] = rslt
-            self._model_data._time_series_clinical_cases[i][date] = np.multiply(rslt,
+            self._model_data.time_series_active_cases[i][date] = rslt
+            self._model_data.time_series_clinical_cases[i][date] = np.multiply(rslt,
                                                                                 Parameters.CLINICAL_BY_AGE)
-            self._model_data._time_series_clinical_cases[i][date] = np.multiply(rslt,
+            self._model_data.time_series_clinical_cases[i][date] = np.multiply(rslt,
                                                                                 Parameters.SUBCLINICAL_BY_AGE)
 
     def _infected_to_hospitalized(self, date):
