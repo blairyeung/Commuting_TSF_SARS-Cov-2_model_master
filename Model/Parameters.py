@@ -35,6 +35,16 @@ NO_DISTRICT = 49
 OUTBREAK_FIRST_DAY = datetime.datetime(2020, 1, 15)
 
 """
+    Ontario age-specific parameters, need to update
+"""
+
+# TODO: Do some research and update the following parameters
+
+ONT_CASE_DISTRIBUTION = np.ones(shape=(16, ), dtype=float) / 16
+ONT_HOSP_DISTRIBUTION = np.ones(shape=(16, ), dtype=float) / 16
+ONT_DEATH_DISTRIBUTION = np.ones(shape=(16, ), dtype=float) / 16
+
+"""
     Age-specific parameters, all 16 entries long
 """
 

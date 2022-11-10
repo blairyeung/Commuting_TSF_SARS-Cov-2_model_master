@@ -20,22 +20,24 @@ class ModelData:
     _time_series_ICU = None
     _time_series_recovered = None
     _time_series_deaths = None
-
     _time_series_immunized = None
+
+    _time_series_immunity = None
 
     def __init__(self, forecast_days=1000, dependency=None):
         """
             Initialize the tensors
             shape=(x, y, z)
             Here, it should be (x * 528 * 16)
-             x = number of days to forecast + dates elapsed since Covid outbreak
-            y = number of counties
+            x = number of counties
+            y = number of days to forecast + dates elapsed since Covid outbreak
             z = 16 age bands
         """
         self.dependency = dependency
         self._time_series_len = self.dependency.total_days + forecast_days
-        x = self._time_series_len
-        y = len(self.dependency.county_data)
+
+        x = len(self.dependency.county_data)
+        y = self._time_series_len
         z = 16
 
         # print(self._time_series_len)
@@ -48,6 +50,9 @@ class ModelData:
         self._time_series_ICU = np.zeros(shape=(x, y, z), dtype=int)
         self._time_series_recovered = np.zeros(shape=(x, y, z), dtype=int)
         self._time_series_deaths = np.zeros(shape=(x, y, z), dtype=int)
+        self._time_series_immunized = np.zeros(shape=(x, y, z), dtype=int)
+
+        self._time_series_immunity = np.zeros(shape=(x, y, z), dtype=float)
 
 
 if __name__ == '__main__':

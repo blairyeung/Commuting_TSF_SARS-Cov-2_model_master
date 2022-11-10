@@ -1,6 +1,7 @@
 from datetime import datetime
 import numpy as np
 import os
+import csv
 
 import Gaussian
 import Parameters
@@ -28,11 +29,9 @@ class Dependency:
     date_to_death_rate_by_phu = dict()
     date_to_vaccines_by_age = np.zeros((0, 3, 9))
 
-
-    date_to_no_cases_by_county = dict()
-    date_to_no_cases_by_county = dict()
-    date_to_no_cases_by_county = dict()
-    date_to_no_cases_by_county = dict()
+    date_to_cases_by_county = None
+    date_to_hospitalizations_by_county = None
+    date_to_deaths_by_county = None
 
     population_by_phu = dict()
     population_by_district = dict()
@@ -62,6 +61,7 @@ class Dependency:
         # self.differentiate()
         self.code_district_linking()
         self.compute_phu_population()
+        self.distribute_to_counties()
 
     def read_matrix(self):
         """
@@ -113,6 +113,7 @@ class Dependency:
         lines = contents.split('\n')
         for line in range(1, len(lines) - 1):
             elements = [lines[line][:lines[line].index(',')], lines[line][lines[line].index(',') + 1:]]
+            elements[1] = elements[1].replace('"', '')
             self.district_to_phu[int(elements[0])] = elements[1]
             if elements[1] not in self.phu_to_district:
                 self.phu_to_district[elements[1]] = [int(elements[0])]
@@ -152,18 +153,24 @@ class Dependency:
            :return:
         """
         read_path = self.get_dependency_path() + 'All case trends data.csv'
-        with open(read_path) as file:
-            contents = file.read()
-        lines = contents.split('\n')
+        with open(read_path, newline='') as file:
+            reader = csv.reader(file, delimiter=',')
+            lines = list(reader)
 
         self.find_max_date()
 
+        last_recorded = 0
+
         for line in range(1, len(lines) - 1):
-            elements = lines[line].split(',')
+            elements = lines[line]
+            # print(elements)
+            elements[1] = elements[1].replace('"', '')
             string = elements[0]
             this_day = datetime.strptime(string, '%d-%b-%y')
             after_outbreak = (this_day - Parameters.OUTBREAK_FIRST_DAY).days
             phu = elements[1]
+            if after_outbreak > last_recorded:
+                last_recorded = after_outbreak
             if phu == 'Ontario':
                 pass
             else:
@@ -180,6 +187,10 @@ class Dependency:
                         self.date_to_incidence_rate_by_phu[phu][after_outbreak] = float(elements[7])
                         self.date_to_hospitalization_rate_by_phu[phu][after_outbreak] = float(elements[9])
                         self.date_to_death_rate_by_phu[phu][after_outbreak] = float(elements[11])
+
+        for i in range(last_recorded-1, self.total_days):
+            for phu in self.date_to_incidence_rate_by_phu.keys():
+                self.date_to_incidence_rate_by_phu[phu][i] = self.date_to_incidence_rate_by_phu[phu][last_recorded]
 
         file.close()
         return
@@ -329,6 +340,7 @@ class Dependency:
             self.district_to_county[district].append(county)
             self.population_by_district[district] += population
             self.county_to_district[county] = district
+
     def compute_phu_population(self):
         for i in self.phu_to_district.keys():
             districts = self.phu_to_district[i]
@@ -336,8 +348,31 @@ class Dependency:
             for d in districts:
                 self.population_by_phu[i] += self.population_by_district[d]
 
-    def compute_num_cases(self):
-        return
+    def distribute_to_counties(self):
+        self.date_to_cases_by_county = np.zeros(shape=(Parameters.NO_COUNTY, self.total_days, 16), dtype=float)
+        self.date_to_hospitalizations_by_county = np.zeros(shape=(Parameters.NO_COUNTY, self.total_days, 16), dtype=float)
+        self.date_to_deaths_by_county = np.zeros(shape=(Parameters.NO_COUNTY, self.total_days, 16), dtype=float)
+        print(self.date_to_incidence_rate_by_phu.keys())
+        for i in range(len(self.county_data)):
+            county = self.county_data[i][0]
+            district = self.county_data[i][1]
+            population = self.county_data[i][2]
+            phu = self.district_to_phu[district]
+
+            print(population)
+
+            incidences = self.date_to_incidence_rate_by_phu[phu].reshape(self.total_days, 1)
+            cases_ratio = Parameters.ONT_CASE_DISTRIBUTION.reshape(16, 1)
+            self.date_to_cases_by_county[i] = np.matmul(incidences, cases_ratio.T) * population / 10000.0
+
+            hospitalizations = self.date_to_hospitalization_rate_by_phu[phu].reshape(self.total_days, 1)
+            hospitalization_ratio = Parameters.ONT_HOSP_DISTRIBUTION.reshape(16, 1)
+            self.date_to_hospitalizations_by_county[i] = np.matmul(hospitalizations, hospitalization_ratio.T) * \
+                                                         population / 10000.0
+
+            deaths = self.date_to_death_rate_by_phu[phu].reshape(self.total_days, 1)
+            deaths_ratio = Parameters.ONT_DEATH_DISTRIBUTION.reshape(16, 1)
+            self.date_to_deaths_by_county[i] = np.matmul(deaths, deaths_ratio.T) * population / 10000.0
 
 
 if __name__ == '__main__':
