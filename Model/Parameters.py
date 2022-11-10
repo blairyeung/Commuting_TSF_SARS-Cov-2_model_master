@@ -30,6 +30,7 @@ MATRIX_SIZE = 16
 MATRIX_CATEGORIES = ['urban', 'rural']
 MATRIX_CONTACT_TYPE = ['home', 'school', 'work', 'others']
 MATRIX_COUNTRY_ISO = 'CA'
+MATRIX_PRESETS = {'day': np.array([0.9, 1.0, 0.2, 0.8]), 'night': np.subtract(np.ones(shape=(4,)), np.array([0.9, 1.0, 0.2, 0.8]))}
 
 """
     Geo constants

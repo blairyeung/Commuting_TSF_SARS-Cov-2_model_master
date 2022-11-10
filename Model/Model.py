@@ -27,9 +27,9 @@ class Model:
         self._model_transition()
         return
 
-    def _get_new_cases(self, cases, contact_type=1):
+    def _get_new_cases(self, cases, contact_type=0, contact_pattern='day'):
         susceptibility = Parameters.sup_by_age
-        matrix = self._synthesize_matrix(contact_type)
+        matrix = self._synthesize_matrix(contact_type, contact_pattern)
         return np.matmul(matrix, cases)
 
     def _model_transition(self):
@@ -150,14 +150,23 @@ class Model:
                                                              Parameters.subclinical_rate)
 
 
-    def _synthesize_matrix(self, type=1):
-        pass
+    def _synthesize_matrix(self, contact_type=0, contact_pattern='day'):
+        matrices = self.dependency.matrix_by_class
+        preset = Parameters.MATRIX_PRESETS[contact_pattern]
+        matrix = np.zeros(shape=(16, 16))
+        for j in range(4):
+            matrix = np.add(matrix, preset[j] * matrices[contact_type][j])
+        return matrix
+
     def _initialize_dependencies(self):
         self.dependency = Dependency.Dependency()
 
 
 if __name__ == '__main__':
     m = Model(forecast_days=100)
-    for i in range(10):
+    m._synthesize_matrix()
+    """
+    for i in range(99):
         m.run_one_cycle()
+    """
     pass
