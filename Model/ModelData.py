@@ -1,3 +1,4 @@
+import copy
 import math
 import numpy as np
 import Dependency as Dependency
@@ -72,11 +73,13 @@ class ModelData:
         self.time_series_clinical_cases = np.concatenate([self.dependency.date_to_cases_by_county,
                                                  np.zeros(shape=(x, y, z))], axis=1)
 
-        self.time_series_active_cases = np.multiply(self._time_series_clinical_cases,
+        self.time_series_active_cases = np.multiply(self.time_series_clinical_cases,
                                                        Parameters.BAYES_CLINICAL_BY_AGE.T)
 
-        self.time_series_sub_clinical_cases = np.subtract(self._time_series_active_cases,
-                                                       self._time_series_clinical_cases)
+        self.time_series_exposed = copy.deepcopy(self.time_series_active_cases)
+
+        self.time_series_sub_clinical_cases = np.subtract(self.time_series_active_cases,
+                                                       self.time_series_clinical_cases)
 
         self.time_series_deaths = np.concatenate([self.dependency.date_to_deaths_by_county,
                                                    np.zeros(shape=(x, y, z))], axis=1)

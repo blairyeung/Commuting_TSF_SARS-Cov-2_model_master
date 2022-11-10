@@ -23,7 +23,7 @@ class Model:
         Firstly, we convert the number of newly infected cases to active cases
         """
         self.date += 1
-        # self._model_data
+        print(self.date)
         self._model_transition()
         return
 
@@ -38,6 +38,13 @@ class Model:
         # self._hospitalized_to_icu(self.date)
         # self._infected_to_removed(self.date)
 
+
+    def _susceptible_to_exposed(self, date):
+        for i in range(Parameters.NO_COUNTY):
+            exposed_cases = self._model_data.time_series_exposed[i][date]
+            active_transmissible = self._model_data.time_series_clinical_cases[i][date]
+            self._get_new_cases(exposed_cases + active_transmissible)
+
     def _exposed_to_cases(self, date):
         ratio = np.ones(shape=(16, 1), dtype=float)
 
@@ -46,7 +53,10 @@ class Model:
         kernel_size = kernel.shape[0]
 
         for i in range(Parameters.NO_COUNTY):
-            county_data = self._model_data.time_series_active_cases[i]
+            """
+                All exposed + first 2.5 days of clinical, read paper!
+            """
+            county_data = self._model_data.time_series_exposed[i]
             data = county_data[date - kernel_size:date]
             data = data[::-1]
             rslt = np.sum(np.multiply(data, kernel), axis=0)
@@ -162,8 +172,8 @@ class Model:
 if __name__ == '__main__':
     m = Model(forecast_days=100)
     m._synthesize_matrix()
-    """
+
     for i in range(99):
         m.run_one_cycle()
-    """
+
     pass

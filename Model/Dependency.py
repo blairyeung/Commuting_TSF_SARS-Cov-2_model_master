@@ -359,7 +359,7 @@ class Dependency:
             population = self.county_data[i][2]
             phu = self.district_to_phu[district]
 
-            print(population)
+            # print(population)
 
             incidences = self.date_to_incidence_rate_by_phu[phu].reshape(self.total_days, 1)
             cases_ratio = Parameters.ONT_CASE_DISTRIBUTION.reshape(16, 1)
