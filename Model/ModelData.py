@@ -153,11 +153,10 @@ class ModelData:
         infected = infected.transpose(1, 0, 2)[:date]
         infected = infected.transpose(1, 2, 0)
         # print(infected.shape)
-
         raw_kernel_infected = Parameters.INFECTION_EFFICACY_KERNEL[::-1]
         kernel_infected = raw_kernel_infected[:date].reshape(date, 1)
         # print(kernel_infected.shape)
-       #  print(infected.shape)
+        print(infected.shape)
         # print(kernel_infected.shape)
 
         immunity_infected = np.matmul(infected, kernel_infected).reshape(528, 16)

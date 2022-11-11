@@ -381,7 +381,7 @@ class Dependency:
             deaths_ratio = Parameters.ONT_DEATH_DISTRIBUTION.reshape(16, 1)
             self.date_to_deaths_by_county[i] = np.matmul(deaths, deaths_ratio.T) * population / 100000.0
 
-            vaccinated = self.date_to_vaccines_by_county[i] = ((population / 100.0) * self.date_to_vaccines_by_age)
+            self.date_to_vaccines_by_county[i] = ((population / 100.0) * self.date_to_vaccines_by_age)
 
 
 
