@@ -99,13 +99,13 @@ def get_cases_total():
         no_vent_by_pr[days2[i]] = vent[i]
 
     no_icu = np.divide(no_icu_by_pr[:tot_cases.shape[0]], np.clip(tot_cases[:no_icu_by_pr.shape[0]],
-                                                                        a_max=1000000, a_min=1))
-    no_hosp = np.divide(no_hosp_by_pr[:tot_cases.shape[0]],  np.clip(tot_cases[:no_icu_by_pr.shape[0]],
-                                                                        a_max=1000000, a_min=1))
-    no_vent = np.divide(no_vent_by_pr[:tot_cases.shape[0]],  np.clip(tot_cases[:no_icu_by_pr.shape[0]],
-                                                                        a_max=1000000, a_min=1))
-    no_deaths = np.divide(tot_deaths[:tot_cases.shape[0]],  np.clip(tot_cases[:no_icu_by_pr.shape[0]],
-                                                                        a_max=1000000, a_min=1))
+                                                                  a_max=1000000, a_min=1))
+    no_hosp = np.divide(no_hosp_by_pr[:tot_cases.shape[0]], np.clip(tot_cases[:no_icu_by_pr.shape[0]],
+                                                                    a_max=1000000, a_min=1))
+    no_vent = np.divide(no_vent_by_pr[:tot_cases.shape[0]], np.clip(tot_cases[:no_icu_by_pr.shape[0]],
+                                                                    a_max=1000000, a_min=1))
+    no_deaths = np.divide(tot_deaths[:tot_cases.shape[0]], np.clip(tot_cases[:no_icu_by_pr.shape[0]],
+                                                                   a_max=1000000, a_min=1))
 
     print(len(dates2))
 
