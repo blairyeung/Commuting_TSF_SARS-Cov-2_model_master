@@ -1,3 +1,4 @@
+import copy
 from datetime import datetime
 import numpy as np
 import os
@@ -36,6 +37,7 @@ class Dependency:
 
     population_by_phu = dict()
     population_by_district = dict()
+    index_to_population = list()
 
     def __init__(self):
         self.read_files()
@@ -89,7 +91,7 @@ class Dependency:
 
     def read_county_data(self):
         """
-            county_data: 520 * 3 float-valued np.array
+            county_data: shape=(520, 3) float-valued np.array
             county_data[0:520][0] is the county code
             county_data[0:520][1] is the district code
             county_data[0:520][2] is the population
@@ -100,11 +102,14 @@ class Dependency:
         lines = contents.split('\n')
         for line in range(1, len(lines) - 1):
             elements = lines[line].split(',')
-            self.county_data[line - 1] = [elements[0], elements[5], elements[4]]
-            self.code_to_name[elements[0]] = elements[1]
+            self.county_data[line - 1] = [int(elements[0]), int(elements[5]), int(elements[4])]
+            self.code_to_name[int(elements[0])] = elements[1]
             self.county_codes.append(int(elements[0]))
-            self.code_to_index[elements[0]] = line - 1
+            self.code_to_index[int(elements[0])] = line - 1
         file.close()
+        self.county_data = np.array(self.county_data)
+        self.index_to_population = copy.deepcopy(self.county_data).transpose(1, 0)[2]
+        # self.index_to_population = self.index_to_population.reshape(3, self.county_data.shape[0])[2]
         return
 
     def read_phu(self):
@@ -130,7 +135,8 @@ class Dependency:
         lines = contents.split('\n')
         for line in range(1, len(lines) - 1):
             elements = lines[line].split(',')
-            self.commute_matrix[self.code_to_index[elements[0]]][self.code_to_index[elements[2]]] = int(elements[6])
+            self.commute_matrix[self.code_to_index[int(elements[0])]][self.code_to_index[int(elements[2])]] = \
+                int(elements[6])
         file.close()
         return
 

@@ -23,6 +23,11 @@ def get_bayes(lst):
     for i in range(lst.shape[0]):
         bayes[i] = 1 / lst[i]
     return bayes
+
+def get_immunity_kernel(dose=0, length=2000):
+    kernel = np.ones(shape=(length, ), dtype=float)
+    return kernel
+
 """
     Matrix constants
 """
@@ -30,7 +35,8 @@ MATRIX_SIZE = 16
 MATRIX_CATEGORIES = ['urban', 'rural']
 MATRIX_CONTACT_TYPE = ['home', 'school', 'work', 'others']
 MATRIX_COUNTRY_ISO = 'CA'
-MATRIX_PRESETS = {'day': np.array([0.9, 1.0, 0.2, 0.8]), 'night': np.subtract(np.ones(shape=(4,)), np.array([0.9, 1.0, 0.2, 0.8]))}
+MATRIX_PRESETS = {'day': np.array([0.9, 1.0, 0.2, 0.8]),
+                  'night': np.subtract(np.ones(shape=(4,)), np.array([0.9, 1.0, 0.2, 0.8]))}
 
 """
     Geo constants
@@ -135,6 +141,11 @@ HOS2ICU_CONVOLUTION_KERNEL = normalize(norm(kernel_size_3, mean=11-7.5, scale=1)
 kernel_size_4 = np.linspace(0, 15, 15)
 ICU2DEA_CONVOLUTION_KERNEL = normalize(gamma.pdf(kernel_size_4, a=2.5, scale=1.9))
 
+VACCINE_EFFICACY_KERNEL_DOSE1 = get_immunity_kernel(dose=1)
+VACCINE_EFFICACY_KERNEL_DOSE2 = get_immunity_kernel(dose=2)
+VACCINE_EFFICACY_KERNEL_DOSE3 = get_immunity_kernel(dose=3)
+
+INFECTION_EFFICACY_KERNEL = get_immunity_kernel(dose=0)
 
 if __name__ == '__main__':
     print(kernel_size_2)

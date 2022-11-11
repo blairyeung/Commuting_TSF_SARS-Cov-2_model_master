@@ -24,6 +24,7 @@ class Model:
         """
         self.date += 1
         print(self.date)
+        self._model_data.compute_immunity(self.date)
         self._model_transition()
         return
 
@@ -39,11 +40,12 @@ class Model:
         # self._infected_to_removed(self.date)
 
     def _susceptible_to_exposed(self, date):
-        for i in range(Parameters.NO_COUNTY):
-            exposed_cases = self._model_data.time_series_exposed[i][date]
-            active_transmissible = self._model_data.time_series_clinical_cases[i][date]
-            # TODO: Replace this with self._model_data.time_series_immunity[i][date] after update
-            immunity_level = np.zeros(shape=(16, ))
+        for c in range(Parameters.NO_COUNTY):
+            exposed_cases = self._model_data.time_series_exposed[c][date]
+            active_transmissible = self._model_data.time_series_clinical_cases[c][date]
+            # TODO: Replace this with self._model_data.time_series_immunity[c][date] after update
+            # immunity_level = np.zeros(shape=(16, ))
+            immunity_level = self._model_data.time_series_immunity[c][date]
             immunity_coeff = np.ones(shape=(16, )) - immunity_level
             self._get_new_cases(np.multiply(exposed_cases + active_transmissible, immunity_coeff))
 
@@ -54,7 +56,7 @@ class Model:
         kernel = np.matmul(raw_kernel.reshape((raw_kernel.shape[0], 1)), ratio.T)
         kernel_size = kernel.shape[0]
 
-        for i in range(Parameters.NO_COUNTY):
+        for c in range(Parameters.NO_COUNTY):
             """
                 All exposed + first 2.5 days of clinical, read paper!
             """
@@ -62,10 +64,10 @@ class Model:
             data = county_data[date - kernel_size:date]
             data = data[::-1]
             rslt = np.sum(np.multiply(data, kernel), axis=0)
-            self._model_data.time_series_active_cases[i][date] = rslt
-            self._model_data.time_series_clinical_cases[i][date] = np.multiply(rslt,
+            self._model_data.time_series_active_cases[c][date] = rslt
+            self._model_data.time_series_clinical_cases[c][date] = np.multiply(rslt,
                                                                                Parameters.CLINICAL_BY_AGE)
-            self._model_data.time_series_clinical_cases[i][date] = np.multiply(rslt,
+            self._model_data.time_series_clinical_cases[c][date] = np.multiply(rslt,
                                                                                Parameters.SUBCLINICAL_BY_AGE)
 
     def _infected_to_hospitalized(self, date):
