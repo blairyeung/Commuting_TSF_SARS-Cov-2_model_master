@@ -115,8 +115,6 @@ def get_cases_total():
                                 'CFR': no_deaths})
 
     # icu_rate_df.to_csv(d.get_dependency_path() + 'Hospitalizations.csv')
-    # print(grouped2)
-
 
 
 def get_hosp_total():
