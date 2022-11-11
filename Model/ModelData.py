@@ -143,7 +143,7 @@ class ModelData:
 
         population = self.dependency.index_to_population
 
-        print(population)
+        # print(population)
 
         vaccine_immunized_individuals = np.matmul(population.reshape(population.shape[0], 1),
                                           immunity_from_vaccine.reshape(16, 1).T)
@@ -156,22 +156,22 @@ class ModelData:
         raw_kernel_infected = Parameters.INFECTION_EFFICACY_KERNEL[::-1]
         kernel_infected = raw_kernel_infected[:date].reshape(date, 1)
         # print(kernel_infected.shape)
-        print(infected.shape)
+        # print(infected.shape)
         # print(kernel_infected.shape)
 
         immunity_infected = np.matmul(infected, kernel_infected).reshape(528, 16)
 
-        print(immunity_infected.shape, vaccine_immunized_individuals.shape)
+        # print(immunity_infected.shape, vaccine_immunized_individuals.shape)
         infected_immunized_individuals = None
 
         self.time_series_immunized = self.time_series_immunized.transpose(1, 0, 2)
 
         self.time_series_immunized[date] = immunity_infected + vaccine_immunized_individuals
 
-        print(self.time_series_immunized.shape)
+        # print(self.time_series_immunized.shape)
 
         self.time_series_immunized = self.time_series_immunized.transpose(1, 0, 2)
-        print(self.time_series_immunized.shape)
+        # print(self.time_series_immunized.shape)
         # print(vaccine_immunized_individuals.shape)
 
 

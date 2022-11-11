@@ -31,6 +31,8 @@ class Model:
     def _get_new_cases(self, cases, contact_type=0, contact_pattern='day'):
         susceptibility = Parameters.sup_by_age
         matrix = self._synthesize_matrix(contact_type, contact_pattern)
+        self._model_data.compute_immunity(self.date)
+        immunity = self._model_data.time_series_immunity[self.date]
         return np.matmul(matrix, cases)
 
     def _model_transition(self):
@@ -60,7 +62,7 @@ class Model:
             """
                 All exposed + first 2.5 days of clinical, read paper!
             """
-            county_data = self._model_data.time_series_exposed[i]
+            county_data = self._model_data.time_series_exposed[c]
             data = county_data[date - kernel_size:date]
             data = data[::-1]
             rslt = np.sum(np.multiply(data, kernel), axis=0)
@@ -178,6 +180,6 @@ if __name__ == '__main__':
     m._synthesize_matrix()
 
     for i in range(100):
-        m.run_one_cycle()
+        m.  run_one_cycle()
 
     pass
