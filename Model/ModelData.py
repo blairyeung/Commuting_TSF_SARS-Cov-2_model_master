@@ -70,7 +70,7 @@ class ModelData:
             """
             self.time_series_vaccinated = np.zeros(shape=(y, z), dtype=int)
 
-            self.time_series_immunity = np.zeros(shape=(x, y, z), dtype=float)
+            self.time_series_immunity = np.zeros(shape=(x, self.time_series_len, z), dtype=float)
 
     def _load_from_dependencies(self):
         x = len(self.dependency.county_data)
@@ -101,6 +101,11 @@ class ModelData:
                                                       np.zeros(shape=(y, 3, z))], axis=0)
 
         self.time_series_vaccinated = self.time_series_vaccinated.transpose(1, 0, 2)
+
+        print(self.time_series_vaccinated.shape)
+
+        self.time_series_immunized = np.zeros(shape=(x, self.time_series_len, z), dtype=float)
+        self.time_series_immunity = np.zeros(shape=(x, self.time_series_len, z), dtype=float)
 
         # self.time_series_immunized = self.time_series_active_cases + 0.9 * self.time_series_vaccinated
 
@@ -138,10 +143,12 @@ class ModelData:
 
         population = self.dependency.index_to_population
 
+        print(population)
+
         vaccine_immunized_individuals = np.matmul(population.reshape(population.shape[0], 1),
                                           immunity_from_vaccine.reshape(16, 1).T)
 
-        infected = copy.deepcopy(self.time_series_infected)
+        infected = self.time_series_infected
 
         infected = infected.transpose(1, 0, 2)[:date]
         infected = infected.transpose(1, 2, 0)
@@ -154,14 +161,18 @@ class ModelData:
         # print(kernel_infected.shape)
 
         immunity_infected = np.matmul(infected, kernel_infected).reshape(528, 16)
-        # print(immunity_infected.shape)
-        # print(immunity_infected.shape)
-        # print(self.time_series_exposed.shape)
 
+        print(immunity_infected.shape, vaccine_immunized_individuals.shape)
         infected_immunized_individuals = None
 
-        # self.time_series_immunized[]
+        self.time_series_immunized = self.time_series_immunized.transpose(1, 0, 2)
 
+        self.time_series_immunized[date] = immunity_infected + vaccine_immunized_individuals
+
+        print(self.time_series_immunized.shape)
+
+        self.time_series_immunized = self.time_series_immunized.transpose(1, 0, 2)
+        print(self.time_series_immunized.shape)
         # print(vaccine_immunized_individuals.shape)
 
 

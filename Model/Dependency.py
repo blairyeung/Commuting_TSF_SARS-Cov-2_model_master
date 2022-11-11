@@ -61,7 +61,7 @@ class Dependency:
         """
             Do not differentiate cases
         """
-        # self.differentiate()
+        self.differentiate()
         self.code_district_linking()
         self.compute_phu_population()
         self.distribute_to_counties()
@@ -279,9 +279,8 @@ class Dependency:
 
         """
         for i in range(self.total_days - 1):
-            vaccine_differentiated = np.subtract(self.date_to_vaccines_by_age[i+1] - self.date_to_vaccines_by_age[i])
-        self.date_to_vaccines_by_age = vaccine_differentiated
-
+            vaccine_differentiated[i+1] = self.date_to_vaccines_by_age[i+1] - self.date_to_vaccines_by_age[i]
+        self.date_to_vaccines_by_age = np.clip(vaccine_differentiated, a_min=0, a_max=0.2)
         # global date_to_incidence_rate_by_phu
 
         """

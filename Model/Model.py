@@ -170,7 +170,7 @@ class Model:
         return matrix
 
     def _initialize_dependencies(self):
-        self.dependency = Dependency.Dependency()
+         self.dependency = Dependency.Dependency()
 
 
 if __name__ == '__main__':
