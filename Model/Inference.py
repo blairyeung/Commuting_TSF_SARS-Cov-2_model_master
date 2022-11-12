@@ -31,10 +31,6 @@ cases = np.array(list(df.cases))
 hospitalization = np.array(list(df.hospitalization))
 icu = np.array(list(df.ICU))
 deaths = np.array(list(df.death))
-print(cases)
-print(hospitalization)
-print(icu)
-print(deaths)
 
 # fit them into the arrays
 
@@ -42,10 +38,6 @@ cases_augment = augment(cases)
 hospitalized_augment = augment(hospitalization)
 icu_augment = augment(icu)
 deaths_augment = augment(deaths)
-
-
-
-print(cases_augment)
 
 
 # cases_augment = np.reshape(np.array(cv2.GaussianBlur(cases_augment.reshape(100, 1), (25, 25), 5)), newshape=(100,))
@@ -63,6 +55,12 @@ cfr = deaths_augment / cases_augment
 
 plt.plot(list(range(0, 100)), icu_ratio)
 plt.show()
+
+infereced_df = pd.DataFrame({'hospitalization': hosp_ratio,
+                             'icu': icu_ratio,
+                            'cfr': cfr})
+
+infereced_df.to_csv(d.get_dependency_path() + 'Inferenced_age_specific_data.csv')
 
 # TODO: Find the WEIGHTED AVERAGE and inference the conditional probabilities.
 
