@@ -60,7 +60,8 @@ infereced_df = pd.DataFrame({'hospitalization': hosp_ratio,
                              'icu': icu_ratio,
                             'cfr': cfr})
 
-infereced_df.to_csv(d.get_dependency_path() + 'Inferenced_age_specific_data.csv')
+
+# infereced_df.to_csv(d.get_dependency_path() + 'Inferenced_age_specific_data.csv')
 
 # TODO: Find the WEIGHTED AVERAGE and inference the conditional probabilities.
 """

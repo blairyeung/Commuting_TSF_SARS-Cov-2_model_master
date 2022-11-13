@@ -109,12 +109,16 @@ def get_cases_total():
 
     print(len(dates2))
 
-    icu_rate_df = pd.DataFrame({'ICU': no_icu,
-                                'Ventilator': no_vent,
-                                'Hospitalization': no_hosp,
-                                'CFR': no_deaths})
 
-    # icu_rate_df.to_csv(d.get_dependency_path() + 'Hospitalizations.csv')
+    icu_rate_df = pd.DataFrame({'Cases': tot_cases,
+                                'ICU': no_icu[:tot_cases.shape[0]],
+                                'Ventilator': no_vent[:tot_cases.shape[0]],
+                                'Hospitalization': no_hosp[:tot_cases.shape[0]],
+                                'CFR': no_deaths[:tot_cases.shape[0]]})
+
+    print(icu_rate_df)
+
+    icu_rate_df.to_csv(d.get_dependency_path() + 'Hospitalizations.csv')
 
 
 def get_hosp_total():
