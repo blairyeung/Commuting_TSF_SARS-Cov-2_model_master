@@ -33,7 +33,7 @@ class Model:
         matrix = self._synthesize_matrix(contact_type, contact_pattern)
         self._model_data.compute_immunity(self.date)
         immunity = self._model_data.time_series_immunity[self.date]
-        return np.matmul(matrix, cases)
+        return np.matmul(matrix, cases) * susceptibility * immunity
 
     def _model_transition(self):
         self._exposed_to_cases(self.date)
@@ -177,7 +177,7 @@ class Model:
 
 if __name__ == '__main__':
     m = Model(forecast_days=100)
-    m._synthesize_matrix()
+    # m._synthesize_matrix()
 
     for i in range(100):
         m.  run_one_cycle()
