@@ -53,22 +53,22 @@ a modelling study. Lancet Infect Dis 2020; published online Dec 23. https://doi.
 一些参数可以直接套用，但还有一些由于不是age-specific，需要我们再去自己查
 ### **论文在这里**： https://doi.org/10.1016/S1473-3099(20)30984-1
 
-![img.png](img.png)
-![img_1.png](img_1.png)
-![img_2.png](img_2.png)
+![img.png](Images/img.png)
+![img_1.png](Images/img_1.png)
+![img_2.png](Images/img_2.png)
 # 2. 模型结构
 模型结构介绍: https://github.com/blairyeung/Commuting_TSF_SARS-Cov-2_model_master/blob/main/beamer.pdf \
 ## 2.1 State转换
-![Figure_1.png](Figure_1.png)
+![Figure_1.png](Images/Figure_1.png)
 **Algorithm 1:** Transition from exposed individuals to infected individuals
-![img_4.png](img_4.png)
+![img_4.png](Images/img_4.png)
 使用矩阵乘法及哈达玛积计算新增病例数量。\
-![img_5.png](img_5.png) \
+![img_5.png](Images/img_5.png) \
 其中， **raw_kernel** 为样本数量为 n 的概率分布，0-11 代表自感染后的天数（1-12天）， 数值对应一个病毒
 者在第 n 天转变为病例的概率。 kernel均被归一化（normalized）。
 ### ***这里是一个例子***
 我们首先对ratio（16， 1）转置后的kernel（1，12）求矩阵积 （M） np.matmul(ratio, np.transpose(raw_kernel))
-![img_9.png](img_9.png)
+![img_9.png](Images/img_9.png)
 **Figure 1**: 概率分布和转换率的矩阵积，行代表 -天数，列代表年龄段。i行j列为， 年龄段为 i 的个体在第 j 天
 由携带者转变为病例的概率。
 \
@@ -76,20 +76,20 @@ a modelling study. Lancet Infect Dis 2020; published online Dec 23. https://doi.
 \
 然后，我们通过self._time_series_infected得到过去12天中，16个年龄段每个年龄段
 的感染人数。(N)
-![img_6.png](img_6.png)
+![img_6.png](Images/img_6.png)
 **Figure 2**: 在过去12天，16个不同年龄段的感染人数。 行代表 -天数（自今天 -n 天），列代表16个年龄段。\
 \
 \
 \
 然后，我们求M矩阵在N矩阵上的卷积。但由于我们只在乎今天新增的人数，该操作等效为将M矩阵竖向反转后，
 与N矩阵求矩阵积 numpy.matmul(np.flip(M, axis=0), N)。经过这个操作，我们将得到以下矩阵。（Q）
-![img_7.png](img_7.png)
+![img_7.png](Images/img_7.png)
 **Figure 3**: 在过去12天，16个不同年龄段的感染人数中，**在今天由携带者转变为病例的人数**。 行代表 -天数（自今天 -n 天），列代表16个年龄段。\
 \
 \
 \
 然后，我们对矩阵的每一列求和，即可得出在今天新增的病例数。
-![img_8.png](img_8.png)
+![img_8.png](Images/img_8.png)
 **Figure 4**: 经过卷积计算（对每一列进行求和），在今天由携带者转变为新增病例的数量。每一列代表一个年龄段。
 \
 \

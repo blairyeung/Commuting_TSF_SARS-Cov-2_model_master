@@ -39,6 +39,10 @@ class Dependency:
     population_by_district = dict()
     index_to_population = list()
 
+    age_band_to_ratio = dict()
+    population_by_age_band = np.zeros(shape=(16,), dtype=int)
+    ratio_by_age_band = np.zeros(shape=(16,), dtype=int)
+
     def __init__(self):
         self.read_files()
 
@@ -383,7 +387,8 @@ class Dependency:
 
             self.date_to_vaccines_by_county[i] = ((population / 100.0) * self.date_to_vaccines_by_age)
 
-
+    def read_age(self):
+        read_path = self.get_dependency_path() + '1710000501-eng.csv'
 
 if __name__ == '__main__':
     dependency = Dependency()
