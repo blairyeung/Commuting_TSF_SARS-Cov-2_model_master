@@ -4,6 +4,9 @@ import numpy as np
 import os
 import csv
 
+import pandas as pd
+import Util as util
+
 import Gaussian
 import Parameters
 
@@ -43,6 +46,8 @@ class Dependency:
     population_by_age_band = np.zeros(shape=(16,), dtype=int)
     ratio_by_age_band = np.zeros(shape=(16,), dtype=int)
 
+    ontario_population = 0
+
     def __init__(self):
         self.read_files()
 
@@ -69,6 +74,7 @@ class Dependency:
         self.code_district_linking()
         self.compute_phu_population()
         self.distribute_to_counties()
+        self.read_age()
 
     def read_matrix(self):
         """
@@ -389,6 +395,12 @@ class Dependency:
 
     def read_age(self):
         read_path = self.get_dependency_path() + '1710000501-eng.csv'
+        df = pd.read_csv(read_path)
+        population = np.array(list(df.Persons), dtype=int)
+        self.ontario_population = population[0]
+        self.population_by_age_band[0:15] = population[1:16]
+        self.population_by_age_band[15] = np.sum(population[16:])
+        self.ratio_by_age_band = util.normalize(self.population_by_age_band)
 
 if __name__ == '__main__':
     dependency = Dependency()

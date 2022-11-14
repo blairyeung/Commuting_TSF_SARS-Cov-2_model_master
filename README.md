@@ -7,6 +7,7 @@ we will use DOG to upsample/downsample it back to 16 age bands.
 ### 1.1.0 ***TODO*** 加拿大每个年龄段的COVID确诊，住院，死亡比例
 * Shape : (16, ), dtype = float
 * Source: **还没找到**
+* **Statistics Canada. Table 17-10-0005-01  Population estimates on July 1st, by age and sex**
 ### 1.1.1 ***TODO:*** 每个年龄段新冠患者的无症状比例
 * Shape : (16, ), dtype = float
 * Source: **还没找到**
