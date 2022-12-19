@@ -29,13 +29,19 @@ class Model:
         return
 
     def _get_new_cases(self, cases, contact_type=0, contact_pattern='day'):
-        susceptibility = Parameters.sup_by_age
+        # TODO: Change these?
+        susceptibility = Parameters.SUSP_BY_AGE
         matrix = self._synthesize_matrix(contact_type, contact_pattern)
         self._model_data.compute_immunity(self.date)
-        immunity = self._model_data.time_series_immunity[self.date]
-        return np.matmul(matrix, cases) * susceptibility * immunity
+        # print(self._model_data.time_series_immunity.shape)
+        immunity = self._model_data.time_series_immunity.transpose(1, 0, 2)[self.date]
+        # print(immunity.shape)
+        rslt = np.matmul(matrix, cases) * susceptibility * immunity
+        # print(rslt.shape)
+        return rslt
 
     def _model_transition(self):
+        self._susceptible_to_exposed(self.date)
         self._exposed_to_cases(self.date)
         # self._infected_to_hospitalization(self.date)
         # self._hospitalized_to_icu(self.date)
@@ -51,6 +57,10 @@ class Model:
             immunity_coeff = np.ones(shape=(16, )) - immunity_level
             self._get_new_cases(np.multiply(exposed_cases + active_transmissible, immunity_coeff))
 
+
+    """
+        Exposed to cases
+    """
     def _exposed_to_cases(self, date):
         ratio = np.ones(shape=(16, 1), dtype=float)
 
@@ -108,7 +118,7 @@ class Model:
         self._icu_to_removed(date)
 
     def _subclinical_to_removed(self, date):
-        kernel = Parameters
+        kernel = Parameters.SUB2REC_CONVOLUTION_KERNEL;
         kernel = kernel.reshape((kernel.shape[0], 1))
         kernel_size = kernel.shape[0]
         rslt = np.sum(np.multiply(self._time_series_active_cases[date - kernel_size:date],
@@ -177,7 +187,6 @@ class Model:
 
 if __name__ == '__main__':
     m = Model(forecast_days=100)
-    # m._synthesize_matrix()
 
     for i in range(100):
         m.  run_one_cycle()

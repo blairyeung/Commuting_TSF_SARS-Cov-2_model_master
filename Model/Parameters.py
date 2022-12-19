@@ -77,7 +77,7 @@ ONT_DEATH_DISTRIBUTION = np.array([0, 0, 0.010693183, 0.032079549, 0.083009492, 
 """
 
 # susceptibility
-SUSP_BY_AGE = np.array([1, 2])
+SUSP_BY_AGE = np.zeros(shape=(16, ))
 # subclinical ratio
 SUBCLINICAL_BY_AGE = np.array([0.750, 0.712, 0.683, 0.650, 0.616, 0.583, 0.550, 0.517, 0.483, 0.450, 0.417, 0.383,
                             0.350, 0.317, 0.283, 0.250])

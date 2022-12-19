@@ -4,6 +4,7 @@
 We use 16 age-bands for our model. For the data collected that does not match this specification, 
 we will use DOG to upsample/downsample it back to 16 age bands.
 ## 1.1 常数项 （非时序类型数据）
+![img.png](img.png)
 ### 1.1.0 ***TODO*** 加拿大每个年龄段的COVID确诊，住院，死亡比例
 * Shape : (16, ), dtype = float
 * Source: **还没找到**
