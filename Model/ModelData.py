@@ -97,6 +97,9 @@ class ModelData:
         self.time_series_hospitalized = np.concatenate([self.dependency.date_to_hospitalizations_by_county,
                                                         np.zeros(shape=(x, y, z))], axis=1)
 
+        self.time_series_ICU =  np.concatenate([self.dependency.date_to_hospitalizations_by_county,
+                                                        np.zeros(shape=(x, y, z))], axis=1)
+
         self.time_series_vaccinated = np.concatenate([self.dependency.date_to_vaccines_by_age,
                                                       np.zeros(shape=(y, 3, z))], axis=0)
 
