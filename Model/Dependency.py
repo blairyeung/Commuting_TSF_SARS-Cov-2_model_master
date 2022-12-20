@@ -37,6 +37,7 @@ class Dependency:
     date_to_hospitalizations_by_county = None
     date_to_deaths_by_county = None
     date_to_vaccines_by_county = None
+    date_to_ICU_by_county = None
 
     population_by_phu = dict()
     population_by_district = dict()

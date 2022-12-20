@@ -137,8 +137,6 @@ SUB2REC_CONVOLUTION_KERNEL = normalize(gamma.pdf(kernel_size_2, a=1.6, scale=4))
     These kernels are for hospitalization, ICU, and deaths
 """
 
-# TODO: Need to multiply all of the hospitalization, ICU, deaths distribution with P(HOSP), P(ICU), P(CFR)
-
 kernel_size_3 = np.linspace(0, 15, 15)
 INF2HOS_CONVOLUTION_KERNEL = normalize(norm(kernel_size_3, mean=7.5, scale=1))
 HOS2ICU_CONVOLUTION_KERNEL = normalize(norm(kernel_size_3, mean=11 - 7.5, scale=1))
