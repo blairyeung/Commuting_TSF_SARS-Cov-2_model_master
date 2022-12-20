@@ -121,19 +121,21 @@ VACCINE_AGE_BANDS = ['05-11yrs', '12-17yrs', '18-29yrs', '30-39yrs', '40-49yrs',
     These kernels are for 
 """
 
+EXP2ACT_RATIO = np.ones(shape=(16, ))
+
 kernel_size_1 = np.linspace(0, 12, 12)
 EXP2ACT_CONVOLUTION_KERNEL = normalize(gamma.pdf(kernel_size_1, a=1.2, scale=4))
 ACT2CLI_CONVOLUTION_KERNEL = normalize(gamma.pdf(kernel_size_1, a=1.2, scale=4))
 ACT2SUB_CONVOLUTION_KERNEL = normalize(gamma.pdf(kernel_size_1, a=1.2, scale=4))
 
-"""
-    These kernels are for
-"""
-
 kernel_size_2 = np.linspace(0, 25, 25)
 SUB2REC_CONVOLUTION_KERNEL = normalize(gamma.pdf(kernel_size_2, a=1.6, scale=4))
 # TODO: CHECK IF THIS IS RIGHT?
 CLI2REC_CONVOLUTION_KERNEL = normalize(gamma.pdf(kernel_size_2, a=1.6, scale=4))
+
+
+# TODO: this is incorrect
+ICU2REC_CONVOLUTION_KERNEL = normalize(gamma.pdf(kernel_size_2, a=1.6, scale=4))
 
 """ 
     These kernels are for hospitalization, ICU, and deaths
