@@ -42,7 +42,8 @@ deaths_augment = augment(deaths)
 
 # cases_augment = np.reshape(np.array(cv2.GaussianBlur(cases_augment.reshape(100, 1), (25, 25), 5)), newshape=(100,))
 cases_augment = np.reshape(np.array(cv2.GaussianBlur(cases_augment.reshape(100, 1), (25, 25), 0)), newshape=(100,))
-hospitalized_augment = np.reshape(np.array(cv2.GaussianBlur(hospitalized_augment.reshape(100, 1), (25, 25), 0)), newshape=(100,))
+hospitalized_augment = np.reshape(np.array(cv2.GaussianBlur(hospitalized_augment.reshape(100, 1), (25, 25), 0)),
+                                  newshape=(100,))
 icu_augment = np.reshape(np.array(cv2.GaussianBlur(icu_augment.reshape(100, 1), (25, 25), 0)), newshape=(100,))
 deaths_augment = np.reshape(np.array(cv2.GaussianBlur(deaths_augment.reshape(100, 1), (25, 25), 0)), newshape=(100,))
 
