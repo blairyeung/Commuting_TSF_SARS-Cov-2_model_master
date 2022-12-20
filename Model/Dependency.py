@@ -367,9 +367,12 @@ class Dependency:
 
     def distribute_to_counties(self):
         self.date_to_cases_by_county = np.zeros(shape=(Parameters.NO_COUNTY, self.total_days, 16), dtype=float)
-        self.date_to_hospitalizations_by_county = np.zeros(shape=(Parameters.NO_COUNTY, self.total_days, 16), dtype=float)
+        self.date_to_hospitalizations_by_county = np.zeros(shape=(Parameters.NO_COUNTY, self.total_days, 16),
+                                                           dtype=float)
+        self.date_to_ICU_by_county = np.zeros(shape=(Parameters.NO_COUNTY, self.total_days, 16), dtype=float)
         self.date_to_deaths_by_county = np.zeros(shape=(Parameters.NO_COUNTY, self.total_days, 16), dtype=float)
         self.date_to_vaccines_by_county = np.zeros(shape=(Parameters.NO_COUNTY, self.total_days, 3, 16), dtype=float)
+
         # print(self.date_to_incidence_rate_by_phu.keys())
         for i in range(len(self.county_data)):
             county = self.county_data[i][0]
@@ -384,9 +387,18 @@ class Dependency:
             self.date_to_cases_by_county[i] = np.matmul(incidences, cases_ratio.T) * population / 100000.0
 
             hospitalizations = self.date_to_hospitalization_rate_by_phu[phu].reshape(self.total_days, 1)
+
             hospitalization_ratio = Parameters.ONT_HOSP_RATIO.reshape(16, 1)
             self.date_to_hospitalizations_by_county[i] = np.matmul(hospitalizations, hospitalization_ratio.T) * \
                                                          population / 100000.0
+
+            ICU = np.convolve(hospitalizations.reshape(self.total_days),
+                              Parameters.HOS2ICU_CONVOLUTION_KERNEL, mode='same').reshape(self.total_days, 1)
+
+            ICU_ratio = (Parameters.ONT_ICU_RATIO / Parameters.ONT_HOSP_RATIO).reshape(16, 1)
+
+
+            self.date_to_ICU_by_county[i] =  np.matmul(ICU, ICU_ratio.T) * population / 100000.0
 
             deaths = self.date_to_death_rate_by_phu[phu].reshape(self.total_days, 1)
             deaths_ratio = Parameters.ONT_CFR.reshape(16, 1)
@@ -402,6 +414,7 @@ class Dependency:
         self.population_by_age_band[0:15] = population[1:16]
         self.population_by_age_band[15] = np.sum(population[16:])
         self.ratio_by_age_band = util.normalize(self.population_by_age_band)
+
 
 if __name__ == '__main__':
     dependency = Dependency()
