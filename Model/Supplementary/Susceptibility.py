@@ -13,7 +13,8 @@ susceptibility_raw[50:60] = 0.82
 susceptibility_raw[60:70] = 0.88
 susceptibility_raw[70:100] = 0.74
 
-susceptibility = np.reshape(np.array(cv2.GaussianBlur(susceptibility_raw.reshape(100, 1), (25, 25), 0)), newshape=(100,))
+susceptibility = np.reshape(np.array(cv2.GaussianBlur(susceptibility_raw.reshape(100, 1), (25, 25), 0)),
+                            newshape=(100,))
 
 age_strat = np.zeros(shape=(16, ))
 for i in range(15):

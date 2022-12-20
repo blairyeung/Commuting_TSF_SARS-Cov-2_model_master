@@ -60,6 +60,16 @@ infereced_df = pd.DataFrame({'hospitalization': hosp_ratio,
                              'icu': icu_ratio,
                             'cfr': cfr})
 
+print(hosp_ratio)
+
+age_strat = np.zeros(shape=(16, ))
+for i in range(15):
+    age_strat[i] = np.sum(hosp_ratio[5*i:5 * (i+1)]) / 5
+
+age_strat[15] = np.sum(hosp_ratio[74:]) / 25
+print((age_strat))
+
+
 
 # infereced_df.to_csv(d.get_dependency_path() + 'Inferenced_age_specific_data.csv')
 
