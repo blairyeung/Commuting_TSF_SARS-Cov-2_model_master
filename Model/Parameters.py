@@ -132,6 +132,8 @@ ACT2SUB_CONVOLUTION_KERNEL = normalize(gamma.pdf(kernel_size_1, a=1.2, scale=4))
 
 kernel_size_2 = np.linspace(0, 25, 25)
 SUB2REC_CONVOLUTION_KERNEL = normalize(gamma.pdf(kernel_size_2, a=1.6, scale=4))
+# TODO: CHECK IF THIS IS RIGHT?
+CLI2REC_CONVOLUTION_KERNEL = normalize(gamma.pdf(kernel_size_2, a=1.6, scale=4))
 
 """ 
     These kernels are for hospitalization, ICU, and deaths

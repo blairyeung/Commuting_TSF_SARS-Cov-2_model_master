@@ -50,7 +50,6 @@ class Model:
         for c in range(Parameters.NO_COUNTY):
             exposed_cases = self._model_data.time_series_exposed[c][date]
             active_transmissible = self._model_data.time_series_clinical_cases[c][date]
-            # TODO: Replace this with self._model_data.time_series_immunity[c][date] after update
             # immunity_level = np.zeros(shape=(16, ))
             immunity_level = self._model_data.time_series_immunity[c][date]
             immunity_coeff = np.ones(shape=(16, )) - immunity_level
@@ -118,60 +117,69 @@ class Model:
         self._icu_to_removed(date)
 
     def _subclinical_to_removed(self, date):
-        kernel = Parameters.SUB2REC_CONVOLUTION_KERNEL
-        kernel = kernel.reshape((kernel.shape[0], 1))
-        kernel_size = kernel.shape[0]
-        rslt = np.sum(np.multiply(self._model_data.time_series_active_cases[date - kernel_size:date],
-                                  kernel), axis=1)
+        # All subclinical cases recovers
+        ratio = np.ones(shape=(16, 1))
 
-        self._model_data.time_series_active_cases[date] = rslt
-        self._model_data.time_series_clinical_cases[date] = np.multiply(rslt,
-                                                             Parameters.clinical_rate)
-        self._model_data.time_series_clinical_cases[date] = np.multiply(rslt,
-                                                             Parameters.subclinical_rate)
+        raw_kernel = Parameters.SUB2REC_CONVOLUTION_KERNEL
+        kernel = np.matmul(raw_kernel.reshape((raw_kernel.shape[0], 1)), ratio.T)
+        kernel_size = kernel.shape[0]
+
+        for c in range(Parameters.NO_COUNTY):
+            county_data = self._model_data.time_series_sub_clinical_cases[c]
+            data = county_data[date - kernel_size:date]
+            data = data[::-1]
+            rslt = np.sum(np.multiply(data, kernel), axis=0)
+            self._model_data.time_series_recovered[c][date] = rslt
 
     def _clinical_to_removed(self, date):
-        kernel = Parameters
-        kernel = kernel.reshape((kernel.shape[0], 1))
+        # All non-hospitalized cases recvovers
+        ratio = np.ones(shape=(16, 1)) - Parameters.ONT_HOSP_RATIO.reshape(16, 1)
+        # TODO: Check kernel!
+        raw_kernel = Parameters.CLI2REC_CONVOLUTION_KERNEL
+        kernel = np.matmul(raw_kernel.reshape((raw_kernel.shape[0], 1)), ratio.T)
         kernel_size = kernel.shape[0]
-        rslt = np.sum(np.multiply(self._model_data.time_series_active_cases[date - kernel_size:date],
-                                  kernel), axis=1)
 
-        self._model_data.time_series_active_cases[date] = rslt
-        self._model_data.time_series_clinical_cases[date] = np.multiply(rslt,
-                                                             Parameters.clinical_rate)
-        self._model_data.time_series_clinical_cases[date] = np.multiply(rslt,
-                                                             Parameters.subclinical_rate)
+        for c in range(Parameters.NO_COUNTY):
+            county_data = self._model_data.time_series_clinical_cases[c]
+            data = county_data[date - kernel_size:date]
+            data = data[::-1]
+            rslt = np.sum(np.multiply(data, kernel), axis=0)
+            self._model_data.time_series_recovered[c][date] = rslt
+
 
     def _hospitalized_to_removed(self, date):
-        kernel = Parameters
-        kernel = kernel.reshape((kernel.shape[0], 1))
+        # hospitalized cases my decease, or recov3er
+        ratio = np.ones(shape=(16, 1))
+        # TODO: Change kernel!
+        # TODO: Patients may die in this stage, update!
+        raw_kernel = Parameters.CLI2REC_CONVOLUTION_KERNEL
+        raw_kernel_2 = Parameters.CLI2
+        kernel = np.matmul(raw_kernel.reshape((raw_kernel.shape[0], 1)), ratio.T)
         kernel_size = kernel.shape[0]
-        rslt = np.sum(np.multiply(self._model_data.time_series_active_cases[date - kernel_size:date],
-                                  kernel), axis=1)
 
-        self._model_data.time_series_active_cases[date] = rslt
-        self._model_data.time_series_clinical_cases[date] = np.multiply(rslt,
-                                                              Parameters.clinical_rate)
-        self._model_data.time_series_clinical_cases[date] = np.multiply(rslt,
-                                                             Parameters.subclinical_rate)
+        for c in range(Parameters.NO_COUNTY):
+            county_data = self._model_data.time_series_clinical_cases[c]
+            data = county_data[date - kernel_size:date]
+            data = data[::-1]
+            rslt = np.sum(np.multiply(data, kernel), axis=0)
+            self._model_data.time_series_recovered[c][date] = rslt
+
 
     def _icu_to_removed(self, date):
-        """
-        :param date:
-        :return:
-        """
-        kernel = Parameters.ICU2DEA_CONVOLUTION_KERNEL
-        kernel = kernel.reshape((kernel.shape[0], 1))
-        kernel_size = kernel.shape[0]
-        rslt = np.sum(np.multiply(self._model_data.time_series_active_cases[date - kernel_size:date],
-                                  kernel), axis=0)
+        ratio = np.ones(shape=(16, 1)) - Parameters.ONT_CFR.reshape(16, 1)
+        death_kernel = Parameters.ICU2DEA_CONVOLUTION_KERNEL
+        # TODO: We do not have this kernel yet!
+        recover_kernel = Parameters.ICU2REC_CONVOLUTION_KERNEL
+        death_kernel = np.matmul(death_kernel.reshape((death_kernel.shape[0], 1)), ratio.T)
+        recover_kernel = np.matmul(recover_kernel.reshape((recover_kernel.shape[0], 1)), ratio.T)
+        kernel_size = death_kernel.shape[0]
 
-        self._model_data.time_series_active_cases[date] = rslt
-        self._model_data.time_series_clinical_cases[date] = np.multiply(rslt,
-                                                             Parameters.clinical_rate)
-        self._model_data.time_series_clinical_cases[date] = np.multiply(rslt,
-                                                             Parameters.subclinical_rate)
+        for c in range(Parameters.NO_COUNTY):
+            county_data = self._model_data.time_series_clinical_cases[c]
+            data = county_data[date - kernel_size:date]
+            data = data[::-1]
+            rslt = np.sum(np.multiply(data, kernel), axis=0)
+            self._model_data.time_series_recovered[c][date] = rslt
 
     def _synthesize_matrix(self, contact_type=0, contact_pattern='day'):
         matrices = self.dependency.matrix_by_class
@@ -179,10 +187,10 @@ class Model:
         matrix = np.zeros(shape=(16, 16))
         for j in range(4):
             matrix = np.add(matrix, preset[j] * matrices[contact_type][j])
-        return matrix
+         return matrix
 
     def _initialize_dependencies(self):
-         self.dependency = Dependency.Dependency()
+          self.dependency = Dependency.Dependency()
 
 
 if __name__ == '__main__':
