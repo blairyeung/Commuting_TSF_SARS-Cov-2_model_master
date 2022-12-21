@@ -21,13 +21,13 @@
 \usepackage[english]{babel}
 \usepackage{amsthm}
 \usepackage{soul}
+
+% FONT
 \usepackage[charter,cal=cmcal]{mathdesign} % Specify font for serif family
 \usepackage{avant} % Specify avant font for sans serif family
 \usepackage{mathtools} % Replaces amsmath
 \usepackage{sectsty} % Specify section formatting
-	\sectionfont{\sffamily\color{DarkBlue}}
-	\subsectionfont{\sffamily\color{LightBlue}}
-	\subsubsectionfont{\small\sffamily}
+
 
 \DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
 \newcommand{\La}{\mathcal{L}}
@@ -111,29 +111,62 @@
 % \usepackage[sfdefault]{carlito}
 % \usepackage{fontspec}
 % \setmainfont{Arial}
-
+\usepackage{booktabs}  
 \newcommand{\urlref}{\hl{[REF]}}
 \newcommand{\pendingref}{\textbf{\hl{[REF]}}$ \ $}
 \newcommand{\unknownref}{\textcolor{ReD}{\textbf{\hl{[REF]}}}$ \ $}
 \newcommand{\pendingdata}{\textbf{\hl{$<$DATA$>$}}$ \ $}
 \newcommand{\unknowndata}{\textcolor{ReD}{\textbf{\hl{$<$DATA$>$}}}$ \ $}
+\newcommand{\suppfigure}{{\textbf{\hl{$<$FIGURE$>$}}}$ \ $}
+\newcommand{\mainfigure}{\textcolor{ReD}{\textbf{\hl{$<$FIGURE$>$}}}$ \ $}
 
-\title{Supplementary Materials}
+\title{Predicting the transmission of COVID-19 using inter and intra-county mobility: a mathematical modelling study}
 \author{Blair Yang}
 \date{August 2022}
 
 
 \begin{document}
 
+\maketitle
+
 \section*{Style}
 \urlref $ \ \ \ $Pending reference, with the following URL\\
 \pendingref $ \ \ $ Pending reference, with the following URL\\
 \unknownref $ \ \ $ Pending reference, with un-specified topic (need to find relevant papers)\\
 \pendingdata $ \ \ $ Pending data, need to be filled with data from the cited papers\\
-\unknowndata $ \ \ $ Pending data, need to be find relevant paper with such data
+\unknowndata $ \ \ $ Pending data, need to be find relevant paper with such data\\
+\mainfigure $ \ \ $ Pending main figure, need to be add a major figure for this section\\
+\suppfigure $ \ \ $ Pending supplementary figure, need to be add a supplementary figure in the supplementary material section for this section\\
+
+\mainfigure Essentially, the model takes in
+\begin{enumerate}
+    \item \important{PAST} Time-series data of the no. cases in Ontario in 26 PHUs
+    \item \important{PAST} Time-series data of the ratio of 1st, 2nd, and 3rd dose vaccination in Ontario
+    \item Labour force data and the commute matrix in Ontario
+    \item Contact Matrix and CoMix
+    \item \important{PREDICTED} Google mobility data in Ontario \emphasize{(Generated from NN)}
+    \item Epidemiological parameters
+    \item Vaccine parameters and time-series data of the \important{PREDICTED} immunity waning effects
+    \item Whether we use machine learning to address the
+\end{enumerate}
+and outputs
+\begin{itemize}
+    \item no. cases in each district
+    \item no. severe cases (ICU occupancy) in each district
+    \item no. deaths in each district
+\end{itemize}
 
 \section{Methodology (supplementary material)}
-\subsection{Data acquisition}
+\begin{center}
+    \includegraphics[width = 480pt]{Figure 1.jpg}
+\end{center}
+\textbf{Figure 1:} The epidemiological compartmental model. The transmission (infection) was divided into two stages: workplace and school, and household and others. \textbf{A).} Data calibration using time-series forecast. The Ontario-specific google mobility index, vaccination status, and current ratio of VOCs, were sent into a MLP network to forecast the trend in the following three years. \textbf{B).} The age-specific effective contact matrix synthesized from the relevant data output from the MLP network by categories. \textbf{C).} The susceptible compartment of the SEIR(S) model, stratified into 528 subgroups according to demographical data. The susceptible individuals in 528 counties will be redistributed by the starting of time-step 1 at the beginning of each transmission cycle due to commutation and will be restored by time-step 5. We assumed all of the removed individuals will be moved into the susceptible group 15 days after recovery with immunity (waning). \textbf{D).} The exposed and infected compartment of the model during the workplace and school transmission cycle. This stage uses synthesized workplace and school contact matrix, after redistribution due to commutation. \textbf{E).} The he exposed and infected compartment of the model during the household and others transmission cycle. This stage uses synthesized residence and others contact matrix, after restoration of commutation. \textbf{F).} The removed stage of the compartmental model. We assumed all of the recovered individuals will be move to susceptible state 15 days after recovery due to immunity waning. The recovered individual still has shielding immunity against infection.
+\subsection{Data source}
+
+\subsubsection{Demographic of Ontario}
+
+We stratified the population in Ontario into 26 public health units (PHU), \pendingdata districts, and 528 counties, and 16 age bands, according to the 2016 Canadian demographics census \pendingref. Our model... . The pool of susceptible individuals was divided into 528 counties, administrated by 26 PHUs. We assumed a uniformed incidence rate for the counties within the same PHU at on the first day of the modelling. 
+
 
 \subsubsection{Epidemiological data}
 
@@ -141,7 +174,7 @@ We acquired the time-series data of COVID-19 cases, deaths, and vaccination data
 
 \subsubsection{Vaccine data}
 
-We acquired the provincial time-series vaccination data in Ontario from Ontario public health, covering the percentage population who has taken first does, second dose, and third does. We assumed a uniform distribution of the vaccination population ratio for every PHU. 
+We acquired the provincial time-series vaccination data in Ontario from Ontario public health, covering the percentage population who has taken first does, second dose, and third does. We assumed a uniform distribution of the vaccination ratio for every PHU.  
 
 \subsubsection{Labour force data}
 
@@ -149,7 +182,11 @@ We used the labour force age distribution of Canada from \pendingref \emphasize{
 
 \subsubsection{Commute data}
 
-The commuting data in Ontario was excerpted from the 2016 demographic census. We assumed a constant age distribution. 
+The commuting matrix in Ontario was excerpted from the 2016 demographic census. We assumed a uniform age distribution across the province, and adjusted the number of commuters by \pendingdata due to the change in employment rate (\pendingdata). 
+
+\subsubsection{Population mobility data}
+
+We used the population mobility data from Google. \unknownref The data was categorized into 5 groups: grocery and pharmacy, residential, retail and recreation, transit, and workplaces. To address the fluctuation of the population mobility, we used a multi-layer perceptive model (MLP) from Keras to forecast the population mobility in the next 1000 days since August 23rd, 2022. \cite{ref6} \pendingref 
 
 
 \subsection{Data Calibration}
@@ -164,11 +201,124 @@ Where $i$ is a positive integer which denotes to the age of distribution, I deno
 
 \subsubsection{Prevalence calibration}
 
-\hl{Source} suggested that there are significant underascertainment of the number of cases and deaths of COVID-19 in Canada. \cite{ref2} \cite{ref3} We calculated the average of the underascertainment ratio of \pendingdata and assumed the number to be constant throughout the pandemic.
+\hl{Source} suggested that there are significant underascertainment of the number of cases and deaths of COVID-19 in Canada. \cite{ref2} \cite{ref3} We calculated the average of the underascertainment ratio of \pendingdata and assumed the ratio to be constant throughout the pandemic.
 
 \subsubsection{Vaccine immunity level estimation}
 
-\hl{Source} suggested that the waning effect of COVID-19 vaccine efficacy.
+Khoury and Menni suggested that the predictability of the immunity waning effect of COVID-19 vaccine.  \cite{ref4} \cite{ref5} Menni's model gave an insight into the age-group specific vaccine efficacy of the most prevalence vaccines in Ontario, BNT162b2 and mRNA1273mm against infection for up to eight months. Khoury's model gave an estimation of the longer-term waning effect of the vaccine efficacy against both mild and severe symptoms. We \emphasize{combined two models} for both short-term and long-term accuracy. \mainfigure, \suppfigure.\\\\
+Ontario has announced its plan for third boost dose. $\cdots$ We also
+
+\subsection{Differential equations for the model}
+
+\begin{align*}
+     \text{Epidemiological} \ & \begin{cases}
+     dS(t) = - \sum_{x \in C} \vect{m_x \beta_0 \circ \vect{1_{16} - \mu} \vect{M^x}^T \vect{I_{t,c} + 0.5I_{t,s}}}\\
+        dE(t) = \sum_{x \in C} \vect{m_x \beta_0 \circ \vect{1_{16} - \mu} \vect{M^x}^T \vect{I_{t,c} + 0.5I_{t,s}}} - dI\\
+        dI_s(t) = \sum_{d \leq t} \vect{v \circ E_d \sigma (t - d) - \gamma_{s}I_s} - dR_s(t)\\
+         dI_c(t) = \sum_{d \leq t} \vect{ \vect{1_{16} - v} \circ E_d \sigma (t - d) - \gamma_{s}I_s} - dR_c(t)\\
+        dI_{hosp} (t) =  \vect{\sum_{d \leq t} I_{i,d} h(i) \vect{1 - g(i)}  T_{hosp}(t - d) }_{i}^{i \in \text{age bands}}\\
+        dI_{ICU}(t) = \vect{\sum_{d \leq t} I_{hosp, d} g(i) T_{ICU}(t - d) }_{i}^{i \in \text{age bands}}\\
+         dI_{non-hosp}(t) =  d I_{c} - d I_{hosp,  t}- d I_{ICU, t} - dR_{ICU}\\
+         dI(t) = dI_s(t) + dI_{non-hosp}(t) + dI_{hosp}(t) + dI_{ICU}(t)\\
+         d R_{s}(t) = \sum_{d \leq t} I_s\gamma_s(t-d)\\
+         d R_{non-hosp}(t) = \sum_{d \leq t} I_{non-hosp} \gamma_{non-hosp}(t-d)\\
+         d R_{hosp}(t) = \sum_{d \leq t} I_{hosp} \gamma_{hosp}(t-d)\\
+         d R_{ICU}(t) = \sum_{d \leq t} I_{ICU} \gamma_{ICU}(t-d)\\
+         dR(t) = dR_s (t) + d R_{non-hosp}(t) +d R_{hosp}(t) + d R_{ICU}(t)\\
+    d D (t) = cfr \circ dR(t)\\
+    d r (t) = \vect{1_{16} - cfr} \circ dR(t)\\
+     \mu_{t,v,s} = \frac{\sum_{d \leq t} V_d \varphi(t - d)\mu_{0,v,s}}{P}\\
+         \mu_{t,n,s} = \frac{\sum_{d \leq t} I_d \varphi(t - d)\mu_{0,v,s}}{P}\\
+         \mu_{t,s} = \frac{\sum_{d \leq t} I_d \varphi(t - d)\mu_{0,v,s} +  \sum_{d \leq t} V_d \varphi(t - d)\mu_{0,v,s}}{P}\\
+         cfr = cfr_0 \circ \mu_{t,s}
+     \end{cases}\\
+     \text{Commutational} \ & \begin{cases}
+     out_{c,t, I} = {I_{c,t} \circ w}\\
+        out_{c,t, S} = {S_{c,t} \circ w}\\
+        OUT_{c,t,I} = \vect{\frac{C_{i,j}}{sum\vect{C_i}} out_{c,t,I}}_{j}^{j \in \set{1, \cdots, 528}}\\
+        OUT_{c,t,S} = \vect{\frac{C_{i,j}}{sum\vect{C_i}} out_{c,t,S}}_{j}^{j \in \set{1, \cdots, 528}}
+     \end{cases}
+\end{align*}
+
+\newpage 
+\subsection{Parameters}
+
+\begin{center}
+    \begin{table}[h]
+    \caption{Parameters that are not subject to fitting}
+    \centering
+\begin{tabular}[H]{p{2cm}p{4cm}p{4cm}p{5cm}}
+     \textbf{Parameter}& \textbf{Description}  & \textbf{Value}& \textbf{Reference} \\
+     \midrule
+     $d_E$ & Latent period ($E$ to $I_p$ and $E$ to $I_s$; days) & $\sim gamma(2.5,4)$& Set to 2.5 so that incubation period (latent period plus period of preclinical infectiousness) is 5 days\\
+     $d_p$ & Duration of pre-clinical infectiousness& $\sim gamma(2.5,4)$ &  \\
+     $d_c$ & Duration of clinical infectiousness& $\sim gamma(2.5,4)$ &  \\
+     $d_s$ & Duration of sub-clinical infectiousness& $\sim gamma(5,4)$ &  \\
+     $d_I$ & Duration of PCR positivity& $\sim normal(9.87, 0.25)$ &  
+\end{tabular}
+\end{table}
+\end{center}
+
+\begin{align*}
+    P(Hosp|Clinical) = /
+\end{align*}
+We defined following variables with their corresponding meaning. Each variable is a real-valued function $\cdot: \text{date} \to \R^+$.
+\begin{align*}
+    S & := \ \text{Number of susceptible individuals}\\
+    E & := \ \text{Number of exposed individuals}\\
+    I & := \ \text{Number of infected individuals}\\
+    I_s &:= \text{Number of subclinical infected individuals}\\
+    I_p &:= \text{Number of preclinical infected individuals}\\
+    I_c &:= \text{Number of clinical infected individuals}\\
+    I_h &:= \text{Number of hospitalized infected individuals}\\
+    I_{ICU} &:= \text{Number of ICU-hospitalized infected individuals}\\
+    R & := \ \text{Number of removed individuals}\\
+    r & := \ \text{Number of recovered individuals}\\
+    D & := \ \text{Number of deceased individuals}\\ 
+\end{align*}
+We define the following notations to represent the change of variables:
+\begin{align*}
+    \Delta \ \cdot &:= \ \text{Number of individuals transformed into a specific state within a time step}\\
+    \delta \ \cdot &:= \ \text{Number of individuals transformed out from a specific state within a time step}\\
+    d \ \cdot &:= \ \text{chahnge of the number of individuals transformed out from a specific state within a time step}\\
+\end{align*}
+We define the following transition functions:
+\subsection*{Susceptible to exposed}
+\begin{align*}
+    \Delta S(t) &= \overbrace{\vect{\Delta R(t) - \Delta D(t)}}^{= \Delta r(t)}\\
+    \delta S(t) &= - \Delta E(t)\\
+    dS(t) &=  \Delta S(t) - \delta S(t) = \overbrace{\vect{\Delta R(t) - \Delta D(t)}}^{= \Delta r(t)} - \Delta E
+\end{align*}
+
+
+\subsection*{Exposed to infected}
+\subsubsection*{Exposed to subclinically-infected}
+\begin{align*}
+    \Delta I_s(t) &= \vect{E * f_{d_s}  }(t) \circ  sub\_ratio \\
+    \delta I_s(t) &= \vect{I_s * f_{d_{s}}} (t) \\
+    d I_s(t) &=  \Delta I_s(t)  -  \delta I_s (t)
+\end{align*}
+
+\subsubsection*{Exposed to pre-clinically infected}
+\begin{align*}
+    \Delta I_p(t) &= \vect{E * f_{d_p} }(t) \circ  cli\_ratio \\
+    \delta I_p(t) &= \vect{I_p(t) * f_{d_{c}}} (t) \\
+    d I_p(t) &=  \Delta I_p (t)  -  \delta I_p (t)
+\end{align*}
+
+\subsection*{Exposed to all-type of infected indeviduals}
+\begin{align*}
+    \Delta I &= \Delta I_s + \Delta I_p\\
+    \delta I &= \delta I_s + \delta I_p\\
+    d I &= d I_s + d I_p\\
+\end{align*}
+
+\subsection*{Transition within infected}
+\subsubsection*{Pre-clinical infected to clinical infected}
+\begin{align*}
+    \Delta I_c &= \vect{I_p * f_{d_c}} (t)\\
+    \delta I_c &= \vect{I_c * f_{d_r - d_c}} (t)\\
+\end{align*}
 
 \bibliographystyle{plain}
 
@@ -177,7 +327,15 @@ Where $i$ is a positive integer which denotes to the age of distribution, I deno
 
 \bibitem{ref2}{Bolotin, S., Tran, V., Deeks, S. L., Peci, A., Brown, K. A., Buchan, S. A., Ogbulafor, K., Ramoutar, T., Nguyen, M., Thakkar, R., DelaCruz, R., Mustfa, R., Maregmen, J., Woods, O., Krasna, T., Cronin, K., Osman, S., Joh, E., $\&$amp; Allen, V. G. (2021). Assessment of population infection with SARS-COV-2 in Ontario, Canada, March to June 2020. Eurosurveillance, 26(50). https://doi.org/10.2807/1560-7917.es.2021.26.50.2001559}
 
-\bibitem{ref3}{Anand, S. S., Arnold, C., Bangdiwala, S. I., Bolotin, S., Bowdish, D., Chanchlani, R., de Souza, R. J., Desai, D., Kandasamy, S., Khan, F., Khan, Z., Langlois, M.-A., Limbachia, J., Lear, S. A., Loeb, M., Loh, L., Manoharan, B., Nakka, K., Pelchat, M., … Wahi, G. (2022). Seropositivity and risk factors for SARS-COV-2 infection in a South Asian community in Ontario: A cross-sectional analysis of a prospective cohort study. CMAJ Open, 10(3). https://doi.org/10.9778/cmajo.20220031 }
+\bibitem{ref3}{Anand, S. S., Arnold, C., Bangdiwala, S. I., Bolotin, S., Bowdish, D., Chanchlani, R., de Souza, R. J., Desai, D., Kandasamy, S., Khan, F., Khan, Z., Langlois, M.-A., Limbachia, J., Lear, S. A., Loeb, M., Loh, L., Manoharan, B., Nakka, K., Pelchat, M., … Wahi, G. (2022). Seropositivity and risk factors for SARS-COV-2 infection in a South Asian community in Ontario: A cross-sectional analysis of a prospective cohort study. CMAJ Open, 10(3). https://doi.org/10.9778/cmajo.20220031}
+
+\bibitem{ref4}{Khoury, D. S., Cromer, D., Reynaldi, A., Schlub, T. E., Wheatley, A. K., Juno, J. A., Subbarao, K., Kent, S. J., Triccas, J. A., $\&$ Davenport, M. P. (2021). Neutralizing antibody levels are highly predictive of immune protection from symptomatic SARS-CoV-2 infection. Nature Medicine. https://doi.org/10.1038/s41591-021-01377-8}
+
+\bibitem{ref5}{Menni, C., May, A., Polidori, L., Louca, P., Wolf, J., Capdevila, J., Hu, C., Ourselin, S., Steves, C. J., Valdes, A. M., $\&x$amp; Spector, T. D. (2022). Covid-19 vaccine waning and effectiveness and side-effects of boosters: A Prospective Community study from the Zoe Covid Study. The Lancet Infectious Diseases, 22(7), 1002–1010. https://doi.org/10.1016/s1473-3099(22)00146-3}
+
+\bibitem{ref6}{https://github.com/keras-team/keras}
+
+\bibitem{ref7}{10.1001/jama.2022.2274}
 \end{thebibliography}
 
 \end{document}

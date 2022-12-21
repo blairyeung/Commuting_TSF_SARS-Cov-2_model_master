@@ -1,6 +1,8 @@
 """
     Version
 """
+import math
+
 from scipy.stats import gamma
 from scipy.stats import lognorm
 from Util import norm
@@ -125,40 +127,39 @@ VACCINE_AGE_BANDS = ['05-11yrs', '12-17yrs', '18-29yrs', '30-39yrs', '40-49yrs',
 EXP2ACT_RATIO = np.ones(shape=(16, ))
 
 kernel_size_1 = np.linspace(0, 12, 12)
+
 EXP2ACT_CONVOLUTION_KERNEL = normalize(gamma.pdf(kernel_size_1, a=1.2, scale=4))
 ACT2CLI_CONVOLUTION_KERNEL = normalize(gamma.pdf(kernel_size_1, a=1.2, scale=4))
 ACT2SUB_CONVOLUTION_KERNEL = normalize(gamma.pdf(kernel_size_1, a=1.2, scale=4))
 
+kernel_size_3 = np.linspace(0, 15, 15)
+INF2HOS_CONVOLUTION_KERNEL = normalize(norm(kernel_size_3, mean=7.5, scale=1))
+HOS2ICU_CONVOLUTION_KERNEL = normalize(norm(kernel_size_3, mean=11.1 - 7.5, scale=1))
+HOS2DEA_CONVOLUTION_KERNEL = normalize(norm(kernel_size_3, mean=7.5, scale=math.sqrt(5)))
+
 kernel_size_2 = np.linspace(0, 25, 25)
 SUB2REC_CONVOLUTION_KERNEL = normalize(gamma.pdf(kernel_size_2, a=1.6, scale=4))
-# TODO: CHECK IF THIS IS RIGHT?
 CLI2REC_CONVOLUTION_KERNEL = normalize(gamma.pdf(kernel_size_2, a=1.6, scale=4))
 
 # TODO: this is incorrect
 
-HOS2REC_CONVOLUTION_KERNEL = normalize(lognorm.pdf(range(0, 40), s=1.2, loc=11.08))
-ICU2REC_CONVOLUTION_KERNEL = normalize(lognorm.pdf(range(0, 40), s=1.25, loc=13.33))
+"""
+    Average stay in hospital and ICU
+"""
+HOS2RMV_CONVOLUTION_KERNEL = normalize(lognorm.pdf(range(0, 40), s=1.2, loc=11.08))
+ICU2RMV_CONVOLUTION_KERNEL = normalize(lognorm.pdf(range(0, 40), s=1.25, loc=13.33))
 
 """ 
     These kernels are for hospitalization, ICU, and deaths
 """
 
-kernel_size_3 = np.linspace(0, 15, 15)
-INF2HOS_CONVOLUTION_KERNEL = normalize(norm(kernel_size_3, mean=7.5, scale=1))
-HOS2ICU_CONVOLUTION_KERNEL = normalize(norm(kernel_size_3, mean=11 - 7.5, scale=1))
 
-kernel_size_4 = np.linspace(0, 15, 15)
-ICU2DEA_CONVOLUTION_KERNEL = normalize(gamma.pdf(kernel_size_4, a=2.5, scale=1.9))
+
+kernel_size_4 = np.linspace(0, 30, 30)
+CLI2DEA_CONVOLUTION_KERNEL = normalize(norm.pdf(kernel_size_4, loc=15, scale=2))
 
 VACCINE_EFFICACY_KERNEL_DOSE1 = get_immunity_kernel(dose=1)
 VACCINE_EFFICACY_KERNEL_DOSE2 = get_immunity_kernel(dose=2)
 VACCINE_EFFICACY_KERNEL_DOSE3 = get_immunity_kernel(dose=3)
 
 INFECTION_EFFICACY_KERNEL = get_immunity_kernel(dose=0)
-
-if __name__ == '__main__':
-    print(kernel_size_2)
-    print(ICU2DEA_CONVOLUTION_KERNEL)
-    find_mean(ICU2DEA_CONVOLUTION_KERNEL)
-    plt.plot(kernel_size_4, ICU2DEA_CONVOLUTION_KERNEL)
-    plt.show()

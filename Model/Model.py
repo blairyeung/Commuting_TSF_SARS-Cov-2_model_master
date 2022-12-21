@@ -129,12 +129,11 @@ class Model:
             data = county_data[date - kernel_size:date]
             data = data[::-1]
             rslt = np.sum(np.multiply(data, kernel), axis=0)
-            self._model_data.time_series_recovered[c][date] = rslt
+            self._model_data.time_series_recovered[c][date] += rslt
 
     def _clinical_to_removed(self, date):
         # All non-hospitalized cases recvovers
         ratio = np.ones(shape=(16, 1)) - Parameters.ONT_HOSP_RATIO.reshape(16, 1)
-        # TODO: Check kernel!
         raw_kernel = Parameters.CLI2REC_CONVOLUTION_KERNEL
         kernel = np.matmul(raw_kernel.reshape((raw_kernel.shape[0], 1)), ratio.T)
         kernel_size = kernel.shape[0]
@@ -144,35 +143,22 @@ class Model:
             data = county_data[date - kernel_size:date]
             data = data[::-1]
             rslt = np.sum(np.multiply(data, kernel), axis=0)
-            self._model_data.time_series_recovered[c][date] = rslt
+            self._model_data.time_series_recovered[c][date] += rslt
 
 
     def _hospitalized_to_removed(self, date):
-        # hospitalized cases my decease, or recov3er
-        ratio = np.ones(shape=(16, 1))
+        # hospitalized cases may decease, or recover
+        death_ratio = (Parameters.ONT_CFR / Parameters.ONT_HOSP_RATIO).reshape(16, 1)
+        recovery_ratio = np.ones(shape=(16, 1)) - death_ratio
         # TODO: Change kernel!
         # TODO: Patients may die in this stage, update!
-        raw_kernel = Parameters.CLI2REC_CONVOLUTION_KERNEL
-        raw_kernel_2 = Parameters.CLI2
-        kernel = np.matmul(raw_kernel.reshape((raw_kernel.shape[0], 1)), ratio.T)
-        kernel_size = kernel.shape[0]
 
-        for c in range(Parameters.NO_COUNTY):
-            county_data = self._model_data.time_series_clinical_cases[c]
-            data = county_data[date - kernel_size:date]
-            data = data[::-1]
-            rslt = np.sum(np.multiply(data, kernel), axis=0)
-            self._model_data.time_series_recovered[c][date] = rslt
+        recover_kernel = Parameters.HOS2RMV_CONVOLUTION_KERNEL
+        death_kernel = Parameters.HOS2DEA_CONVOLUTION_KERNEL
 
-
-    def _icu_to_removed(self, date):
-        ratio = np.ones(shape=(16, 1)) - Parameters.ONT_CFR.reshape(16, 1)
-        death_kernel = Parameters.ICU2DEA_CONVOLUTION_KERNEL
-        # TODO: We do not have this kernel yet!
-        recover_kernel = Parameters.ICU2REC_CONVOLUTION_KERNEL
-        death_kernel = np.matmul(death_kernel.reshape((death_kernel.shape[0], 1)), ratio.T)
-        recover_kernel = np.matmul(recover_kernel.reshape((recover_kernel.shape[0], 1)), ratio.T)
-        kernel_size = death_kernel.shape[0]
+        recover_kernel = np.matmul(recover_kernel.reshape((recover_kernel.shape[0], 1)), recovery_ratio.T)
+        death_kernel = np.matmul(death_kernel.reshape((death_kernel.shape[0], 1)), death_ratio.T)
+        kernel_size = 15
 
         for c in range(Parameters.NO_COUNTY):
             county_data = self._model_data.time_series_clinical_cases[c]
@@ -180,6 +166,25 @@ class Model:
             data = data[::-1]
             rslt_recover = np.sum(np.multiply(data, recover_kernel), axis=0)
             rslt_death = np.sum(np.multiply(data, death_kernel), axis=0)
+            self._model_data.time_series_recovered[c][date] += rslt_recover
+            self._model_data.time_series_deaths[c][date] = rslt_death
+
+
+    def _icu_to_removed(self, date):
+
+        ratio = np.ones(shape=(16, 1))
+
+        # TODO: We do not have this kernel yet!
+        kernel = Parameters.ICU2DEA_CONVOLUTION_KERNEL
+
+        kernel = np.matmul(kernel.reshape((kernel.shape[0], 1)), ratio.T)
+        kernel_size = kernel.shape[0]
+
+        for c in range(Parameters.NO_COUNTY):
+            county_data = self._model_data.time_series_clinical_cases[c]
+            data = county_data[date - kernel_size:date]
+            data = data[::-1]
+            rslt = np.sum(np.multiply(data, kernel), axis=0)
             self._model_data.time_series_recovered[c][date] = rslt
 
     def _synthesize_matrix(self, contact_type=0, contact_pattern='day'):
