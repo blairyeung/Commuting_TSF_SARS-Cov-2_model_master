@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999993 (TeX Live 2021/W32TeX) (preloaded format=xelatex 2022.1.20)  21 DEC 2022 12:34
+This is XeTeX, Version 3.141592653-2.6-0.999993 (TeX Live 2021/W32TeX) (preloaded format=xelatex 2022.1.20)  21 DEC 2022 12:36
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1130,12 +1130,12 @@ Underfull \hbox (badness 5681) in paragraph at lines 253--254
  []
 
 
-Overfull \hbox (31.21283pt too wide) in paragraph at lines 250--261
+Overfull \hbox (31.21283pt too wide) in paragraph at lines 250--263
  [][] 
  []
 
 
-Overfull \hbox (35.31224pt too wide) detected at line 286
+Overfull \hbox (35.31224pt too wide) detected at line 288
 []
  []
 
@@ -1158,7 +1158,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 Missing character: There is no … ("2026) in font mdbchr8t!
 Missing character: There is no – ("2013) in font mdbchr8t!
 
-Underfull \hbox (badness 1596) in paragraph at lines 336--337
+Underfull \hbox (badness 1596) in paragraph at lines 338--339
 \T1/mdbch/m/n/12 wan-ing and ef-fec-tive-ness and side-effects of boost-ers: A Prospec-tive Com-mu-nity
  []
 
@@ -1179,7 +1179,7 @@ Package rerunfilecheck Info: File `main.out' has not changed.
 Here is how much of TeX's memory you used:
  36905 strings out of 476190
  842094 string characters out of 5813319
- 1219360 words of memory out of 5000000
+ 1220360 words of memory out of 5000000
  57004 multiletter control sequences out of 15000+600000
  500968 words of font info for 74 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
