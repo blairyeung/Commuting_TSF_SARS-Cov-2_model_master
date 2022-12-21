@@ -250,14 +250,13 @@ Ontario has announced its plan for third boost dose. $\cdots$ We also
 \begin{tabular}[H]{p{2cm}p{6cm}p{4cm}p{4cm}}
      \textbf{Parameter}& \textbf{Description}  & \textbf{Value}& \textbf{Reference} \\
      \midrule
-     $d_E$ & Latent period ($E$ to $I_p$ and $E$ to $I_s$; days) & $\sim gamma(2.5,4)$& Set to 2.5 so that incubation period (latent period plus period of preclinical infectiousness) is 5 days\\
-     $d_p$ & Duration of pre-clinical infectiousness& $\sim gamma(2.5,4)$ &  \\
+     $d_E$ & Latent period ($E$ to $I_p$ and $E$ to $I_s$) & $\sim gamma(2.5,4)$ & Davies et al.\\
      $d_c$ & Duration of clinical infectiousness& $\sim gamma(2.5,4)$ &  \\
      $d_s$ & Duration of sub-clinical infectiousness& $\sim gamma(5,4)$ &  \\
      $d_{pos}$ & Duration of PCR positivity& $\sim normal(9.87, 0.25)$ & \\ 
      $d_{hosp}$ & Duration from PCR positivity to hospitalization& $\sim normal(7.5, 1)$ & \\ 
      $d_{ICU}$ & Duration from hospitalization to ICU& $\sim normal(3.6, 1)$ & \\ 
-     $d_{R,hosp}$ & Average stay in hospital& $\sim normal(3.6, 1)$ & \\ 
+     $d_{R,hosp}$ & Average stay in hospital& $\sim normal(11.08, 1.2)$ & \\ 
      $d_{R,ICU}$ & Average stay in ICU & $\sim normal(3.6, 1)$ & \\ 
 \end{tabular}
 \end{table}
