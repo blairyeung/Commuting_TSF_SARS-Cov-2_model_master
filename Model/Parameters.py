@@ -2,6 +2,7 @@
     Version
 """
 from scipy.stats import gamma
+from scipy.stats import lognorm
 from Util import norm
 from Util import normalize
 import matplotlib.pyplot as plt
@@ -133,9 +134,10 @@ SUB2REC_CONVOLUTION_KERNEL = normalize(gamma.pdf(kernel_size_2, a=1.6, scale=4))
 # TODO: CHECK IF THIS IS RIGHT?
 CLI2REC_CONVOLUTION_KERNEL = normalize(gamma.pdf(kernel_size_2, a=1.6, scale=4))
 
-
 # TODO: this is incorrect
-ICU2REC_CONVOLUTION_KERNEL = normalize(gamma.pdf(kernel_size_2, a=1.6, scale=4))
+
+HOS2REC_CONVOLUTION_KERNEL = normalize(lognorm.pdf(range(0, 40), s=1.2, loc=11.08))
+ICU2REC_CONVOLUTION_KERNEL = normalize(lognorm.pdf(range(0, 40), s=1.25, loc=13.33))
 
 """ 
     These kernels are for hospitalization, ICU, and deaths

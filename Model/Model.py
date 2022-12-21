@@ -178,7 +178,8 @@ class Model:
             county_data = self._model_data.time_series_clinical_cases[c]
             data = county_data[date - kernel_size:date]
             data = data[::-1]
-            rslt = np.sum(np.multiply(data, kernel), axis=0)
+            rslt_recover = np.sum(np.multiply(data, recover_kernel), axis=0)
+            rslt_death = np.sum(np.multiply(data, death_kernel), axis=0)
             self._model_data.time_series_recovered[c][date] = rslt
 
     def _synthesize_matrix(self, contact_type=0, contact_pattern='day'):
