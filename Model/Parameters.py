@@ -5,7 +5,7 @@ import math
 
 from scipy.stats import gamma
 from scipy.stats import lognorm
-from Util import norm
+from scipy.stats import norm
 from Util import normalize
 import matplotlib.pyplot as plt
 import numpy as np
@@ -82,9 +82,8 @@ ONT_CFR = np.array([9.87293737e-05, 9.63117654e-05, 9.62190186e-05, 1.30947921e-
                     3.32161024e-03, 5.97837815e-03, 1.13594029e-02, 2.04377866e-02, 3.74666196e-02,
                     9.35947229e-02])
 
-
 # susceptibility
-SUSC_BY_AGE = np.array([3.991327254652800027e-01, 3.948075309394725174e-01, 4.022340898538860898e-01,
+SUSC_RATIO = np.array([3.991327254652800027e-01, 3.948075309394725174e-01, 4.022340898538860898e-01,
                         4.963382577801381812e-01, 6.774025858086478724e-01, 7.930450307450174208e-01,
                         8.374194527357667894e-01, 8.402912936299908875e-01, 8.176304599317949506e-01,
                         8.081257676036830429e-01, 8.168620238480317486e-01, 8.359357113555672125e-01,
@@ -92,18 +91,17 @@ SUSC_BY_AGE = np.array([3.991327254652800027e-01, 3.948075309394725174e-01, 4.02
                         7.715186068117150242e-01
                         ])
 
-CLINICAL_BY_AGE = np.array([0.2865309, 0.26724745, 0.22402391, 0.15445847, 0.07258315, 0.10150448, 0.2401337,
-                               0.33644525, 0.38357917, 0.42265894, 0.47025061, 0.52584302, 0.59291004, 0.64122657,
-                               0.67295434, 0.71677774])
+CLINICAL_RATIO = np.array([0.2865309, 0.26753682, 0.23495708, 0.23019938, 0.25561971, 0.28454104,
+                            0.31587461, 0.34737841, 0.38386853, 0.42265894, 0.47025061, 0.52584302,
+                            0.59291004, 0.64122657, 0.67295434, 0.71677774])
 
-
-SUBCLINICAL_BY_AGE = np.ones(shape=(16,), dtype=float) - CLINICAL_BY_AGE
+SUBCLINICAL_RATIO = np.ones(shape=(16,), dtype=float) - CLINICAL_RATIO
 
 """
     Bayes
 """
 
-BAYES_CLINICAL_BY_AGE = get_bayes(CLINICAL_BY_AGE)
+BAYES_CLINICAL_BY_AGE = get_bayes(CLINICAL_RATIO)
 
 # Work force
 LABOUR_FORCE_BY_AGE = np.array([0, 0, 0.010693183, 0.032079549, 0.083009492, 0.106146399, 0.106351741,
@@ -124,7 +122,7 @@ VACCINE_AGE_BANDS = ['05-11yrs', '12-17yrs', '18-29yrs', '30-39yrs', '40-49yrs',
     These kernels are for 
 """
 
-EXP2ACT_RATIO = np.ones(shape=(16, ))
+EXP2ACT_RATIO = np.ones(shape=(16,))
 
 kernel_size_1 = np.linspace(0, 12, 12)
 
@@ -133,9 +131,9 @@ ACT2CLI_CONVOLUTION_KERNEL = normalize(gamma.pdf(kernel_size_1, a=1.2, scale=4))
 ACT2SUB_CONVOLUTION_KERNEL = normalize(gamma.pdf(kernel_size_1, a=1.2, scale=4))
 
 kernel_size_3 = np.linspace(0, 15, 15)
-INF2HOS_CONVOLUTION_KERNEL = normalize(norm(kernel_size_3, mean=7.5, scale=1))
-HOS2ICU_CONVOLUTION_KERNEL = normalize(norm(kernel_size_3, mean=11.1 - 7.5, scale=1))
-HOS2DEA_CONVOLUTION_KERNEL = normalize(norm(kernel_size_3, mean=7.5, scale=math.sqrt(5)))
+INF2HOS_CONVOLUTION_KERNEL = normalize(norm.pdf(kernel_size_3, loc=7.5, scale=1))
+HOS2ICU_CONVOLUTION_KERNEL = normalize(norm.pdf(kernel_size_3, loc=11.1 - 7.5, scale=1))
+HOS2DEA_CONVOLUTION_KERNEL = normalize(norm.pdf(kernel_size_3, loc=7.5, scale=math.sqrt(5)))
 
 kernel_size_2 = np.linspace(0, 25, 25)
 SUB2REC_CONVOLUTION_KERNEL = normalize(gamma.pdf(kernel_size_2, a=1.6, scale=4))
@@ -152,8 +150,6 @@ ICU2RMV_CONVOLUTION_KERNEL = normalize(lognorm.pdf(range(0, 40), s=1.25, loc=13.
 """ 
     These kernels are for hospitalization, ICU, and deaths
 """
-
-
 
 kernel_size_4 = np.linspace(0, 30, 30)
 CLI2DEA_CONVOLUTION_KERNEL = normalize(norm.pdf(kernel_size_4, loc=15, scale=2))

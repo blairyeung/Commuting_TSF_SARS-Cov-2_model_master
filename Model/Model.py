@@ -52,13 +52,13 @@ class Model:
             active_transmissible = self._model_data.time_series_clinical_cases[c][date]
             # immunity_level = np.zeros(shape=(16, ))
             immunity_level = self._model_data.time_series_immunity[c][date]
-            immunity_coeff = np.ones(shape=(16, )) - immunity_level
+            immunity_coeff = np.ones(shape=(16,)) - immunity_level
             self._get_new_cases(np.multiply(exposed_cases + active_transmissible, immunity_coeff))
-
 
     """
         Exposed to cases
     """
+
     def _exposed_to_cases(self, date):
         ratio = Parameters.SUSC_BY_AGE.reshape(16, 1)
 
@@ -94,6 +94,21 @@ class Model:
             rslt = np.sum(np.multiply(data, kernel), axis=0)
             self._model_data.time_series_hospitalized[c][date] = rslt
 
+    def _infected_to_death(self, date):
+        ratio = Parameters.ONT_CFR.reshape(16, 1)
+        raw_kernel = Parameters.CLI2DEA_CONVOLUTION_KERNEL
+        kernel = np.matmul(raw_kernel.reshape((raw_kernel.shape[0], 1)), ratio.T)
+        kernel_size = kernel.shape[0]
+
+        for c in range(Parameters.NO_COUNTY):
+            county_data = self._model_data.time_series_clinical_cases[c]
+            data = county_data[date - kernel_size:date]
+            data = data[::-1]
+            rslt = np.sum(np.multiply(data, kernel), axis=0)
+            self._model_data.time_series_deaths[c][date] = rslt
+
+
+        return
 
     def _hospitalized_to_icu(self, date):
         ratio = (Parameters.ONT_ICU_RATIO / Parameters.ONT_HOSP_RATIO).reshape(16, 1)
@@ -132,8 +147,8 @@ class Model:
             self._model_data.time_series_recovered[c][date] += rslt
 
     def _clinical_to_removed(self, date):
-        # All non-hospitalized cases recvovers
-        ratio = np.ones(shape=(16, 1)) - Parameters.ONT_HOSP_RATIO.reshape(16, 1)
+        ratio = np.ones(shape=(16, 1))
+
         raw_kernel = Parameters.CLI2REC_CONVOLUTION_KERNEL
         kernel = np.matmul(raw_kernel.reshape((raw_kernel.shape[0], 1)), ratio.T)
         kernel_size = kernel.shape[0]
@@ -145,39 +160,26 @@ class Model:
             rslt = np.sum(np.multiply(data, kernel), axis=0)
             self._model_data.time_series_recovered[c][date] += rslt
 
-
     def _hospitalized_to_removed(self, date):
-        # hospitalized cases may decease, or recover
-        death_ratio = (Parameters.ONT_CFR / Parameters.ONT_HOSP_RATIO).reshape(16, 1)
-        recovery_ratio = np.ones(shape=(16, 1)) - death_ratio
-        # TODO: Change kernel!
-        # TODO: Patients may die in this stage, update!
+        ratio = np.ones(shape=(16, 1))
 
-        recover_kernel = Parameters.HOS2RMV_CONVOLUTION_KERNEL
-        death_kernel = Parameters.HOS2DEA_CONVOLUTION_KERNEL
-
-        recover_kernel = np.matmul(recover_kernel.reshape((recover_kernel.shape[0], 1)), recovery_ratio.T)
-        death_kernel = np.matmul(death_kernel.reshape((death_kernel.shape[0], 1)), death_ratio.T)
-        kernel_size = 15
+        raw_kernel = Parameters.HOS2RMV_CONVOLUTION_KERNEL
+        kernel = np.matmul(raw_kernel.reshape((raw_kernel.shape[0], 1)), ratio.T)
+        kernel_size = kernel.shape[0]
 
         for c in range(Parameters.NO_COUNTY):
             county_data = self._model_data.time_series_clinical_cases[c]
             data = county_data[date - kernel_size:date]
             data = data[::-1]
-            rslt_recover = np.sum(np.multiply(data, recover_kernel), axis=0)
-            rslt_death = np.sum(np.multiply(data, death_kernel), axis=0)
-            self._model_data.time_series_recovered[c][date] += rslt_recover
-            self._model_data.time_series_deaths[c][date] = rslt_death
-
+            rslt = np.sum(np.multiply(data, kernel), axis=0)
+            self._model_data.time_series_recovered[c][date] += rslt
 
     def _icu_to_removed(self, date):
 
         ratio = np.ones(shape=(16, 1))
 
-        # TODO: We do not have this kernel yet!
-        kernel = Parameters.ICU2DEA_CONVOLUTION_KERNEL
-
-        kernel = np.matmul(kernel.reshape((kernel.shape[0], 1)), ratio.T)
+        raw_kernel = Parameters.ICU2DEA_CONVOLUTION_KERNEL
+        kernel = np.matmul(raw_kernel.reshape((raw_kernel.shape[0], 1)), ratio.T)
         kernel_size = kernel.shape[0]
 
         for c in range(Parameters.NO_COUNTY):
@@ -193,16 +195,16 @@ class Model:
         matrix = np.zeros(shape=(16, 16))
         for j in range(4):
             matrix = np.add(matrix, preset[j] * matrices[contact_type][j])
-         return matrix
+        return matrix
 
     def _initialize_dependencies(self):
-          self.dependency = Dependency.Dependency()
+        self.dependency = Dependency.Dependency()
 
 
 if __name__ == '__main__':
     m = Model(forecast_days=100)
 
     for i in range(100):
-        m.  run_one_cycle()
+        m.run_one_cycle()
 
     pass

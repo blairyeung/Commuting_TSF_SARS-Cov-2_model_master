@@ -247,20 +247,40 @@ Ontario has announced its plan for third boost dose. $\cdots$ We also
     \begin{table}[h]
     \caption{Convolutional kernels in the model as probability distributions}
     \centering
-\begin{tabular}[H]{p{2cm}p{6cm}p{4cm}p{4cm}}
+\begin{tabular}[H]{p{2cm}p{6cm}p{4cm}p{3cm}}
      \textbf{Parameter}& \textbf{Description}  & \textbf{Value}& \textbf{Reference} \\
      \midrule
      $d_E$ & Latent period ($E$ to $I_p$ and $E$ to $I_s$) & $\sim gamma(2.5,4)$ & Davies et al.\\
-     $d_c$ & Duration of clinical infectiousness& $\sim gamma(2.5,4)$ &  \\
-     $d_s$ & Duration of sub-clinical infectiousness& $\sim gamma(5,4)$ &  \\
-     $d_{pos}$ & Duration of PCR positivity& $\sim normal(9.87, 0.25)$ & \\ 
-     $d_{hosp}$ & Duration from PCR positivity to hospitalization& $\sim normal(7.5, 1)$ & \\ 
-     $d_{ICU}$ & Duration from hospitalization to ICU& $\sim normal(3.6, 1)$ & \\ 
-     $d_{R,hosp}$ & Average stay in hospital& $\sim normal(11.08, 1.2)$ & \\ 
-     $d_{R,ICU}$ & Average stay in ICU & $\sim normal(3.6, 1)$ & \\ 
-\end{tabular}
+     $d_c$ & Duration of clinical infectiousness& $\sim gamma(2.5,4)$ &  Davies et al.\\
+     $d_s$ & Duration of sub-clinical infectiousness& $\sim gamma(5,4)$ &  Davies et al.\\
+     $d_{pos}$ & Duration of PCR positivity& $\sim normal(9.87, 0.25)$ & [REF]\\ 
+     $d_{hosp}$ & Duration from PCR positivity to hospitalization& $\sim normal(7.5, 1)$ & Davies et al.\\ 
+     $d_{ICU}$ & Duration from hospitalization to ICU& $\sim normal(3.6, 1)$ & Davies et al.\\ 
+     $d_{R,hosp}$ & Average stay in hospital & $\sim normal(11.08, 1.2)$ & Davies et al.\\ 
+     $d_{R,ICU}$ & Average stay in hospital & $\sim normal(13.33, 1.2)$ & Davies et al.
+    \end{tabular}
 \end{table}
 \end{center}
+
+\begin{center}
+    \begin{table}[h]
+    \caption{Age-specific odds}
+    \centering
+\begin{tabular}[H]{p{3cm}p{5cm}p{4cm}p{3cm}}
+     \textbf{Parameter}& \textbf{Description}  & \textbf{Value}& \textbf{Reference} \\
+     \midrule
+     $susc\_ratio$ & Relative susceptibility to infection by age & 0.39 - 0.86 & Davies et al.\\
+     $clin\_ratio$ & Clinical fraction by age &  0.23 - 0.71  &  Davies et al.\\
+     $hosp\_ratio$ & Hospitalization ratio of clinical cases by age & 0.009 - 0.21 &  [REF]\\
+     $icu\_ratio$ & ICU hospitalized ratio of clinical cases by age & 0.001 - 0.028 &  [REF]\\
+     $cfr\_ratio$ & Case-fatality ratio by age& 0.00009 - 0.09 &  [REF]\\
+     $work\_ratio$ & Working force ratio by age& DoG interpolation &  [REF]\\
+     $sch\_ratio$ & School ratio by age & DoG interpolation &  [REF]
+    \end{tabular}
+\end{table}
+\end{center}
+
+\newpage
 
 \begin{align*}
     P(Hosp|Clinical) = /
@@ -288,6 +308,9 @@ We define the following notations to represent the change of variables:
 We define the following transition functions:
 \subsection*{Susceptible to exposed}
 \begin{align*}
+    \Delta E (t) &= susc_ratio \circ M^x I(x)
+\end{align*}
+\begin{align*}
     \Delta S(t) &= \overbrace{\vect{\Delta R(t) - \Delta D(t)}}^{= \Delta r(t)}\\
     \delta S(t) &= - \Delta E(t)\\
     dS(t) &=  \Delta S(t) - \delta S(t) = \overbrace{\vect{\Delta R(t) - \Delta D(t)}}^{= \Delta r(t)} - \Delta E
@@ -295,32 +318,30 @@ We define the following transition functions:
 
 
 \subsection*{Exposed to infected}
-\subsubsection*{Exposed to subclinically-infected}
+\subsubsection*{Exposed to subclinical infection}
 \begin{align*}
-    \Delta I_s(t) &= \vect{E * f_{d_s}  }(t) \circ  sub\_ratio \\
-    \delta I_s(t) &= \vect{I_s * f_{d_{s}}} (t) \\
-    d I_s(t) &=  \Delta I_s(t)  -  \delta I_s (t)
+    \Delta I_s(t) &= \vect{E * f_{d_s}  }(t) \circ \vect{1_{16} - clin\_ratio} \\
+    \delta I_s(t) &= \vect{I_s * f_{d_{s}}} (t)
 \end{align*}
 
-\subsubsection*{Exposed to pre-clinically infected}
+\subsubsection*{Exposed to pre-clinical infection}
 \begin{align*}
-    \Delta I_p(t) &= \vect{E * f_{d_p} }(t) \circ  cli\_ratio \\
-    \delta I_p(t) &= \vect{I_p(t) * f_{d_{c}}} (t) \\
-    d I_p(t) &=  \Delta I_p (t)  -  \delta I_p (t)
+    \Delta I_p(t) &= \vect{E * f_{d_p} }(t) \circ  clin\_ratio \\
+    \delta I_p(t) &= \vect{I_p(t) * f_{d_{c}}} (t)
 \end{align*}
 
 \subsection*{Exposed to all-type of infected indeviduals}
 \begin{align*}
     \Delta I &= \Delta I_s + \Delta I_p\\
     \delta I &= \delta I_s + \delta I_p\\
-    d I &= d I_s + d I_p\\
+    d S(t) &= \vect{\Delta I_s + \Delta I_p } - \vect{\delta I_s + \delta I_p}
 \end{align*}
 
 \subsection*{Transition within infected}
-\subsubsection*{Pre-clinical infected to clinical infected}
+\subsubsection*{Pre-clinical infection to clinical infection}
 \begin{align*}
     \Delta I_c &= \vect{I_p * f_{d_c}} (t)\\
-    \delta I_c &= \vect{I_c * f_{d_r - d_c}} (t)\\
+    \delta I_c &= \vect{I_c * f_{d_{pos}}} (t)
 \end{align*}
 
 \bibliographystyle{plain}
