@@ -105,7 +105,7 @@ class ModelData:
         self.time_series_hospitalized = np.concatenate([self.dependency.date_to_hospitalizations_by_county,
                                                         np.zeros(shape=(x, y, z))], axis=1)
 
-        self.time_series_ICU =  np.concatenate([self.dependency.date_to_hospitalizations_by_county,
+        self.time_series_ICU = np.concatenate([self.dependency.date_to_hospitalizations_by_county,
                                                         np.zeros(shape=(x, y, z))], axis=1)
 
         self.time_series_vaccinated = np.concatenate([self.dependency.date_to_vaccines_by_age,
@@ -126,8 +126,8 @@ class ModelData:
         :return:
         """
 
-        dose1 = np.clip((self.time_series_vaccinated[0] - self.time_series_vaccinated[1])[:date], a_min=0, a_max=1)
-        dose2 = np.clip((self.time_series_vaccinated[1] - self.time_series_vaccinated[2])[:date], a_min=0, a_max=1)
+        dose1 = (self.time_series_vaccinated[0])[:date]
+        dose2 = (self.time_series_vaccinated[1])[:date]
         dose3 = (self.time_series_vaccinated[2])[:date]
 
         print(np.sum(self.time_series_vaccinated[0], axis=0))
@@ -196,8 +196,16 @@ class ModelData:
         print(kernel_dose_1.shape)
 
         immunity_dose1 = np.multiply(dose1, kernel_dose_1)
+
+        immunity_dose2_rmv = np.multiply(dose2, kernel_dose_1)
+
         immunity_dose2 = np.multiply(dose2, kernel_dose_2)
+
         immunity_dose3 = np.multiply(dose3, kernel_dose_3)
+
+        immunity_dose3_rmv = np.multiply(dose3, kernel_dose_2)
+
+
         immunity_infection = np.multiply(today_incidence, kernel_infection)
 
         print('HOLY!')
@@ -205,11 +213,14 @@ class ModelData:
         print(np.max(immunity_dose1))
         print(np.max(immunity_dose2))
 
-        vaccine_immunity = immunity_dose1 + immunity_dose2 + immunity_dose3
+        vaccine_immunity = immunity_dose1 + immunity_dose2 + immunity_dose3 - immunity_dose3_rmv - immunity_dose2_rmv
 
-        immunity = vaccine_immunity + immunity_infection
+        immunity = vaccine_immunity + (1 - vaccine_immunity) * immunity_infection
 
         print(immunity.shape)
+        print(np.max(immunity_infection))
+        print(np.max(vaccine_immunity))
+        print(np.max(immunity))
 
         today_immunity = np.sum(immunity, axis=0)
         today_vaccine_immunity = np.sum(vaccine_immunity, axis=0)
