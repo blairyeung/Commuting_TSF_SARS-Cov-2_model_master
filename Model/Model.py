@@ -34,23 +34,16 @@ class Model:
 
     def _compute_immunity(self, date):
         """
-        For EXTERNAL call only
-        TODO: Find the vaccine efficacy and immunity waning function from papers, and
-        TODO: calcualte the immunity from the vaccination and cases data
-        This is hard and trciky!
-        :return:
+        TODO: Find the vaccine efficacy and immunity waning function from papers
         """
 
         dose1 = (self._model_data.time_series_vaccinated[0])[:date]
         dose2 = (self._model_data.time_series_vaccinated[1])[:date]
         dose3 = (self._model_data.time_series_vaccinated[2])[:date]
 
-
-
         dose1 = (np.ones(shape=(Parameters.NO_COUNTY, dose1.shape[0], dose1.shape[1])) * dose1).transpose(1, 0, 2)
         dose2 = (np.ones(shape=(Parameters.NO_COUNTY, dose2.shape[0], dose2.shape[1])) * dose2).transpose(1, 0, 2)
         dose3 = (np.ones(shape=(Parameters.NO_COUNTY, dose3.shape[0], dose3.shape[1])) * dose3).transpose(1, 0, 2)
-
 
         county_population = np.array(self.dependency.index_to_population)
         county_population = county_population.reshape(county_population.shape[0], 1)
@@ -81,16 +74,13 @@ class Model:
         kernel_dose_3 = np.multiply(raw_kernel_dose_3[:date].reshape(date, 1, 1), ratio)
         kernel_infection = np.multiply(raw_kernel_infection[:date].reshape(date, 1, 1), ratio)
 
-
         immunity_dose1 = np.multiply(dose1, kernel_dose_1)
         immunity_dose2_rmv = np.multiply(dose2, kernel_dose_1)
         immunity_dose2 = np.multiply(dose2, kernel_dose_2)
         immunity_dose3 = np.multiply(dose3, kernel_dose_3)
         immunity_dose3_rmv = np.multiply(dose3, kernel_dose_2)
 
-
         infection_immunity = np.multiply(today_incidence, kernel_infection)
-
         vaccine_immunity = immunity_dose1 + immunity_dose2 + immunity_dose3 - immunity_dose3_rmv - immunity_dose2_rmv
         today_infection_immunity = np.sum(infection_immunity, axis=0)
         today_vaccine_immunity = np.sum(vaccine_immunity, axis=0)
