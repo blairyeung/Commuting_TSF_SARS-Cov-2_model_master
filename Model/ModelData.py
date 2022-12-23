@@ -83,7 +83,7 @@ class ModelData:
                                                           np.zeros(shape=(x, y, z))], axis=1)
 
         self.time_series_active_cases = np.multiply(self.time_series_clinical_cases,
-                                                    Parameters.BAYES_CLINICAL_BY_AGE.T)
+                                                    Parameters.REVERSE_CLINICAL_BY_AGE.T)
 
         self.time_series_exposed = copy.deepcopy(self.time_series_active_cases)
 

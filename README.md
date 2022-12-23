@@ -35,7 +35,7 @@ a modelling study. Lancet Infect Dis 2020; published online Dec 23. https://doi.
 * Source:  Ontario Public Health
 ### 1.1.5 ***TODO:*** 每个年龄段新冠疫苗接种者的疫苗有效率
 * Shape : (16, ), dtype = float
-* Source: **还没找到**
+* Source: https://www.bmj.com/content/379/bmj-2022-072141
 
 ## 1.2 时序数据
 ### 1.2.1 每个公共卫生局，每个年龄段，在过去2年（至2020年2月15日）每天的新增新冠确诊，死亡数

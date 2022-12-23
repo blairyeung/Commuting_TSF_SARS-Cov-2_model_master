@@ -14,25 +14,12 @@ import datetime
 ver = '1.0'
 
 
-def find_mean(v):
-    tot = 0
-    for i in range(len(v)):
-        tot += v[i]
-        if tot >= 0.5:
-            print(i, len(v))
-            break
-
-
-def get_bayes(lst):
-    bayes = np.zeros(shape=lst.shape)
-    for i in range(lst.shape[0]):
-        bayes[i] = 1 / lst[i]
-    return bayes
-
-
 def get_immunity_kernel(dose=0, length=2000):
     kernel = np.ones(shape=(length,), dtype=float)
     return kernel
+
+
+INFECTIOUSNESS = 0.08
 
 
 """
@@ -101,7 +88,7 @@ SUBCLINICAL_RATIO = np.ones(shape=(16,), dtype=float) - CLINICAL_RATIO
     Bayes
 """
 
-BAYES_CLINICAL_BY_AGE = get_bayes(CLINICAL_RATIO)
+REVERSE_CLINICAL_BY_AGE = np.ones(shape=CLINICAL_RATIO.shape) / CLINICAL_RATIO
 
 # Work force
 LABOUR_FORCE_BY_AGE = np.array([0, 0, 0.010693183, 0.032079549, 0.083009492, 0.106146399, 0.106351741,
@@ -113,6 +100,11 @@ LABOUR_FORCE_BY_AGE = np.array([0, 0, 0.010693183, 0.032079549, 0.083009492, 0.1
 """
 VACCINE_AGE_BANDS = ['05-11yrs', '12-17yrs', '18-29yrs', '30-39yrs', '40-49yrs', '50-59yrs', '60-69yrs', '70-79yrs',
                      '80+']
+
+
+AGE_BANDS = ['0-4yrs', '5-9yrs', '10-14yrs', '15-19yrs', '20-24yrs', '25-29yrs', '30-34yrs', '35-39yrs', '40-44yrs',
+             '45-49yrs', '50-54yrs', '55-59yrs', '60-64yrs', '65-69yrs', '70-74yrs', '75+yrs']
+
 
 """
     Convolution kernels
