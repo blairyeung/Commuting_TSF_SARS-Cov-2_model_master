@@ -1,28 +1,38 @@
 # Commuting_TSF_SARS-Cov-2_model_master
 ***加了TODO的是还没做的，没加的就是做好了的***
+# TODOs:
+
+目前模型已经可以正常运行，但还需要疫苗/感染有效率数据以计算免疫率。
+
+同时，模型目前没有涵盖population mobility，day/night switch 和commutation。
+
+### Population mobility:
+Waiting for incorporation of Martin's AI model.
+### Day/night switch:
+预计12.25日前完成
+### Commutation:
+预计12.27日前完成
+
 # 1. Data collection 
 We use 16 age-bands for our model. For the data collected that does not match this specification, 
 we will use DOG to upsample/downsample it back to 16 age bands.
 ## 1.1 常数项 （非时序类型数据）
 ![img.png](img.png)
-### 1.1.0 ***TODO*** 加拿大每个年龄段的COVID确诊，住院，死亡比例
+### 1.1.0 加拿大每个年龄段的COVID确诊，住院，死亡比例
 * Shape : (16, ), dtype = float
-* Source: **还没找到**
+* Source: Ontario Public Health
 * **Statistics Canada. Table 17-10-0005-01  Population estimates on July 1st, by age and sex**
-### 1.1.1 ***TODO:*** 每个年龄段新冠患者的无症状比例
+### 1.1.1 每个年龄段新冠患者的无症状比例
 * Shape : (16, ), dtype = float
-* Source: **还没找到**
-### 1.1.2 ***TODO:*** 每个年龄段新冠患者的住院比例 (need calibration)
+* Source: Ontario Public Health
+### 1.1.2 每个年龄段新冠患者的住院比例 (need calibration)
 * Shape : (16, ), dtype = float
 * Source: Davies NG, Barnard RC, Jarvis CI, et al. Association of tiered restrictions
 and a second lockdown with COVID-19 deaths and hospital admissions in England:
 a modelling study. Lancet Infect Dis 2020; published online Dec 23. https://doi.org/10.1016/S1473-3099(20)30984-1.
-### 1.1.3 ***TODO:*** 每个年龄段新冠患者的死亡率
+### 1.1.3每个年龄段新冠患者的死亡率
 * Shape : (16, ), dtype = float
-* Source: **还没找到**
-### 1.1.4 ***TODO:*** 每个年龄段新冠患者的死亡率
-* Shape : (16, ), dtype = float
-* Source: **还没找到**
+* Source:  Ontario Public Health
 ### 1.1.5 ***TODO:*** 每个年龄段新冠疫苗接种者的疫苗有效率
 * Shape : (16, ), dtype = float
 * Source: **还没找到**
