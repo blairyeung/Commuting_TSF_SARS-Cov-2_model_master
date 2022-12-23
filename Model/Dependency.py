@@ -20,6 +20,10 @@ class Dependency:
     county_codes = list()
     matrix_by_class = [[None] * 4, [None] * 4]
 
+    """
+        Look up table
+    """
+
     code_to_name = dict()
     district_to_phu = dict()
     phu_to_district = dict()
@@ -27,11 +31,19 @@ class Dependency:
     county_to_district = dict()
     district_to_county = dict()
 
+    """
+        PHU-specific data
+    """
+
     band_to_population = dict()
     date_to_incidence_rate_by_phu = dict()
     date_to_hospitalization_rate_by_phu = dict()
     date_to_death_rate_by_phu = dict()
     date_to_vaccines_by_age = np.zeros((0, 3, 9))
+
+    """
+        County-specific data
+    """
 
     date_to_cases_by_county = None
     date_to_hospitalizations_by_county = None

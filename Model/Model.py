@@ -29,7 +29,7 @@ class Model:
         return
 
     def _get_new_cases(self, cases, contact_type=0, contact_pattern='day'):
-        susceptibility = Parameters.SUSC_BY_AGE
+        susceptibility = Parameters.SUSC_RATIO
         matrix = self._synthesize_matrix(contact_type, contact_pattern)
         self._model_data.compute_immunity(self.date)
         # print(self._model_data.time_series_immunity.shape)
@@ -60,22 +60,24 @@ class Model:
     """
 
     def _exposed_to_cases(self, date):
-        ratio = Parameters.SUSC_BY_AGE.reshape(16, 1)
+        ratio = Parameters.SUSC_RATIO.reshape(16, 1)
 
         raw_kernel = Parameters.EXP2ACT_CONVOLUTION_KERNEL
-        kernel = np.matmul(raw_kernel.reshape((raw_kernel.shape[0], 1)), ratio.T)
-        kernel_size = kernel.shape[0]
 
         for c in range(Parameters.NO_COUNTY):
+            immunity_level = self._model_data.time_series_immunity[c][date]
+            ratio *= immunity_level.reshape(16, 1)
+            kernel = np.matmul(raw_kernel.reshape((raw_kernel.shape[0], 1)), ratio.T)
+            kernel_size = kernel.shape[0]
             county_data = self._model_data.time_series_exposed[c]
             data = county_data[date - kernel_size:date]
             data = data[::-1]
             rslt = np.sum(np.multiply(data, kernel), axis=0)
             self._model_data.time_series_active_cases[c][date] = rslt
             self._model_data.time_series_clinical_cases[c][date] = np.multiply(rslt,
-                                                                               Parameters.CLINICAL_BY_AGE)
+                                                                               Parameters.CLINICAL_RATIO)
             self._model_data.time_series_clinical_cases[c][date] = np.multiply(rslt,
-                                                                               Parameters.SUBCLINICAL_BY_AGE)
+                                                                               Parameters.SUBCLINICAL_RATIO)
 
     def _infected_to_hospitalized(self, date):
 
@@ -178,7 +180,7 @@ class Model:
 
         ratio = np.ones(shape=(16, 1))
 
-        raw_kernel = Parameters.ICU2DEA_CONVOLUTION_KERNEL
+        raw_kernel = Parameters.ICU2RMV_CONVOLUTION_KERNEL
         kernel = np.matmul(raw_kernel.reshape((raw_kernel.shape[0], 1)), ratio.T)
         kernel_size = kernel.shape[0]
 

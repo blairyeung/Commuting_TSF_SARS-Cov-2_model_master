@@ -88,8 +88,13 @@ class ModelData:
 
         self.time_series_sub_clinical_cases = self.time_series_active_cases - self.time_series_clinical_cases
 
-        self.time_series_deaths = np.concatenate([self.dependency.date_to_deaths_by_county,
-                                                  np.zeros(shape=(x, y, z))], axis=1)
+        # TODO: update this
+
+        self.time_series_recovered = np.apply_along_axis(lambda m:
+                                                         np.convolve(m,
+                                                                     Parameters.CLI2REC_CONVOLUTION_KERNEL,
+                                                                     mode='same'), axis=1,
+                                                         arr=self.time_series_clinical_cases)
 
         self.time_series_deaths = np.concatenate([self.dependency.date_to_deaths_by_county,
                                                   np.zeros(shape=(x, y, z))], axis=1)
