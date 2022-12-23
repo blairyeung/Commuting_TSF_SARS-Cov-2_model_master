@@ -301,7 +301,15 @@ class Dependency:
                     yesterday_cuml = today_cuml
 
         """
+
+        dose1 = np.clip((self.date_to_vaccines_by_age[0] - self.date_to_vaccines_by_age[1]), a_min=0, a_max=1)
+        dose2 = np.clip((self.date_to_vaccines_by_age[1] - self.date_to_vaccines_by_age[2]), a_min=0, a_max=1)
+        dose3 = (self.date_to_vaccines_by_age[2])
+
         for i in range(self.total_days - 1):
+
+            # TODO: CHANGE THIS!!!!
+
             vaccine_differentiated[i+1] = self.date_to_vaccines_by_age[i+1] - self.date_to_vaccines_by_age[i]
         self.date_to_vaccines_by_age = np.clip(vaccine_differentiated, a_min=0, a_max=0.2)
         # global date_to_incidence_rate_by_phu

@@ -125,9 +125,32 @@ class ModelData:
         This is hard and trciky!
         :return:
         """
+
         dose1 = np.clip((self.time_series_vaccinated[0] - self.time_series_vaccinated[1])[:date], a_min=0, a_max=1)
         dose2 = np.clip((self.time_series_vaccinated[1] - self.time_series_vaccinated[2])[:date], a_min=0, a_max=1)
         dose3 = (self.time_series_vaccinated[2])[:date]
+
+        print(np.sum(self.time_series_vaccinated[0], axis=0))
+        print(np.sum(self.time_series_vaccinated[1], axis=0))
+        print(np.sum(self.time_series_vaccinated[2], axis=0))
+
+        print('WHY?')
+
+        print(np.sum(self.time_series_vaccinated[0]))
+        print(np.sum(self.time_series_vaccinated[1]))
+        print(np.sum(self.time_series_vaccinated[2]))
+
+        print('FUCK?')
+
+        print(np.sum(dose1))
+        print(np.sum(dose2))
+        print(np.sum(dose3))
+
+        """
+        print(np.sum(dose1, axis=0))
+        print(np.sum(dose2, axis=0))
+        print(np.sum(dose3, axis=0))
+        """
 
         dose1 = (np.ones(shape=(Parameters.NO_COUNTY, dose1.shape[0], dose1.shape[1])) * dose1).transpose(1, 0, 2)
         dose2 = (np.ones(shape=(Parameters.NO_COUNTY, dose2.shape[0], dose2.shape[1])) * dose2).transpose(1, 0, 2)
@@ -182,14 +205,18 @@ class ModelData:
         print(np.max(immunity_dose1))
         print(np.max(immunity_dose2))
 
-        immunity = immunity_dose1 + immunity_dose2 + immunity_dose3 + immunity_infection
+        vaccine_immunity = immunity_dose1 + immunity_dose2 + immunity_dose3
+
+        immunity = vaccine_immunity + immunity_infection
 
         print(immunity.shape)
 
         today_immunity = np.sum(immunity, axis=0)
+        today_vaccine_immunity = np.sum(vaccine_immunity, axis=0)
 
         print(today_immunity.shape)
         print(np.max(today_immunity))
+        print(np.max(today_vaccine_immunity))
 
 
 
