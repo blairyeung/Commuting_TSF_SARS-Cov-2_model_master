@@ -26,18 +26,9 @@ class Model:
         print(self.date)
         self._model_data.compute_immunity(self.date)
         self._model_transition()
+        today_cases = self._model_data.time_series_active_cases.transpose(1, 0, 2)
+        print(np.sum(today_cases[self.date]))
         return
-
-    def _get_new_cases(self, cases, contact_type=0, contact_pattern='day'):
-        susceptibility = Parameters.SUSC_RATIO
-        matrix = self._synthesize_matrix(contact_type, contact_pattern)
-        self._model_data.compute_immunity(self.date)
-        # print(self._model_data.time_series_immunity.shape)
-        immunity = self._model_data.time_series_immunity.transpose(1, 0, 2)[self.date]
-        # print(immunity.shape)
-        rslt = np.matmul(matrix, cases) * susceptibility * immunity
-        # print(rslt.shape)
-        return rslt
 
     def _model_transition(self):
         self._susceptible_to_exposed(self.date)
@@ -46,33 +37,50 @@ class Model:
         self._hospitalized_to_icu(self.date)
         self._infected_to_removed(self.date)
 
+    def _get_new_cases(self, cases, contact_type=0, contact_pattern='day'):
+        susceptibility = Parameters.SUSC_RATIO
+        matrix = self._synthesize_matrix(contact_type, contact_pattern)
+        rslt = np.matmul(matrix, cases) * susceptibility
+        return rslt
+
     def _susceptible_to_exposed(self, date):
+        # self._model_data.compute_immunity(self.date)
         for c in range(Parameters.NO_COUNTY):
-            exposed_cases = self._model_data.time_series_exposed[c][date]
-            active_transmissible = self._model_data.time_series_clinical_cases[c][date]
-            # immunity_level = np.zeros(shape=(16, ))
-            immunity_level = self._model_data.time_series_immunity[c][date]
-            immunity_coeff = np.ones(shape=(16,)) - immunity_level
-            self._get_new_cases(np.multiply(exposed_cases + active_transmissible, immunity_coeff))
+            exposed_cases = self._model_data.time_series_exposed[c][date-1]
+            active_transmissible = self._model_data.time_series_clinical_cases[c][date-1]
+            immunity_level = self._model_data.time_series_immunity[c][date-1]
+            immunity = np.ones(shape=(16,)) - immunity_level
+
+            clinical_infectious = np.sum(self._model_data.time_series_clinical_cases[c][date-5:date], axis=0)
+            sub_clinical_infectious = np.sum(self._model_data.time_series_clinical_cases[c][date-3:date], axis=0)
+            exposed_infectious = np.sum(self._model_data.time_series_exposed[c][date-3:date], axis=0)
+
+            tot_infectiouesness = clinical_infectious + 0.5 * (sub_clinical_infectious + exposed_infectious)
+
+
+            rslt = self._get_new_cases(np.multiply(tot_infectiouesness, immunity),
+                                       contact_type=0,
+                                       contact_pattern='day')
+            # print(rslt)
+            self._model_data.time_series_exposed[c][date] = rslt
 
     """
         Exposed to cases
     """
 
     def _exposed_to_cases(self, date):
-        ratio = Parameters.SUSC_RATIO.reshape(16, 1)
 
         raw_kernel = Parameters.EXP2ACT_CONVOLUTION_KERNEL
 
         for c in range(Parameters.NO_COUNTY):
-            immunity_level = self._model_data.time_series_immunity[c][date]
-            ratio *= immunity_level.reshape(16, 1)
-            kernel = np.matmul(raw_kernel.reshape((raw_kernel.shape[0], 1)), ratio.T)
+            kernel = np.matmul(raw_kernel.reshape((raw_kernel.shape[0], 1)), np.ones(shape=(1, 16)))
             kernel_size = kernel.shape[0]
             county_data = self._model_data.time_series_exposed[c]
             data = county_data[date - kernel_size:date]
             data = data[::-1]
+
             rslt = np.sum(np.multiply(data, kernel), axis=0)
+
             self._model_data.time_series_active_cases[c][date] = rslt
             self._model_data.time_series_clinical_cases[c][date] = np.multiply(rslt,
                                                                                Parameters.CLINICAL_RATIO)
@@ -192,12 +200,13 @@ class Model:
             self._model_data.time_series_recovered[c][date] = rslt
 
     def _synthesize_matrix(self, contact_type=0, contact_pattern='day'):
+        infectioussness = 0.08
         matrices = self.dependency.matrix_by_class
         preset = Parameters.MATRIX_PRESETS[contact_pattern]
         matrix = np.zeros(shape=(16, 16))
         for j in range(4):
             matrix = np.add(matrix, preset[j] * matrices[contact_type][j])
-        return matrix
+        return matrix * infectioussness
 
     def _initialize_dependencies(self):
         self.dependency = Dependency.Dependency()
@@ -206,7 +215,11 @@ class Model:
 if __name__ == '__main__':
     m = Model(forecast_days=100)
 
+
+
     for i in range(100):
         m.run_one_cycle()
+        pass
+    print('FUck')
 
     pass
