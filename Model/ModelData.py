@@ -70,9 +70,9 @@ class ModelData:
             """
                 Note that!!! We asssumed an consistent vaccination level acrross ALL counties in ON!
             """
-            self.time_series_vaccinated = np.zeros(shape=(y, z), dtype=int)
+            self.time_series_vaccinated = np.zeros(shape=(x, y, z), dtype=int)
 
-            self.time_series_immunity = np.zeros(shape=(x, self.time_series_len, z), dtype=float)
+            self.time_series_immunity = np.zeros(shape=(x, y, z), dtype=float)
 
     def _load_from_dependencies(self):
         x = len(self.dependency.county_data)
@@ -113,9 +113,10 @@ class ModelData:
 
         self.time_series_vaccinated = self.time_series_vaccinated.transpose(1, 0, 2)
 
-
-        self.time_series_immunized = np.zeros(shape=(x, y, z), dtype=float)
-        self.time_series_immunity = np.zeros(shape=(x, y, z), dtype=float)
+        self.time_series_immunized = np.zeros(shape=(x, self.dependency.date_to_deaths_by_county.shape[1] + y,
+                                                     z), dtype=float)
+        self.time_series_immunity = np.zeros(shape=(x, self.dependency.date_to_deaths_by_county.shape[1] + y,
+                                                    z), dtype=float)
 
     def compute_immunity(self, date):
         """
@@ -129,22 +130,6 @@ class ModelData:
         dose1 = (self.time_series_vaccinated[0])[:date]
         dose2 = (self.time_series_vaccinated[1])[:date]
         dose3 = (self.time_series_vaccinated[2])[:date]
-
-        print(np.sum(self.time_series_vaccinated[0], axis=0))
-        print(np.sum(self.time_series_vaccinated[1], axis=0))
-        print(np.sum(self.time_series_vaccinated[2], axis=0))
-
-        print('WHY?')
-
-        print(np.sum(self.time_series_vaccinated[0]))
-        print(np.sum(self.time_series_vaccinated[1]))
-        print(np.sum(self.time_series_vaccinated[2]))
-
-        print('FUCK?')
-
-        print(np.sum(dose1))
-        print(np.sum(dose2))
-        print(np.sum(dose3))
 
         """
         print(np.sum(dose1, axis=0))
@@ -165,13 +150,9 @@ class ModelData:
 
         ratio = age_population / np.sum(age_population)
 
-        print(county_population.shape)
-
         population = np.matmul(county_population, ratio.T)
 
         today_population = np.ones(shape=(date, population.shape[0], population.shape[1])) * population
-
-        print(today_population.shape)
 
         today_cases = self.time_series_infected.transpose(1, 0, 2)[:date]
 
@@ -206,28 +187,25 @@ class ModelData:
         immunity_dose3_rmv = np.multiply(dose3, kernel_dose_2)
 
 
-        immunity_infection = np.multiply(today_incidence, kernel_infection)
-
-        print('HOLY!')
-        print(np.max(immunity_infection))
-        print(np.max(immunity_dose1))
-        print(np.max(immunity_dose2))
+        infection_immunity = np.multiply(today_incidence, kernel_infection)
 
         vaccine_immunity = immunity_dose1 + immunity_dose2 + immunity_dose3 - immunity_dose3_rmv - immunity_dose2_rmv
+        # immunity = vaccine_immunity + (1 - vaccine_immunity) * infection_immunity
 
-        immunity = vaccine_immunity + (1 - vaccine_immunity) * immunity_infection
 
-        print(immunity.shape)
-        print(np.max(immunity_infection))
-        print(np.max(vaccine_immunity))
-        print(np.max(immunity))
-
-        today_immunity = np.sum(immunity, axis=0)
+        today_infection_immunity = np.sum(infection_immunity, axis=0)
         today_vaccine_immunity = np.sum(vaccine_immunity, axis=0)
 
-        print(today_immunity.shape)
-        print(np.max(today_immunity))
-        print(np.max(today_vaccine_immunity))
+        today_immunity = today_vaccine_immunity + (np.ones(shape=(Parameters.NO_COUNTY, 16)) - today_vaccine_immunity)\
+                         * today_infection_immunity
+
+        data = self.time_series_immunity.transpose(1, 0, 2)
+
+
+        data[date] = today_immunity
+
+        self.time_series_immunity = data.transpose(1, 0, 2)
+
 
 
 
