@@ -131,11 +131,7 @@ class ModelData:
         dose2 = (self.time_series_vaccinated[1])[:date]
         dose3 = (self.time_series_vaccinated[2])[:date]
 
-        """
-        print(np.sum(dose1, axis=0))
-        print(np.sum(dose2, axis=0))
-        print(np.sum(dose3, axis=0))
-        """
+
 
         dose1 = (np.ones(shape=(Parameters.NO_COUNTY, dose1.shape[0], dose1.shape[1])) * dose1).transpose(1, 0, 2)
         dose2 = (np.ones(shape=(Parameters.NO_COUNTY, dose2.shape[0], dose2.shape[1])) * dose2).transpose(1, 0, 2)
@@ -174,7 +170,6 @@ class ModelData:
         kernel_dose_3 = np.multiply(raw_kernel_dose_3[:date].reshape(date, 1, 1), ratio)
         kernel_infection = np.multiply(raw_kernel_infection[:date].reshape(date, 1, 1), ratio)
 
-        print(kernel_dose_1.shape)
 
         immunity_dose1 = np.multiply(dose1, kernel_dose_1)
 

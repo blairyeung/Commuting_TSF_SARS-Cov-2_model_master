@@ -28,6 +28,7 @@ class Model:
         self._model_transition()
         today_cases = self._model_data.time_series_active_cases.transpose(1, 0, 2)
         print(np.sum(today_cases[self.date]))
+        # print(np.sum(self._model_data.time_series_immunity.transpose(1, 0, 2)[self.date]))
         return
 
     def _model_transition(self):

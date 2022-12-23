@@ -302,8 +302,6 @@ class Dependency:
 
         """
 
-        print(self.date_to_vaccines_by_age.shape)
-
 
         for i in range(self.total_days - 1):
 
@@ -330,14 +328,6 @@ class Dependency:
         dose1 = np.clip((data[0] - data[1]), a_min=0, a_max=1)
         dose2 = np.clip((data[1] - data[2]), a_min=0, a_max=1)
         dose3 = (data[2])
-
-        # print('WHYYYYYY?')
-
-        # print(np.max(dose1))
-        # print(np.max(dose2))
-        # print(np.max(dose3))
-
-        # self.date_to_vaccines_by_age = np.array([dose1, dose2, dose3]).transpose(1, 0, 2)
 
         return
 
