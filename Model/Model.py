@@ -24,12 +24,84 @@ class Model:
         """
         self.date += 1
         print(self.date)
-        self._model_data.compute_immunity(self.date)
+        self._compute_immunity(self.date)
         self._model_transition()
         today_cases = self._model_data.time_series_active_cases.transpose(1, 0, 2)
         print(np.sum(today_cases[self.date]))
         # print(np.sum(self._model_data.time_series_immunity.transpose(1, 0, 2)[self.date]))
         return
+
+
+    def _compute_immunity(self, date):
+        """
+        For EXTERNAL call only
+        TODO: Find the vaccine efficacy and immunity waning function from papers, and
+        TODO: calcualte the immunity from the vaccination and cases data
+        This is hard and trciky!
+        :return:
+        """
+
+        dose1 = (self._model_data.time_series_vaccinated[0])[:date]
+        dose2 = (self._model_data.time_series_vaccinated[1])[:date]
+        dose3 = (self._model_data.time_series_vaccinated[2])[:date]
+
+
+
+        dose1 = (np.ones(shape=(Parameters.NO_COUNTY, dose1.shape[0], dose1.shape[1])) * dose1).transpose(1, 0, 2)
+        dose2 = (np.ones(shape=(Parameters.NO_COUNTY, dose2.shape[0], dose2.shape[1])) * dose2).transpose(1, 0, 2)
+        dose3 = (np.ones(shape=(Parameters.NO_COUNTY, dose3.shape[0], dose3.shape[1])) * dose3).transpose(1, 0, 2)
+
+
+        county_population = np.array(self.dependency.index_to_population)
+        county_population = county_population.reshape(county_population.shape[0], 1)
+
+        age_population = self.dependency.population_by_age_band
+        age_population = age_population.reshape(age_population.shape[0], 1)
+
+        ratio = age_population / np.sum(age_population)
+
+        population = np.matmul(county_population, ratio.T)
+
+        today_population = np.ones(shape=(date, population.shape[0], population.shape[1])) * population
+
+        today_cases = self._model_data.time_series_infected.transpose(1, 0, 2)[:date]
+
+        today_incidence = today_cases / today_population
+
+        self._model_data.time_series_incidence = today_incidence.transpose(1, 0, 2)
+
+        raw_kernel_dose_1 = Parameters.VACCINE_EFFICACY_KERNEL_DOSE1[::-1]
+        raw_kernel_dose_2 = Parameters.VACCINE_EFFICACY_KERNEL_DOSE2[::-1]
+        raw_kernel_dose_3 = Parameters.VACCINE_EFFICACY_KERNEL_DOSE3[::-1]
+        raw_kernel_infection = Parameters.INFECTION_EFFICACY_KERNEL[::-1]
+
+        ratio = np.ones(shape=(1, Parameters.NO_COUNTY, 16))
+        kernel_dose_1 = np.multiply(raw_kernel_dose_1[:date].reshape(date, 1, 1), ratio)
+        kernel_dose_2 = np.multiply(raw_kernel_dose_2[:date].reshape(date, 1, 1), ratio)
+        kernel_dose_3 = np.multiply(raw_kernel_dose_3[:date].reshape(date, 1, 1), ratio)
+        kernel_infection = np.multiply(raw_kernel_infection[:date].reshape(date, 1, 1), ratio)
+
+
+        immunity_dose1 = np.multiply(dose1, kernel_dose_1)
+        immunity_dose2_rmv = np.multiply(dose2, kernel_dose_1)
+        immunity_dose2 = np.multiply(dose2, kernel_dose_2)
+        immunity_dose3 = np.multiply(dose3, kernel_dose_3)
+        immunity_dose3_rmv = np.multiply(dose3, kernel_dose_2)
+
+
+        infection_immunity = np.multiply(today_incidence, kernel_infection)
+
+        vaccine_immunity = immunity_dose1 + immunity_dose2 + immunity_dose3 - immunity_dose3_rmv - immunity_dose2_rmv
+        today_infection_immunity = np.sum(infection_immunity, axis=0)
+        today_vaccine_immunity = np.sum(vaccine_immunity, axis=0)
+
+        today_immunity = today_vaccine_immunity + (np.ones(shape=(Parameters.NO_COUNTY, 16)) - today_vaccine_immunity)\
+                         * today_infection_immunity
+
+        data = self._model_data.time_series_immunity.transpose(1, 0, 2)
+        data[date] = today_immunity
+        self._model_data.time_series_immunity = data.transpose(1, 0, 2)
+        return None
 
     def _model_transition(self):
         self._susceptible_to_exposed(self.date)
