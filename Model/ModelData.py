@@ -164,15 +164,18 @@ class ModelData:
         raw_kernel_dose_3 = Parameters.VACCINE_EFFICACY_KERNEL_DOSE3[::-1]
         raw_kernel_infection = Parameters.INFECTION_EFFICACY_KERNEL[::-1]
 
-        kernel_dose_1 = raw_kernel_dose_1[:date].reshape(date, 1)
-        kernel_dose_2 = raw_kernel_dose_2[:date].reshape(date, 1)
-        kernel_dose_3 = raw_kernel_dose_3[:date].reshape(date, 1)
-        kernel_infection = raw_kernel_infection[:date].reshape(date, 1)
+        ratio = np.ones(shape=(1, Parameters.NO_COUNTY, 16))
+        kernel_dose_1 = np.multiply(raw_kernel_dose_1[:date].reshape(date, 1, 1), ratio)
+        kernel_dose_2 = np.multiply(raw_kernel_dose_2[:date].reshape(date, 1, 1), ratio)
+        kernel_dose_3 = np.multiply(raw_kernel_dose_3[:date].reshape(date, 1, 1), ratio)
+        kernel_infection = np.multiply(raw_kernel_infection[:date].reshape(date, 1, 1), ratio)
 
-        immunity_dose1 = np.multiply(dose1.T, kernel_dose_1)
-        immunity_dose2 = np.multiply(dose2.T, kernel_dose_2)
-        immunity_dose3 = np.multiply(dose3.T, kernel_dose_3)
-        immunity_infection = np.multiply(today_incidence.T, kernel_infection)
+        print(kernel_dose_1.shape)
+
+        immunity_dose1 = np.multiply(dose1, kernel_dose_1)
+        immunity_dose2 = np.multiply(dose2, kernel_dose_2)
+        immunity_dose3 = np.multiply(dose3, kernel_dose_3)
+        immunity_infection = np.multiply(today_incidence, kernel_infection)
 
         print('HOLY!')
         print(np.max(immunity_infection))
