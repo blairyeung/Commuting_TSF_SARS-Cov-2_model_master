@@ -1,8 +1,5 @@
 import csv
-import numpy as np
-import pandas as pd
 import Dependency
-import Parameters
 
 
 def group_by_county(county_name, data, index):
@@ -14,10 +11,6 @@ def group_by_county(county_name, data, index):
 
 
 def slice_ontario():
-    """
-        Slice the CSV file and write it so that it is small enough to be put
-        ont github
-    """
     path = Dependency.get_dependency_path()
     per_path = path + 'Region_Mobility_Report_CSVs/'
     years = ['2020', '2021', '2022']

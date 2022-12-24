@@ -5,10 +5,10 @@ import os
 import csv
 
 import pandas as pd
-import Util as util
 
 import Gaussian
 import Parameters
+import Util
 
 class Dependency:
     county_data = np.zeros((Parameters.NO_COUNTY, 3), dtype=int)
@@ -193,7 +193,6 @@ class Dependency:
 
         for line in range(1, len(lines) - 1):
             elements = lines[line]
-            # print(elements)
             elements[1] = elements[1].replace('"', '')
             string = elements[0]
             this_day = datetime.strptime(string, '%d-%b-%y')
@@ -409,20 +408,24 @@ class Dependency:
 
             hospitalizations = self.date_to_hospitalization_rate_by_phu[phu].reshape(self.total_days, 1)
 
-            hospitalization_ratio = Parameters.ONT_HOSP_RATIO.reshape(16, 1)
+            hospitalization_ratio = Parameters.ONT_HOSP_DISTRIBUTION.reshape(16, 1)
             self.date_to_hospitalizations_by_county[i] = np.matmul(hospitalizations, hospitalization_ratio.T) * \
                                                          population / 100000.0
 
+
+            # THESE ARE INCORRECT!!!!!!!
+            # TODO: this are ratios, not the probability!
+
             ICU = np.convolve(hospitalizations.reshape(self.total_days),
-                              Parameters.HOS2ICU_CONVOLUTION_KERNEL, mode='same').reshape(self.total_days, 1)
+                              Parameters.HOS2ICU_CONVOLUTION_KERNEL, mode='same').reshape(self.total_days, 1) * \
+                  Parameters.ICU_HOSP
 
-            ICU_ratio = (Parameters.ONT_ICU_RATIO / Parameters.ONT_HOSP_RATIO).reshape(16, 1)
-
+            ICU_ratio = Parameters.ONT_ICU_RATIO.reshape(16, 1)
 
             self.date_to_ICU_by_county[i] =  np.matmul(ICU, ICU_ratio.T) * population / 100000.0
 
             deaths = self.date_to_death_rate_by_phu[phu].reshape(self.total_days, 1)
-            deaths_ratio = Parameters.ONT_CFR.reshape(16, 1)
+            deaths_ratio = Parameters.ONT_DEATH_DISTRIBUTION.reshape(16, 1)
             self.date_to_deaths_by_county[i] = np.matmul(deaths, deaths_ratio.T) * population / 100000.0
 
             self.date_to_vaccines_by_county[i] = ((population / 100.0) * self.date_to_vaccines_by_age)
@@ -434,7 +437,7 @@ class Dependency:
         self.ontario_population = population[0]
         self.population_by_age_band[0:15] = population[1:16]
         self.population_by_age_band[15] = np.sum(population[16:])
-        self.ratio_by_age_band = util.normalize(self.population_by_age_band)
+        self.ratio_by_age_band = Util.normalize(self.population_by_age_band)
 
 
 if __name__ == '__main__':

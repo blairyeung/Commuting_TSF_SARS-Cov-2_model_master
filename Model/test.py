@@ -1,7 +1,5 @@
 import numpy as np
 import Parameters
-from scipy.signal import convolve2d
-from Model import Model
 
 """
 ratio = np.ones(shape=(16,), dtype=float)

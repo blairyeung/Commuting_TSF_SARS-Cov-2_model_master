@@ -2,6 +2,12 @@ import numpy as np
 import math
 
 
+def moving_average(a, n=7) :
+    ret = np.cumsum(a, axis=0)
+    ret[n:] = ret[n:] - ret[:-n]
+    return ret[n - 1:] / n
+
+
 def normalize(vec):
     return vec / np.sum(vec)
 

@@ -1,7 +1,5 @@
 import cv2
 import pandas as pd
-import os
-import csv
 import numpy as np
 import Dependency as Dependency
 from datetime import datetime
