@@ -19,13 +19,13 @@ ver = '1.0'
 def get_immunity_kernel(dose=0, length=2000):
     if dose == 0:
         # TODO: natural immunity this is incorrect, update!
-        return THREE_DOSE_EFFICACY / 0.8
+        return THREE_DOSE_EFFICACY
     elif dose == 1:
         return 0.8 * TWO_DOSE_EFFICACY
     elif dose == 2:
-        return TWO_DOSE_EFFICACY / 0.8
+        return TWO_DOSE_EFFICACY
     elif dose == 3:
-        return THREE_DOSE_EFFICACY / 0.8
+        return THREE_DOSE_EFFICACY
     else:
         return np.ones(shape=(2000, 16))
     return

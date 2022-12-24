@@ -21,9 +21,9 @@ class Model:
 
     infectiousness = 0
 
-    def __init__(self, forecast_days=1000, infectiousness=Parameters.INFECTIOUSNESS):
+    def __init__(self, forecast_days=1000, infectiousness=Parameters.INFECTIOUSNESS, prior_immunity=0):
         self._initialize_dependencies()
-        self._model_data = ModelData(forecast_days, self.dependency, True)
+        self._model_data = ModelData(forecast_days, self.dependency, load_from_dependency=True, prior_immunity=prior_immunity)
         self.date = self.dependency.total_days - 1
         self.infectiousness = infectiousness
         return
