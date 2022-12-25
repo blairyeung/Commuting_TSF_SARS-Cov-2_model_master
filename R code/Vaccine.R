@@ -1,6 +1,5 @@
 library('ggplot2')
 
-# NEED TO ADD CONFIDENCE INTERVAL!!!!
 
 
 df <- read.csv('D:/Github/Commuting_TSF_SARS-Cov-2_model_master/Analysis/Probabilistic_analysis/Raw_for_analysis/vaccine_paper_1.csv')
@@ -16,7 +15,6 @@ p <- ggplot(df) + ylab('Attack rate') + xlab('Months upon immumnity gain') +
 p
   
 ggsave("vaccine_unvaccinated.jpg", width = 10, height = 3)
-
 
 p <- ggplot(df) + ylab('Frequency') + xlab('Months upon immumnity gain') +
   geom_point(aes(x = Month, y = Recovered_vaccinated, color='blue')) + 

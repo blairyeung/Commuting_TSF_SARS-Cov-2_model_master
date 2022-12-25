@@ -7,9 +7,9 @@
 同时，模型目前没有涵盖population mobility，day/night switch 和commutation。
 
 ### Population mobility:
-Waiting for incorporation of Martin's AI model.
-### Day/night switch:
-预计12.25日前完成
+模型已经可以读取过去的mobility数据。
+### Calibratino and vaccine efficacy
+调参应该要花很久 vaccine efficacy估计26号弄完。
 ### Commutation:
 预计12.27日前完成
 
