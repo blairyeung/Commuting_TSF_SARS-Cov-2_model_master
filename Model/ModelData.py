@@ -90,7 +90,7 @@ class ModelData:
 
         self.time_series_sub_clinical_cases = self.time_series_active_cases - self.time_series_clinical_cases
 
-        # TODO: update this
+        # Note: these values are obtained from convolution.
 
         self.time_series_recovered = np.apply_along_axis(lambda m:
                                                          np.convolve(m,
@@ -107,10 +107,12 @@ class ModelData:
         self.time_series_ICU = np.concatenate([self.dependency.date_to_ICU_by_county,
                                                         np.zeros(shape=(x, y, z))], axis=1)
 
-        # NOTE: here we assumed constant vaccination!!!!
+        # NOTE: Vaccination assumtpions, might need to change here.
+
+        vaccine_adjust = np.concatenate([np.zeros(shape=(y, 2, z)), 0.015 * np.ones(shape=(y, 1, z))], axis=1)
 
         self.time_series_vaccinated = np.concatenate([self.dependency.date_to_vaccines_by_age,
-                                                      0.002 * np.ones(shape=(y, 3, z))], axis=0)
+                                                      vaccine_adjust], axis=0)
 
         self.time_series_vaccinated = self.time_series_vaccinated.transpose(1, 0, 2)
 
@@ -199,14 +201,11 @@ class ModelData:
             kernel_infection = np.multiply(raw_kernel_infection.reshape(date, 1, 16), ratio)
 
             immunity_dose1 = np.multiply(dose1, kernel_dose_1)
-            immunity_dose2_rmv = np.multiply(dose2, kernel_dose_1)
             immunity_dose2 = np.multiply(dose2, kernel_dose_2)
             immunity_dose3 = np.multiply(dose3, kernel_dose_3)
-            immunity_dose3_rmv = np.multiply(dose3, kernel_dose_2)
 
             infection_immunity = np.multiply(today_incidence, kernel_infection)
-            vaccine_immunity = immunity_dose1 + immunity_dose2 + immunity_dose3 - immunity_dose3_rmv -\
-                               immunity_dose2_rmv
+            vaccine_immunity = immunity_dose1 + immunity_dose2 + immunity_dose3
 
             vaccine_immunity[:][:][0] = 0
 

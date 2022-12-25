@@ -1,67 +1,38 @@
 import math
 import Parameters
+import numpy as np
+import cv2
 
-
-def difference_of_gaussian(lst):
+def blur(lst):
     """
         Perform difference of Gaussian ()
         :param lst:
         :return:
     """
-    sigma_1 = 10
-    sigma_2 = 30
-    age_bands = [5, 12, 18, 30, 40, 50, 60, 70, 80, 90]
-    cont_dist = [0] * 90
-    discr_dist = [0] * Parameters.MATRIX_SIZE
-    for age in range(90):
-        cuml = 0
-        for mu in range(len(age_bands)-1):
-            val = lst[mu]
-            mean = (age_bands[mu] + age_bands[mu+1]) / 2.0
-            diff = age - mean
-            beta = 1.0
-            sqrtpi = math.sqrt(math.pi)
-            add = (beta * math.e ** (- (diff ** 2.0) / (2.0 * (sigma_1 ** 2.0)))) / (sigma_1 * sqrtpi) * val
-            minus = - (beta * math.e ** (- (diff ** 2.0) / (2.0 * (sigma_2 ** 2.0)))) / (sigma_2 * sqrtpi) * val
-            minus = 0
-            cuml += (add + minus)
-        cont_dist[age] = cuml
+    raw = np.zeros(shape=(100, ))
+    raw[5:12] = lst[0]
+    raw[12:18] = lst[1]
+    raw[18:30] = lst[2]
+    raw[30:40] = lst[3]
+    raw[40:50] = lst[4]
+    raw[50:60] = lst[5]
+    raw[60:70] = lst[6]
+    raw[70:80] = lst[7]
+    raw[80:] = lst[8]
 
-    for age in range(90):
-        cont_dist[age] = cont_dist[age] * 6.7
+    blurred = np.reshape(np.array(cv2.GaussianBlur(raw.reshape(100, 1), (9, 9), 0)), newshape=(100,))
 
-    matrix_16_bands = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 90]
-    for i in range(Parameters.MATRIX_SIZE):
-        discr_dist[i] = integrate(cont_dist, matrix_16_bands[i], matrix_16_bands[i+1])
+    rslt = np.zeros(shape=(16, ))
 
-    # Compensation for the last entry for not having a right approximation
-    discr_dist[15] *= 1.24
+    for i in range(15):
+        rslt[i] = np.sum(blurred[5 * i:5 * i + 5]) * Parameters.ONT_AGE_BAND_POPULATION[i]
+    rslt[15] = np.sum(blurred[75:]) * Parameters.ONT_AGE_BAND_POPULATION[15]
 
-    for i in discr_dist:
-        # print(i)
-        pass
-
-    return discr_dist
-
-
-def integrate(lst: list, begin: int, end: int):
-    tot = sum(lst[begin:end]) / (end - begin)
-    return tot
+    return rslt / Parameters.ONT_POPULATOIN
 
 
 def age_dog_algo(lst):
     if sum(lst) == 0:
-        return [0.0] * 16
+        return np.zeros(shape=(16, ))
     else:
-        return difference_of_gaussian(lst)
-
-age_dog_algo([0.9999
-, 0.9999
-, 0.9999
-, 0.9999
-, 0.9999
-, 0.9999
-, 0.9999
-, 0.9999
-, 0.9999
-])
+        return blur(lst)

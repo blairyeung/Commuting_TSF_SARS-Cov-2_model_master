@@ -19,7 +19,8 @@ ver = '1.0'
 def get_immunity_kernel(dose=0, length=2000):
     if dose == 0:
         # TODO: natural immunity this is incorrect, update!
-        return THREE_DOSE_EFFICACY
+        return np.ones(shape=TWO_DOSE_EFFICACY.shape) - 0.15 * \
+            (np.ones(shape=TWO_DOSE_EFFICACY.shape)  - TWO_DOSE_EFFICACY)
     elif dose == 1:
         return 0.8 * TWO_DOSE_EFFICACY
     elif dose == 2:
@@ -36,7 +37,7 @@ DEPENDENCY_PATH = os.getcwd()[:-5] + 'Model Dependencies/'
 TWO_DOSE_EFFICACY = df = pd.read_csv(DEPENDENCY_PATH + 'two_dose.csv', delimiter=',').to_numpy().T[1:17].T
 THREE_DOSE_EFFICACY = df = pd.read_csv(DEPENDENCY_PATH + 'three_dose.csv', delimiter=',').to_numpy().T[1:17].T
 
-INFECTIOUSNESS = 0.03
+INFECTIOUSNESS = 0.08
 
 """
     Matrix constants
@@ -67,6 +68,12 @@ OUTBREAK_FIRST_DAY = datetime.datetime(2020, 1, 15)
 """
     Ontario age-specific parameters Done!
 """
+
+ONT_POPULATOIN = 15109416
+
+ONT_AGE_BAND_POPULATION = np.array([714654, 769062, 803899, 849806, 1057366, 1125877, 1103728, 1042232, 953628,
+                                    920118, 952509, 1037514, 1004860, 855432, 702717, 1216014])
+
 
 ICU_HOSP = 0.1540844459589232
 
@@ -110,7 +117,7 @@ SUSC_RATIO = np.array([3.991327254652800027e-01, 3.948075309394725174e-01, 4.022
 
 CLINICAL_RATIO = np.array([0.2865309, 0.26753682, 0.23495708, 0.23019938, 0.25561971, 0.28454104,
                            0.31587461, 0.34737841, 0.38386853, 0.42265894, 0.47025061, 0.52584302,
-                           0.59291004, 0.64122657, 0.67295434, 0.71677774])
+                           0.59291004, 0.64122657, 0.67295434, 0.71677774]) * 1
 
 SUBCLINICAL_RATIO = np.ones(shape=(16,), dtype=float) - CLINICAL_RATIO
 
@@ -172,3 +179,7 @@ VACCINE_EFFICACY_KERNEL_DOSE2 = get_immunity_kernel(dose=2)
 VACCINE_EFFICACY_KERNEL_DOSE3 = get_immunity_kernel(dose=3)
 
 INFECTION_EFFICACY_KERNEL = get_immunity_kernel(dose=0)
+
+if __name__ == '__main__':
+    plt.plot(get_immunity_kernel(dose=0))
+    plt.show()

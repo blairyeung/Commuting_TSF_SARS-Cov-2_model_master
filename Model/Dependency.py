@@ -195,7 +195,7 @@ class Dependency:
             elements = lines[line]
             elements[1] = elements[1].replace('"', '')
             string = elements[0]
-            this_day = datetime.strptime(string, '%d-%b-%y')
+            this_day = datetime.strptime(string, '%B %d, %Y')
             after_outbreak = (this_day - Parameters.OUTBREAK_FIRST_DAY).days
             phu = elements[1]
             if after_outbreak > last_recorded:
@@ -225,42 +225,33 @@ class Dependency:
         return
 
     def read_vaccine(self):
-        read_path = self.get_dependency_path() + 'vaccines_by_age.csv'
-        with open(read_path) as file:
-            contents = file.read()
-        lines = contents.split('\n')
+        read_path = self.get_dependency_path() + 'vaccine_by_age_auto_update.csv'
+        vaccine_df = pd.read_csv(read_path)
+
+        vaccine_df['Percent_at_least_one_dose'] = vaccine_df['Percent_at_least_one_dose'].fillna(0)
+        vaccine_df['Percent_fully_vaccinated'] = vaccine_df['Percent_fully_vaccinated'].fillna(0)
+        vaccine_df['Percent_3doses'] = vaccine_df['Percent_3doses'].fillna(0)
+
+        vaccine_df['Date'] = pd.to_datetime(vaccine_df['Date'])
 
         self.find_max_date()
 
-        # global date_to_vaccines_by_age
         self.date_to_vaccines_by_age = np.zeros((self.total_days, 3, 9))
-        for line in range(1, len(lines) - 1):
-            elements = lines[line].split(',')
-            string = elements[0]
-            this_day = datetime.strptime(string, '%m/%d/%Y')
-            after_outbreak = (this_day - Parameters.OUTBREAK_FIRST_DAY).days
-            band = elements[1]
 
-            for i in [7, 8, 9]:
-                if elements[i] == '':
-                    elements[i] = 0
+        for i in range(len(vaccine_df)):
+            row = vaccine_df.iloc[i]
+            after_outbreak = (row['Date'] - Parameters.OUTBREAK_FIRST_DAY).days
+            band = row['Agegroup']
 
             if band in Parameters.VACCINE_AGE_BANDS:
-                for i in [7, 8, 9]:
-                    if elements[i] == '':
-                        elements[i] = 0
                 self.date_to_vaccines_by_age[after_outbreak - 1][0][Parameters.VACCINE_AGE_BANDS.index(band)] = float(
-                    elements[7])
+                    row['Percent_at_least_one_dose'])
                 self.date_to_vaccines_by_age[after_outbreak - 1][1][Parameters.VACCINE_AGE_BANDS.index(band)] = float(
-                    elements[8])
+                    row['Percent_fully_vaccinated'])
                 self.date_to_vaccines_by_age[after_outbreak - 1][2][Parameters.VACCINE_AGE_BANDS.index(band)] = float(
-                    elements[9])
+                    row['Percent_3doses'])
 
-        file.close()
 
-        if min(len(lines) - 1, self.total_days) != self.total_days:
-            for i in range(self.total_days, len(lines) - 1):
-                self.date_to_vaccines_by_age[i] = self.date_to_vaccines_by_age[self.total_days]
         return
 
     def reshape_vaccine(self):
@@ -279,6 +270,7 @@ class Dependency:
                 reshaped[date][dose] = lst
 
         self.date_to_vaccines_by_age = reshaped
+
         return
 
     def differentiate(self):
@@ -287,82 +279,63 @@ class Dependency:
         :return:
         """
 
-        # global date_to_vaccines_by_age
         vaccine_differentiated = np.zeros((self.total_days, 3, 16))
-        """
-                for dose in [0, 1, 2]:
-            for age in range(Parameters.MATRIX_SIZE):
-                yesterday_cuml = 0.0
-                for date in range(self.total_days):
-                    today_cuml = self.date_to_vaccines_by_age[date][dose][age]
-                    delta = today_cuml - yesterday_cuml
-                    self.date_to_vaccines_by_age[date][dose][age] = delta
-                    yesterday_cuml = today_cuml
-
-        """
-
-
-        for i in range(self.total_days - 1):
-
-            # TODO: CHANGE THIS!!!!
-
-            vaccine_differentiated[i+1] = self.date_to_vaccines_by_age[i+1] - self.date_to_vaccines_by_age[i]
-        self.date_to_vaccines_by_age = np.clip(vaccine_differentiated, a_min=0, a_max=0.2)
-        """
-                cases_differentiated = dict()
-        for phu in self.date_to_incidence_rate_by_phu:
-            phu_data = self.date_to_incidence_rate_by_phu[phu]
-            yesterday_cuml = 0.0
-            for date in range(self.total_days):
-                today_cuml = phu_data[date]
-                delta = today_cuml - yesterday_cuml
-                phu_data[date] = delta
-                yesterday_cuml = today_cuml
-
-        self.date_to_incidence_rate_by_phu = cases_differentiated
-        """
 
         data = self.date_to_vaccines_by_age.transpose(1, 0, 2)
-
         dose1 = np.clip((data[0] - data[1]), a_min=0, a_max=1)
         dose2 = np.clip((data[1] - data[2]), a_min=0, a_max=1)
         dose3 = (data[2])
+        self.date_to_vaccines_by_age = np.array([dose1, dose2, dose3]).transpose(1, 0, 2)
+
+        for i in range(self.total_days - 1):
+            vaccine_differentiated[i+1] = self.date_to_vaccines_by_age[i+1] - self.date_to_vaccines_by_age[i]
+
+        self.date_to_vaccines_by_age = vaccine_differentiated
+
+        read_path = self.get_dependency_path() + 'vaccine_by_age_admin.csv'
+        vaccine_df_dose_admin = pd.read_csv(read_path)
+
+        vaccine_df_dose_admin = vaccine_df_dose_admin.fillna(0)
+
+        vaccine_df_dose_admin['report_date'] = pd.to_datetime(vaccine_df_dose_admin['report_date'])
+
+        for i in range(len(vaccine_df_dose_admin)):
+            row = vaccine_df_dose_admin.iloc[i]
+            after_outbreak = (row['report_date'] - Parameters.OUTBREAK_FIRST_DAY).days
+            more_dose = row['previous_day_total_doses_administered'] - row['previous_day_at_least_one'] - \
+                        row['previous_day_fully_vaccinated'] - row['previous_day_3doses']
+            ratio = more_dose / Parameters.ONT_POPULATOIN
+            vaccine_raito = ratio * np.ones(shape=(16, ))
+
+            print(self.date_to_vaccines_by_age[after_outbreak - 1][2])
+
+            self.date_to_vaccines_by_age[after_outbreak - 1][2] = self.date_to_vaccines_by_age[after_outbreak - 1][2] \
+                                                                  + vaccine_raito
+
+            print('new', self.date_to_vaccines_by_age[after_outbreak - 1][2] )
+
+        self.date_to_vaccines_by_age = np.clip(vaccine_differentiated, a_min=0, a_max=0.2)
 
         return
 
     def find_max_date(self):
-        read_path = self.get_dependency_path() + 'All case trends data.csv'
-        with open(read_path) as file:
-            contents = file.read()
-        lines = contents.split('\n')
-        # global total_days
+        case_path = self.get_dependency_path() + 'All case trends data.csv'
+        vaccine_path = self.get_dependency_path() + 'vaccine_by_age_auto_update.csv'
+
+        cases = pd.read_csv(case_path)
+        vaccines = pd.read_csv(vaccine_path)
 
         # First we count the number of total days:
-        max_size = 0
-        for line in range(1, len(lines) - 1):
-            elements = lines[line].split(',')
-            string = elements[0]
-            this_day = datetime.strptime(string, '%d-%b-%y')
-            after_outbreak = (this_day - Parameters.OUTBREAK_FIRST_DAY).days
-            max_size = max(after_outbreak, max_size)
 
-        self.total_days = max_size
+        cases['Date'] = pd.to_datetime(cases['Date'])
+        case_max_size = (cases['Date'].max() - Parameters.OUTBREAK_FIRST_DAY).days
 
-        file.close()
+        vaccines['Date'] = pd.to_datetime(vaccines['Date'])
+        vaccine_max_size = (vaccines['Date'].max() - Parameters.OUTBREAK_FIRST_DAY).days
 
-        read_path = self.get_dependency_path() + 'vaccines_by_age.csv'
-        with open(read_path) as file:
-            contents = file.read()
-        lines = contents.split('\n')
-        max_size = 0
-        for line in range(1, len(lines) - 1):
-            elements = lines[line].split(',')
-            string = elements[0]
-            this_day = datetime.strptime(string, '%m/%d/%Y')
-            after_outbreak = (this_day - Parameters.OUTBREAK_FIRST_DAY).days
-            max_size = max(after_outbreak, max_size)
+        after_outbreak = max(case_max_size, vaccine_max_size)
 
-        self.total_days = max(max_size, self.total_days)
+        self.total_days = after_outbreak
 
     def code_district_linking(self):
         for i in self.county_data:
@@ -414,7 +387,6 @@ class Dependency:
 
 
             # THESE ARE INCORRECT!!!!!!!
-            # TODO: this are ratios, not the probability!
 
             ICU = np.convolve(hospitalizations.reshape(self.total_days),
                               Parameters.HOS2ICU_CONVOLUTION_KERNEL, mode='same').reshape(self.total_days, 1) * \
@@ -428,7 +400,9 @@ class Dependency:
             deaths_ratio = Parameters.ONT_DEATH_DISTRIBUTION.reshape(16, 1)
             self.date_to_deaths_by_county[i] = np.matmul(deaths, deaths_ratio.T) * population / 100000.0
 
-            self.date_to_vaccines_by_county[i] = ((population / 100.0) * self.date_to_vaccines_by_age)
+            # This is wrong, and idk why
+
+            self.date_to_vaccines_by_county[i] = ((population) * self.date_to_vaccines_by_age)
 
     def read_age(self):
         read_path = self.get_dependency_path() + '1710000501-eng.csv'
