@@ -109,7 +109,8 @@ class ModelData:
 
         # NOTE: Vaccination assumtpions, might need to change here.
 
-        vaccine_adjust = np.concatenate([np.zeros(shape=(y, 2, z)), 0.015 * np.ones(shape=(y, 1, z))], axis=1)
+        vaccine_adjust = np.concatenate([np.zeros(shape=(y, 2, z)), 0.001 * Parameters.ONT_VACCINE_DISTRIBUTION * 16
+                                         * np.ones(shape=(y, 1, 1))], axis=1)
 
         self.time_series_vaccinated = np.concatenate([self.dependency.date_to_vaccines_by_age,
                                                       vaccine_adjust], axis=0)

@@ -44,6 +44,7 @@ class Model:
 
         if display_status:
             self.print_data(self.date)
+            print(self.dependency.mobility[self.date])
         return
 
     def print_data(self, date):
@@ -106,7 +107,8 @@ class Model:
 
         infection_immunized = np.sum(np.multiply(today_incidence, kernel_infection), axis=0)
 
-        vaccine_immunity = immunity_dose1 + immunity_dose2 + immunity_dose3 - immunity_dose1_rmv - immunity_dose2_rmv
+        # vaccine_immunity = immunity_dose1 + immunity_dose2 + immunity_dose3 - immunity_dose1_rmv - immunity_dose2_rmv
+        vaccine_immunity = immunity_dose1 + immunity_dose2 + immunity_dose3 - immunity_dose2_rmv
 
         infection_immunity = infection_immunized / today_population
         vaccine_immunized = vaccine_immunity * today_population
@@ -128,6 +130,8 @@ class Model:
         # print(vaccine_immunity[0])
         # print(infection_immunity[0])
         # print(today_immunity[0])
+
+        # TODO: DEBUG THIS
 
         data = self._model_data.time_series_immunity.transpose(1, 0, 2)
         data[date] = today_immunity
@@ -168,7 +172,15 @@ class Model:
 
             tot_infectiouesness = clinical_infectious + 0.5 * (sub_clinical_infectious + exposed_infectious)
 
-            rslt = self._get_new_cases(tot_infectiouesness, contact_type=0, contact_pattern=time_step) * immunity
+            county_data = self.dependency.county_data[c]
+
+            if county_data[2] > 10000:
+                type = 0
+            else:
+                type = 1
+
+
+            rslt = self._get_new_cases(tot_infectiouesness, contact_type=type, contact_pattern=time_step) * immunity
             # print(rslt)
             if time_step == 'day':
                 self._model_data.time_series_exposed[c][date] = rslt
@@ -301,7 +313,7 @@ class Model:
         preset = Parameters.MATRIX_PRESETS[contact_pattern]
         matrix = np.zeros(shape=(16, 16))
         for j in range(4):
-            matrix = np.add(matrix, preset[j] * matrices[contact_type][j])
+            matrix = np.add(matrix, preset[j] * matrices[contact_type][j]) * self.dependency.mobility[self.date][j]
         return matrix * self.infectiousness
 
     def _initialize_dependencies(self):

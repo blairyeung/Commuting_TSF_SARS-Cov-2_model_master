@@ -1,5 +1,6 @@
 import csv
 import Dependency
+import os
 
 
 def group_by_county(county_name, data, index):
@@ -11,7 +12,7 @@ def group_by_county(county_name, data, index):
 
 
 def slice_ontario():
-    path = Dependency.get_dependency_path()
+    path = os.getcwd()[:-5] + 'Model Dependencies/'
     per_path = path + 'Region_Mobility_Report_CSVs/'
     years = ['2020', '2021', '2022']
     sur_path = '_CA_Region_Mobility_Report.csv'

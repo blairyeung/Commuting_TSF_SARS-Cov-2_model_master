@@ -59,6 +59,10 @@ class Dependency:
     population_by_age_band = np.zeros(shape=(16,), dtype=int)
     ratio_by_age_band = np.zeros(shape=(16,), dtype=int)
 
+    raw_mobility = None
+
+    mobility = None
+
     ontario_population = 0
 
     def __init__(self):
@@ -88,6 +92,79 @@ class Dependency:
         self.compute_phu_population()
         self.distribute_to_counties()
         self.read_age()
+        self.read_mobility()
+        self.mobility_reshape()
+
+
+    def read_mobility(self):
+        path = self.get_dependency_path()
+        read_path = path + 'Region_Mobility_Report_CSVs/'
+        path_2020 = read_path + '2020_CA_Region_Mobility_Report.csv'
+        path_2021 = read_path + '2021_CA_Region_Mobility_Report.csv'
+        path_2022 = read_path + '2022_CA_Region_Mobility_Report.csv'
+        df1 = pd.read_csv(path_2020)
+        df2 = pd.read_csv(path_2021)
+        df3 = pd.read_csv(path_2022)
+
+        df = pd.concat([df1, df2, df3])
+
+        df['date'] = pd.to_datetime(df['date'])
+
+        groups = df.groupby('iso_3166_2_code')
+        Ontario = groups.get_group('CA-ON')
+        max_date = (Ontario['date'].max() - Parameters.OUTBREAK_FIRST_DAY).days
+        min_date = (Ontario['date'].min() - Parameters.OUTBREAK_FIRST_DAY).days
+
+        mobility = np.zeros(shape=(6, 3000))
+
+        retail = Ontario['retail_and_recreation_percent_change_from_baseline'].to_numpy()
+        grocery = Ontario['grocery_and_pharmacy_percent_change_from_baseline'].to_numpy()
+        park = Ontario['parks_percent_change_from_baseline'].to_numpy()
+        trainsit = Ontario['transit_stations_percent_change_from_baseline'].to_numpy()
+        workplace = Ontario['workplaces_percent_change_from_baseline'].to_numpy()
+        residential = Ontario['residential_percent_change_from_baseline'].to_numpy()
+        mobility[0][min_date:max_date + 1] = retail
+        mobility[1][min_date:max_date + 1] = grocery
+        mobility[2][min_date:max_date + 1] = park
+        mobility[3][min_date:max_date + 1] = trainsit
+        mobility[4][min_date:max_date + 1] = workplace
+        mobility[5][min_date:max_date + 1] = residential
+        mobility = mobility / 100
+        self.raw_mobility = mobility.T
+        return
+
+
+    def mobility_reshape(self):
+        year_forecast = 10
+        no_shcool_day_start = datetime.strptime('2020-04-25', '%Y-%m-%d')
+        no_shcool_day_end = datetime.strptime('2020-09-04', '%Y-%m-%d')
+
+        no_school_start = (no_shcool_day_start - Parameters.OUTBREAK_FIRST_DAY).days
+        no_school_end = (no_shcool_day_end - Parameters.OUTBREAK_FIRST_DAY).days
+
+        # print(no_school_start, no_school_end)
+
+        count = 0
+
+        work = np.mean(self.raw_mobility.T[3:5], axis=0).T
+        residential = self.raw_mobility.T[5]
+        other = np.mean(self.raw_mobility.T[0:2], axis=0).T
+        school = np.zeros(shape=(3000, ))
+
+        while count * 365 + no_school_start < 3000:
+            count += 1
+            start = count * 365 + no_school_start
+            end = count * 365 + no_school_end
+            school[start:end] = -0.8
+            pass
+
+
+        conct = np.concatenate([residential.reshape(3000, 1), school.reshape(3000, 1),
+                                work.reshape(3000, 1), other.reshape(3000, 1)], axis=1)
+        self.mobility = conct + np.ones(shape=conct.shape)
+
+        return
+
 
     def read_matrix(self):
         """
@@ -304,15 +381,16 @@ class Dependency:
             after_outbreak = (row['report_date'] - Parameters.OUTBREAK_FIRST_DAY).days
             more_dose = row['previous_day_total_doses_administered'] - row['previous_day_at_least_one'] - \
                         row['previous_day_fully_vaccinated'] - row['previous_day_3doses']
-            ratio = more_dose / Parameters.ONT_POPULATOIN
-            vaccine_raito = ratio * np.ones(shape=(16, ))
+            ratio = more_dose * Parameters.ONT_VACCINE_DISTRIBUTION
+            vaccine_raito = ratio / Parameters.ONT_AGE_BAND_POPULATION
 
-            print(self.date_to_vaccines_by_age[after_outbreak - 1][2])
+
+            # print(self.date_to_vaccines_by_age[after_outbreak - 1][2])
 
             self.date_to_vaccines_by_age[after_outbreak - 1][2] = self.date_to_vaccines_by_age[after_outbreak - 1][2] \
                                                                   + vaccine_raito
 
-            print('new', self.date_to_vaccines_by_age[after_outbreak - 1][2] )
+           # vaccine_raito print('new', self.date_to_vaccines_by_age[after_outbreak - 1][2] )
 
         self.date_to_vaccines_by_age = np.clip(vaccine_differentiated, a_min=0, a_max=0.2)
 
