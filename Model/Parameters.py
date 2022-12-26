@@ -45,8 +45,11 @@ TWO_DOSE_EFFICACY = np.multiply(log_fit(np.linspace(0, 1999, 2000), a=62.715, b=
 THREE_DOSE_EFFICACY = np.multiply(log_fit(np.linspace(0, 1999, 2000), a=93.327, b=0.003, c=0).reshape(2000, 1),
                                 np.ones(shape=(16, 1)).T) / 100
 
-INFECTION_IMMUNITY = np.multiply(log_fit(np.linspace(0, 1999, 2000), a=100, b=0.002, c=0).reshape(2000, 1),
-                                np.ones(shape=(16, 1)).T) / 100
+# INFECTION_IMMUNITY = np.multiply(log_fit(np.linspace(0, 1999, 2000), a=100, b=0.002, c=0).reshape(2000, 1),
+#                                 np.ones(shape=(16, 1)).T) / 100
+
+INFECTION_IMMUNITY = np.ones(shape=TWO_DOSE_EFFICACY.shape) - \
+                     (np.ones(shape=TWO_DOSE_EFFICACY.shape) - TWO_DOSE_EFFICACY) * 0.154
 INFECTIOUSNESS = 0.08
 
 """
