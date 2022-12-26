@@ -16,27 +16,36 @@ import datetime
 ver = '1.0'
 
 
+def log_fit(x, a=0, b=0, c=0):
+    return a * np.exp(-b * x) + c
+
 def get_immunity_kernel(dose=0, length=2000):
-    # if dose == 0:
-    #     # TODO: natural immunity this is incorrect, update!
-    #     return np.ones(shape=TWO_DOSE_EFFICACY.shape) - 0.15 * \
-    #         (np.ones(shape=TWO_DOSE_EFFICACY.shape)  - TWO_DOSE_EFFICACY)
-    # elif dose == 1:
-    #     return 0.8 * TWO_DOSE_EFFICACY
-    # elif dose == 2:
-    #     return TWO_DOSE_EFFICACY
-    # elif dose == 3:
-    #     return THREE_DOSE_EFFICACY
-    # else:
-    #     return np.ones(shape=(2000, 16))
+    if dose == 0:
+        return INFECTION_IMMUNITY
+    elif dose == 1:
+        return 0.8 * TWO_DOSE_EFFICACY
+    elif dose == 2:
+        return TWO_DOSE_EFFICACY
+    elif dose == 3:
+        return THREE_DOSE_EFFICACY
+    else:
+        return np.ones(shape=(2000, 16))
     return np.ones(shape=(2000, 16))
 
 
 DEPENDENCY_PATH = os.getcwd()[:-5] + 'Model Dependencies/'
 
-TWO_DOSE_EFFICACY = df = pd.read_csv(DEPENDENCY_PATH + 'two_dose.csv', delimiter=',').to_numpy().T[1:17].T
-THREE_DOSE_EFFICACY = df = pd.read_csv(DEPENDENCY_PATH + 'three_dose.csv', delimiter=',').to_numpy().T[1:17].T
+# TWO_DOSE_EFFICACY = pd.read_csv(DEPENDENCY_PATH + 'two_dose.csv', delimiter=',').to_numpy().T[1:17].T
+# THREE_DOSE_EFFICACY = pd.read_csv(DEPENDENCY_PATH + 'three_dose.csv', delimiter=',').to_numpy().T[1:17].T
 
+TWO_DOSE_EFFICACY = np.multiply(log_fit(np.linspace(0, 1999, 2000), a=62.715, b=0.004, c=10).reshape(2000, 1),
+                                np.ones(shape=(16, 1)).T) / 100
+
+THREE_DOSE_EFFICACY = np.multiply(log_fit(np.linspace(0, 1999, 2000), a=93.327, b=0.003, c=0).reshape(2000, 1),
+                                np.ones(shape=(16, 1)).T) / 100
+
+INFECTION_IMMUNITY = np.multiply(log_fit(np.linspace(0, 1999, 2000), a=100, b=0.002, c=0).reshape(2000, 1),
+                                np.ones(shape=(16, 1)).T) / 100
 INFECTIOUSNESS = 0.08
 
 """

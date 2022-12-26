@@ -3,7 +3,7 @@ library('ggplot2')
 
 df <- read.csv('D:/Github/Commuting_TSF_SARS-Cov-2_model_master/Analysis/Probabilistic_analysis/Raw_for_analysis/vaccine_paper_2.csv')
 
-p <- ggplot(df) + ylab('Effectiveness') + xlab('Months since vaccination') +
+p <- ggplot(df) + ylab('Effectiveness') + xlab('Weeks since vaccination') +
   geom_point(aes(x = Month, y = Effectiveness, color=Source)) + 
   geom_line(aes(x = Month, y = Effectiveness, color=Source)) +
   geom_ribbon(aes(x = Month, ymin = Effectiveness_min, ymax = Effectiveness_max, fill=Source), alpha=0.5) +
@@ -11,7 +11,7 @@ p <- ggplot(df) + ylab('Effectiveness') + xlab('Months since vaccination') +
 
 p
 
-write.csv(df, 'back_up.csv')
+ write.csv(df, 'back_up.csv')
 
 ggsave("two_papers.jpg", width = 15, height = 6)
 

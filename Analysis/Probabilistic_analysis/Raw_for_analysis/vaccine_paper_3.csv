@@ -1,0 +1,70 @@
+Source,Type,Dose,Month,Week_start,Week_end,Effectiveness,Effectiveness_min,Effectiveness_max
+Andrews et al.,BNT-162b2,Dose 1,2,0,4,43,40,45
+Andrews et al.,BNT-162b2,Dose 1,4,4,,32,30,33
+Andrews et al.,BNT-162b2,Dose 2,1,0,2,58,56,60
+Andrews et al.,BNT-162b2,Dose 2,3.5,2,5,65,64,67
+Andrews et al.,BNT-162b2,Dose 2,7.5,5,10,49,47,50
+Andrews et al.,BNT-162b2,Dose 2,12.5,10,15,30,29,32
+Andrews et al.,BNT-162b2,Dose 2,17.5,15,20,15,14,17
+Andrews et al.,BNT-162b2,Dose 2,22.5,20,25,12,10,13
+Andrews et al.,BNT-162b2,Dose 2,25,25,,9,7,11
+Andrews et al.,BNT-162b2,Booster (BNT162b2),0.5,0,1,67,66,68
+Andrews et al.,BNT-162b2,Booster (BNT162b2),3,1,5,67,67,68
+Andrews et al.,BNT-162b2,Booster (BNT162b2),7.5,5,10,55,54,56
+Andrews et al.,BNT-162b2,Booster (BNT162b2),10,10,,46,45,47
+Andrews et al.,BNT-162b2,Booster (mRNA-1273),0.5,0,1,74,73,75
+Andrews et al.,BNT-162b2,Booster (mRNA-1273),3,1,5,74,73,75
+Andrews et al.,BNT-162b2,Booster (mRNA-1273),7.5,5,10,64,63,66
+Andrews et al.,BNT-162b2,Booster (mRNA-1273),10,10,,55,30,71
+Andrews et al.,mRNA-1273,Dose 1,2,0,4,48,43,52
+Andrews et al.,mRNA-1273,Dose 1,4,4,,32,27,36
+Andrews et al.,mRNA-1273,Dose 2,1,0,2,61,53,68
+Andrews et al.,mRNA-1273,Dose 2,3.5,2,5,75,71,79
+Andrews et al.,mRNA-1273,Dose 2,7.5,5,10,53,48,57
+Andrews et al.,mRNA-1273,Dose 2,12.5,10,15,36,33,38
+Andrews et al.,mRNA-1273,Dose 2,17.5,15,20,25,23,27
+Andrews et al.,mRNA-1273,Dose 2,22.5,20,25,15,12,18
+Andrews et al.,mRNA-1273,Dose 2,25,25,,15,4,25
+Andrews et al.,mRNA-1273,Booster (BNT162b2),2,0,4,64,62,67
+Andrews et al.,mRNA-1273,Booster (BNT162b2),12,4,20,65,62,67
+Andrews et al.,mRNA-1273,Booster (BNT162b2),30,20,40,50,1,75
+Andrews et al.,mRNA-1273,Booster (mRNA-1273),2,0,4,68,66,70
+Andrews et al.,mRNA-1273,Booster (mRNA-1273),12,4,20,66,64,69
+Andrews et al.,mRNA-1273,Booster (mRNA-1273),30,20,40,66,64,69
+Ferdinands et al.,BNT-162b2,Dose 2,4,0,8,63,46,74
+Ferdinands et al.,BNT-162b2,Dose 2,12,8,16,55,46,63
+Ferdinands et al.,BNT-162b2,Dose 2,20,16,24,54,45,61
+Ferdinands et al.,BNT-162b2,Dose 2,28,24,32,42,34,50
+Ferdinands et al.,BNT-162b2,Dose 2,36,32,40,44,39,49
+Ferdinands et al.,BNT-162b2,Dose 2,44,40,48,51,46,56
+Ferdinands et al.,BNT-162b2,Dose 2,52,48,56,32,20,42
+Ferdinands et al.,BNT-162b2,Dose 2,60,56,64,0,-21,18
+Ferdinands et al.,BNT-162b2,Dose 2,68,64,72,11,-48,46
+Ferdinands et al.,BNT-162b2,Booster (BNT162b2),4,0,8,88,86,90
+Ferdinands et al.,BNT-162b2,Booster (BNT162b2),12,8,16,85,83,86
+Ferdinands et al.,BNT-162b2,Booster (BNT162b2),20,16,24,66,63,70
+Ferdinands et al.,BNT-162b2,Booster (BNT162b2),28,24,32,33,24,42
+Ferdinands et al.,BNT-162b2,Booster (BNT162b2),36,32,40,32,15,46
+Ferdinands et al.,BNT-162b2,Booster (BNT162b2),44,40,48,17,-66,80
+Ferdinands et al.,mRNA-1273,Dose 2,4,0,8,87,75,93
+Ferdinands et al.,mRNA-1273,Dose 2,12,8,16,74,64,82
+Ferdinands et al.,mRNA-1273,Dose 2,20,16,24,64,55,72
+Ferdinands et al.,mRNA-1273,Dose 2,28,24,32,57,49,64
+Ferdinands et al.,mRNA-1273,Dose 2,36,32,40,62,57,66
+Ferdinands et al.,mRNA-1273,Dose 2,44,40,48,61,56,65
+Ferdinands et al.,mRNA-1273,Dose 2,52,48,56,43,30,53
+Ferdinands et al.,mRNA-1273,Dose 2,60,56,64,25,6,41
+Ferdinands et al.,mRNA-1273,Dose 2,68,64,72,20,-62,60
+Ferdinands et al.,mRNA-1273,Booster (mRNA-1273),4,0,8,91,89,92
+Ferdinands et al.,mRNA-1273,Booster (mRNA-1273),12,8,16,90,88,91
+Ferdinands et al.,mRNA-1273,Booster (mRNA-1273),20,16,24,65,60,70
+Ferdinands et al.,mRNA-1273,Booster (mRNA-1273),28,24,32,44,30,49
+Ferdinands et al.,mRNA-1273,Booster (mRNA-1273),36,32,40,10,-32,38
+CDC,Unspecified,Dose 2,4,0,8,69,62,75
+CDC,Unspecified,Dose 2,12,8,16,50,45,55
+CDC,Unspecified,Dose 2,18,16,20,48,41,54
+CDC,Unspecified,Dose 2,20,20,,37,34,40
+CDC,Unspecified,Booster (unspecified),4,0,8,87,85,88
+CDC,Unspecified,Booster (unspecified),12,8,16,81,79,82
+CDC,Unspecified,Booster (unspecified),18,16,20,66,59,71
+CDC,Unspecified,Booster (unspecified),20,20,,31,-50,68

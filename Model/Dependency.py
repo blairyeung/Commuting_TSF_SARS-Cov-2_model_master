@@ -2,6 +2,7 @@ import copy
 from datetime import datetime
 
 import cv2
+import matplotlib.pyplot as plt
 import numpy as np
 import os
 import csv
@@ -11,6 +12,7 @@ import pandas as pd
 import Gaussian
 import Parameters
 import Util
+
 
 class Dependency:
     county_data = np.zeros((Parameters.NO_COUNTY, 3), dtype=int)
@@ -97,7 +99,6 @@ class Dependency:
         self.read_mobility()
         self.mobility_reshape()
 
-
     def read_mobility(self):
         path = self.get_dependency_path()
         read_path = path + 'Region_Mobility_Report_CSVs/'
@@ -135,7 +136,6 @@ class Dependency:
         self.raw_mobility = mobility.T
         return
 
-
     def mobility_reshape(self):
         year_forecast = 10
         summer_break_day_start = datetime.strptime('2020-04-25', '%Y-%m-%d')
@@ -155,14 +155,14 @@ class Dependency:
         work = np.mean(self.raw_mobility.T[3:5], axis=0).T
         residential = self.raw_mobility.T[5]
         other = np.mean(self.raw_mobility.T[0:2], axis=0).T
-        school = np.zeros(shape=(3000, ))
+        school = np.zeros(shape=(3000,))
 
         while count * 365 + summer_break_start < 3000:
             count += 1
             start = count * 365 + summer_break_start
             end = min(count * 365 + summer_break_end, 3000)
             # print(start, end)
-            school[start:end] = -0.8
+            school[start:end] = - 0.65
             pass
 
         count = 0
@@ -172,11 +172,11 @@ class Dependency:
             start = count * 365 + christmas_start
             end = min(count * 365 + christmas_end, 3000)
             # print(start, end)
-            school[start:end] = -0.8
+            school[start:end] = - 0.65
             pass
 
-        school = np.reshape(cv2.GaussianBlur(school.reshape(3000, 1), (7, 7), 0), newshape=(3000,))
-
+        school = np.reshape(cv2.GaussianBlur(school.reshape(3000, 1), (7, 7), 0), newshape=(3000,)) \
+                 - 0.2 * np.ones(shape=school.shape)
 
         conct = np.concatenate([residential.reshape(3000, 1), school.reshape(3000, 1),
                                 work.reshape(3000, 1), other.reshape(3000, 1)], axis=1)
@@ -186,7 +186,6 @@ class Dependency:
         # print(np.max(self.raw_mobility), np.min(self.raw_mobility))
 
         return
-
 
     def read_matrix(self):
         """
@@ -303,9 +302,9 @@ class Dependency:
                 pass
             else:
                 if phu not in self.date_to_incidence_rate_by_phu:
-                    self.date_to_incidence_rate_by_phu[phu] = np.zeros(shape=(self.total_days, ), dtype=float)
-                    self.date_to_hospitalization_rate_by_phu[phu] = np.zeros(shape=(self.total_days, ), dtype=float)
-                    self.date_to_death_rate_by_phu[phu] = np.zeros(shape=(self.total_days, ), dtype=float)
+                    self.date_to_incidence_rate_by_phu[phu] = np.zeros(shape=(self.total_days,), dtype=float)
+                    self.date_to_hospitalization_rate_by_phu[phu] = np.zeros(shape=(self.total_days,), dtype=float)
+                    self.date_to_death_rate_by_phu[phu] = np.zeros(shape=(self.total_days,), dtype=float)
                 else:
                     if elements[7] == '-':
                         self.date_to_incidence_rate_by_phu[phu][after_outbreak] = 0.0
@@ -316,7 +315,7 @@ class Dependency:
                         self.date_to_hospitalization_rate_by_phu[phu][after_outbreak] = float(elements[9])
                         self.date_to_death_rate_by_phu[phu][after_outbreak] = float(elements[11])
 
-        for i in range(last_recorded-1, self.total_days):
+        for i in range(last_recorded - 1, self.total_days):
             for phu in self.date_to_incidence_rate_by_phu.keys():
                 self.date_to_incidence_rate_by_phu[phu][i] = self.date_to_incidence_rate_by_phu[phu][last_recorded]
 
@@ -349,7 +348,6 @@ class Dependency:
                     row['Percent_fully_vaccinated'])
                 self.date_to_vaccines_by_age[after_outbreak - 1][2][Parameters.VACCINE_AGE_BANDS.index(band)] = float(
                     row['Percent_3doses'])
-
 
         return
 
@@ -387,7 +385,7 @@ class Dependency:
         self.date_to_vaccines_by_age = np.array([dose1, dose2, dose3]).transpose(1, 0, 2)
 
         for i in range(self.total_days - 1):
-            vaccine_differentiated[i+1] = self.date_to_vaccines_by_age[i+1] - self.date_to_vaccines_by_age[i]
+            vaccine_differentiated[i + 1] = self.date_to_vaccines_by_age[i + 1] - self.date_to_vaccines_by_age[i]
 
         self.date_to_vaccines_by_age = vaccine_differentiated
 
@@ -409,17 +407,16 @@ class Dependency:
                 ratio = more_dose * self.date_to_vaccines_by_age[after_outbreak - 1][2] / \
                         np.sum(self.date_to_vaccines_by_age[after_outbreak - 1][2])
             else:
-                ratio = more_dose * Parameters.ONT_VACCINE_DISTRIBUTION
+                ratio = more_dose * Parameters.ONT_AGE_BAND_POPULATION / Parameters.ONT_POPULATOIN
 
             vaccine_raito = ratio / Parameters.ONT_AGE_BAND_POPULATION
-
 
             # print(self.date_to_vaccines_by_age[after_outbreak - 1][2])
 
             self.date_to_vaccines_by_age[after_outbreak - 1][2] = self.date_to_vaccines_by_age[after_outbreak - 1][2] \
                                                                   + vaccine_raito
 
-           # vaccine_raito print('new', self.date_to_vaccines_by_age[after_outbreak - 1][2] )
+        # vaccine_raito print('new', self.date_to_vaccines_by_age[after_outbreak - 1][2] )
 
         self.date_to_vaccines_by_age = np.clip(vaccine_differentiated, a_min=0, a_max=0.2)
 
@@ -492,7 +489,6 @@ class Dependency:
             self.date_to_hospitalizations_by_county[i] = np.matmul(hospitalizations, hospitalization_ratio.T) * \
                                                          population / 100000.0
 
-
             # THESE ARE INCORRECT!!!!!!!
 
             ICU = np.convolve(hospitalizations.reshape(self.total_days),
@@ -501,7 +497,7 @@ class Dependency:
 
             ICU_ratio = Parameters.ONT_ICU_RATIO.reshape(16, 1)
 
-            self.date_to_ICU_by_county[i] =  np.matmul(ICU, ICU_ratio.T) * population / 100000.0
+            self.date_to_ICU_by_county[i] = np.matmul(ICU, ICU_ratio.T) * population / 100000.0
 
             deaths = self.date_to_death_rate_by_phu[phu].reshape(self.total_days, 1)
             deaths_ratio = Parameters.ONT_DEATH_DISTRIBUTION.reshape(16, 1)

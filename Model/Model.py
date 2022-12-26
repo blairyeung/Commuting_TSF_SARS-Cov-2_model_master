@@ -79,7 +79,8 @@ class Model:
 
         today_population = np.ones(shape=(population.shape[0], population.shape[1])) * population
 
-        today_cases = self._model_data.time_series_infected.transpose(1, 0, 2)[:date]
+        today_cases = self._model_data.time_series_active_cases.transpose(1, 0, 2)[:date]
+        # today_cases = self._model_data.time_series_infected.transpose(1, 0, 2)[:date]
 
         today_incidence = today_cases
 
@@ -164,10 +165,17 @@ class Model:
     def _susceptible_to_exposed(self, date, time_step='day'):
         for c in range(Parameters.NO_COUNTY):
             immunity_level = self._model_data.time_series_immunity[c][date - 1]
+
             immunity = np.ones(shape=(16,)) - immunity_level
 
-            clinical_infectious = np.sum(self._model_data.time_series_clinical_cases[c][date - 5:date], axis=0)
-            sub_clinical_infectious = np.sum(self._model_data.time_series_clinical_cases[c][date - 3:date], axis=0)
+            if c == 0:
+                print('Coefficient', immunity)
+                print('RAW_IMMUNITY', immunity_level)
+                print('Mobility', self.dependency.mobility[self.date])
+
+            clinical_infectious = np.sum(self._model_data.time_series_clinical_cases[c][date - 2:date], axis=0)
+            # sub_clinical_infectious = np.sum(self._model_data.time_series_clinical_cases[c][date - 3:date], axis=0) ?
+            sub_clinical_infectious = np.sum(self._model_data.time_series_clinical_cases[c][date - 2:date], axis=0)
             exposed_infectious = np.sum(self._model_data.time_series_exposed[c][date - 3:date], axis=0)
 
             tot_infectiouesness = clinical_infectious + 0.5 * (sub_clinical_infectious + exposed_infectious)
@@ -178,7 +186,6 @@ class Model:
                 type = 0
             else:
                 type = 1
-
 
             rslt = self._get_new_cases(tot_infectiouesness, contact_type=type, contact_pattern=time_step) * immunity
             # print(rslt)
