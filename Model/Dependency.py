@@ -1,5 +1,7 @@
 import copy
 from datetime import datetime
+
+import cv2
 import numpy as np
 import os
 import csv
@@ -136,13 +138,17 @@ class Dependency:
 
     def mobility_reshape(self):
         year_forecast = 10
-        no_shcool_day_start = datetime.strptime('2020-04-25', '%Y-%m-%d')
-        no_shcool_day_end = datetime.strptime('2020-09-04', '%Y-%m-%d')
+        summer_break_day_start = datetime.strptime('2020-04-25', '%Y-%m-%d')
+        summer_break_day_end = datetime.strptime('2020-09-04', '%Y-%m-%d')
 
-        no_school_start = (no_shcool_day_start - Parameters.OUTBREAK_FIRST_DAY).days
-        no_school_end = (no_shcool_day_end - Parameters.OUTBREAK_FIRST_DAY).days
+        winter_break_day_start = datetime.strptime('2020-12-20', '%Y-%m-%d')
+        winter_break_day_end = datetime.strptime('2021-01-09', '%Y-%m-%d')
 
-        # print(no_school_start, no_school_end)
+        summer_break_start = (summer_break_day_start - Parameters.OUTBREAK_FIRST_DAY).days
+        summer_break_end = (summer_break_day_end - Parameters.OUTBREAK_FIRST_DAY).days
+
+        christmas_start = (winter_break_day_start - Parameters.OUTBREAK_FIRST_DAY).days
+        christmas_end = (winter_break_day_end - Parameters.OUTBREAK_FIRST_DAY).days
 
         count = 0
 
@@ -151,17 +157,33 @@ class Dependency:
         other = np.mean(self.raw_mobility.T[0:2], axis=0).T
         school = np.zeros(shape=(3000, ))
 
-        while count * 365 + no_school_start < 3000:
+        while count * 365 + summer_break_start < 3000:
             count += 1
-            start = count * 365 + no_school_start
-            end = count * 365 + no_school_end
+            start = count * 365 + summer_break_start
+            end = min(count * 365 + summer_break_end, 3000)
+            # print(start, end)
             school[start:end] = -0.8
             pass
+
+        count = 0
+
+        while count * 365 + christmas_start < 3000:
+            count += 1
+            start = count * 365 + christmas_start
+            end = min(count * 365 + christmas_end, 3000)
+            # print(start, end)
+            school[start:end] = -0.8
+            pass
+
+        school = np.reshape(cv2.GaussianBlur(school.reshape(3000, 1), (7, 7), 0), newshape=(3000,))
 
 
         conct = np.concatenate([residential.reshape(3000, 1), school.reshape(3000, 1),
                                 work.reshape(3000, 1), other.reshape(3000, 1)], axis=1)
         self.mobility = conct + np.ones(shape=conct.shape)
+
+        # print(np.max(self.mobility), np.min(self.mobility))
+        # print(np.max(self.raw_mobility), np.min(self.raw_mobility))
 
         return
 
@@ -379,9 +401,16 @@ class Dependency:
         for i in range(len(vaccine_df_dose_admin)):
             row = vaccine_df_dose_admin.iloc[i]
             after_outbreak = (row['report_date'] - Parameters.OUTBREAK_FIRST_DAY).days
-            more_dose = row['previous_day_total_doses_administered'] - row['previous_day_at_least_one'] - \
-                        row['previous_day_fully_vaccinated'] - row['previous_day_3doses']
-            ratio = more_dose * Parameters.ONT_VACCINE_DISTRIBUTION
+            more_dose = 0
+            if row['previous_day_3doses'] != 0:
+                more_dose = row['previous_day_total_doses_administered'] - row['previous_day_at_least_one'] - \
+                            row['previous_day_fully_vaccinated'] - row['previous_day_3doses']
+            if np.sum(self.date_to_vaccines_by_age[after_outbreak - 1][2]) != 0:
+                ratio = more_dose * self.date_to_vaccines_by_age[after_outbreak - 1][2] / \
+                        np.sum(self.date_to_vaccines_by_age[after_outbreak - 1][2])
+            else:
+                ratio = more_dose * Parameters.ONT_VACCINE_DISTRIBUTION
+
             vaccine_raito = ratio / Parameters.ONT_AGE_BAND_POPULATION
 
 
