@@ -109,7 +109,7 @@ class Model:
         infection_immunized = np.sum(np.multiply(today_incidence, kernel_infection), axis=0)
 
         # vaccine_immunity = immunity_dose1 + immunity_dose2 + immunity_dose3 - immunity_dose1_rmv - immunity_dose2_rmv
-        vaccine_immunity = immunity_dose1 + immunity_dose2 + immunity_dose3 - immunity_dose2_rmv
+        vaccine_immunity = immunity_dose1 + immunity_dose2 + immunity_dose3
 
         infection_immunity = infection_immunized / today_population
         vaccine_immunized = vaccine_immunity * today_population

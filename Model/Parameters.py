@@ -12,6 +12,7 @@ from Util import normalize
 import matplotlib.pyplot as plt
 import numpy as np
 import datetime
+import cv2
 
 ver = '1.0'
 
@@ -131,7 +132,7 @@ SUSC_RATIO = np.array([3.991327254652800027e-01, 3.948075309394725174e-01, 4.022
 
 CLINICAL_RATIO = np.array([0.2865309, 0.26753682, 0.23495708, 0.23019938, 0.25561971, 0.28454104,
                            0.31587461, 0.34737841, 0.38386853, 0.42265894, 0.47025061, 0.52584302,
-                           0.59291004, 0.64122657, 0.67295434, 0.71677774]) * 1
+                           0.59291004, 0.64122657, 0.67295434, 0.71677774])
 
 SUBCLINICAL_RATIO = np.ones(shape=(16,), dtype=float) - CLINICAL_RATIO
 
@@ -159,6 +160,16 @@ AGE_BANDS = ['0-4yrs', '5-9yrs', '10-14yrs', '15-19yrs', '20-24yrs', '25-29yrs',
 """
     Convolutional kernels
 """
+
+raw_age_df = pd.read_csv(os.getcwd()[:-5] + 'Model Dependencies/' + '1710000501-eng.csv')
+raw_age_dist = raw_age_df['Persons'].to_numpy()[1:].reshape(21, 1) * np.ones(shape=(1, 5))
+raw_age_dist = raw_age_dist.flatten() / 5
+raw_age_dist = np.reshape(np.array(cv2.GaussianBlur(raw_age_dist.reshape(105, 1), (9, 9), 0)),
+                                      newshape=(105,))
+
+RAW_AGE_DISTRIBUTION = np.zeros(shape=(100, ))
+RAW_AGE_DISTRIBUTION[:100] = raw_age_dist[:100]
+RAW_AGE_DISTRIBUTION[99] = np.sum(raw_age_dist[100:])
 
 EXP2ACT_RATIO = np.ones(shape=(16,))
 

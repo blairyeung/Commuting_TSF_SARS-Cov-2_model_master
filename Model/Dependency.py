@@ -44,6 +44,8 @@ class Dependency:
     date_to_hospitalization_rate_by_phu = dict()
     date_to_death_rate_by_phu = dict()
     date_to_vaccines_by_age = np.zeros((0, 3, 9))
+    date_to_vaccines_by_age_un_reshaped = np.zeros((0, 3, 9))
+    date_to_vaccines_by_age_un_differentaited = np.zeros((0, 3, 9))
 
     """
         County-specific data
@@ -358,6 +360,11 @@ class Dependency:
         """
 
         # global date_to_vaccines_by_age
+
+        self.date_to_vaccines_by_age_un_reshaped = copy.deepcopy(self.date_to_vaccines_by_age)
+
+        # print(self.date_to_vaccines_by_county.shape)
+
         reshaped = np.zeros((self.total_days, 3, 16))
 
         for date in range(self.total_days):
@@ -367,6 +374,8 @@ class Dependency:
                 reshaped[date][dose] = lst
 
         self.date_to_vaccines_by_age = reshaped
+
+        self.date_to_vaccines_by_age_un_differentaited = copy.deepcopy(self.date_to_vaccines_by_age )
 
         return
 
@@ -381,7 +390,11 @@ class Dependency:
         data = self.date_to_vaccines_by_age.transpose(1, 0, 2)
         dose1 = np.clip((data[0] - data[1]), a_min=0, a_max=1)
         dose2 = np.clip((data[1] - data[2]), a_min=0, a_max=1)
-        dose3 = (data[2])
+
+        # dose1 = data[0]
+        # dose2 = data[1]
+        dose3 = data[2]
+
         self.date_to_vaccines_by_age = np.array([dose1, dose2, dose3]).transpose(1, 0, 2)
 
         for i in range(self.total_days - 1):
@@ -519,4 +532,11 @@ class Dependency:
 
 if __name__ == '__main__':
     dependency = Dependency()
+    reshaped_data = dependency.date_to_vaccines_by_age_un_differentaited.transpose(1, 0, 2)[0]
+    data = dependency.date_to_vaccines_by_age_un_reshaped.transpose(1, 0, 2)[0]
+    print()
+    plt.plot(data)
+    plt.show()
+    plt.plot(reshaped_data)
+    plt.show()
     pass

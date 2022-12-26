@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999993 (TeX Live 2021/W32TeX) (preloaded format=xelatex 2022.1.20)  24 DEC 2022 23:48
+This is XeTeX, Version 3.141592653-2.6-0.999993 (TeX Live 2021/W32TeX) (preloaded format=xelatex 2022.1.20)  26 DEC 2022 00:48
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1096,6 +1096,12 @@ File: vaccine_vaccined.jpg Graphic file (type bmp)
  [1
 
 ]
+File: Three_paper_avg.jpg Graphic file (type bmp)
+<Three_paper_avg.jpg>
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
 (fancyhdr)                Make it at least 14.49998pt, for example:
@@ -1107,12 +1113,10 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 File: Figure 1.jpg Graphic file (type bmp)
 <Figure 1.jpg>
 
-Overfull \hbox (7.96877pt too wide) in paragraph at lines 172--173
+Overfull \hbox (7.96877pt too wide) in paragraph at lines 177--178
  [] 
  []
 
-LaTeX Font Info:    Font shape `T1/mdbch/b/n' will be
-(Font)              scaled to size 13.82408pt on input line 175.
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
 (fancyhdr)                Make it at least 14.49998pt, for example:
@@ -1121,7 +1125,14 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
 [3]
-Overfull \hbox (22.88213pt too wide) in paragraph at lines 192--193
+LaTeX Font Info:    Font shape `T1/mdbch/b/n' will be
+(Font)              scaled to size 13.82408pt on input line 180.
+
+
+LaTeX Warning: Citation `ref1' on page 4 undefined on input line 189.
+
+
+Overfull \hbox (22.88213pt too wide) in paragraph at lines 197--198
 \T1/mdbch/m/n/12 We used the labour force age dis-tri-bu-tion of Canada from []\T1/mdbch/b/n/12 [REF]$ $[][](2016[] [][][]Cen[]-[]sus)[] \T1/mdbch/m/n/12 in year [][]\T1/mdbch/b/n/12 DATA[]$ $\T1/mdbch/m/n/12 and
  []
 
@@ -1133,14 +1144,30 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
 [4]
-Underfull \hbox (badness 10000) in paragraph at lines 219--221
+
+LaTeX Warning: Citation `ref6' on page 5 undefined on input line 205.
+
+
+LaTeX Warning: Citation `ref2' on page 5 undefined on input line 220.
+
+
+LaTeX Warning: Citation `ref3' on page 5 undefined on input line 220.
+
+
+LaTeX Warning: Citation `ref4' on page 5 undefined on input line 224.
+
+
+LaTeX Warning: Citation `ref5' on page 5 undefined on input line 224.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 224--226
 
  []
 
 LaTeX Font Info:    Font shape `T1/mdbch/m/n' will be
-(Font)              scaled to size 7.68005pt on input line 252.
+(Font)              scaled to size 7.68005pt on input line 257.
 LaTeX Font Info:    Font shape `T1/mdbch/m/n' will be
-(Font)              scaled to size 5.76004pt on input line 252.
+(Font)              scaled to size 5.76004pt on input line 257.
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
 (fancyhdr)                Make it at least 14.49998pt, for example:
@@ -1157,17 +1184,17 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
 [6]
-Overfull \hbox (2.76007pt too wide) in paragraph at lines 261--273
+Overfull \hbox (2.76007pt too wide) in paragraph at lines 266--278
  [][] 
  []
 
 
-Underfull \hbox (badness 6608) in paragraph at lines 286--286
+Underfull \hbox (badness 6608) in paragraph at lines 291--291
 []\T1/mdbch/m/n/12 ICU hos-pi-tal-ized ra-tio of
  []
 
 
-Overfull \hbox (2.76009pt too wide) in paragraph at lines 280--291
+Overfull \hbox (2.76009pt too wide) in paragraph at lines 285--296
  [][] 
  []
 
@@ -1179,7 +1206,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
 [7]
-Overfull \hbox (35.31224pt too wide) detected at line 318
+Overfull \hbox (35.31224pt too wide) detected at line 323
 []
  []
 
@@ -1202,7 +1229,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 [9]
 Missing character: There is no – ("2013) in font mdbchr8t!
 
-Underfull \hbox (badness 1596) in paragraph at lines 369--370
+Underfull \hbox (badness 1596) in paragraph at lines 374--375
 \T1/mdbch/m/n/12 wan-ing and ef-fec-tive-ness and side-effects of boost-ers: A Prospec-tive Com-mu-nity
  []
 
@@ -1217,14 +1244,20 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
+
+LaTeX Warning: There were undefined references.
+
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
 Package rerunfilecheck Info: File `main.out' has not changed.
 (rerunfilecheck)             Checksum: 0E68DC5318F8BD14C20D35D0F75863B8;2611.
  ) 
 Here is how much of TeX's memory you used:
- 37768 strings out of 476190
- 861437 string characters out of 5813319
- 1263386 words of memory out of 5000000
- 57842 multiletter control sequences out of 15000+600000
+ 37776 strings out of 476190
+ 861624 string characters out of 5813319
+ 1266248 words of memory out of 5000000
+ 57849 multiletter control sequences out of 15000+600000
  500968 words of font info for 74 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
  99i,17n,103p,1711b,494s stack positions out of 5000i,500n,10000p,200000b,80000s
