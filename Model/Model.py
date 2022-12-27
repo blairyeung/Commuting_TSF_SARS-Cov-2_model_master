@@ -91,11 +91,17 @@ class Model:
         raw_kernel_dose_3 = (Parameters.VACCINE_EFFICACY_KERNEL_DOSE3[:date])[::-1]
         raw_kernel_infection = (Parameters.INFECTION_EFFICACY_KERNEL[:date])[::-1]
 
+        raw_kernel_dose_1_rmv = (Parameters.ONE_DOSE_EFFICACY_RMV[:date])[::-1]
+        raw_kernel_dose_2_rmv = (Parameters.TWO_DOSE_EFFICACY_RMV[:date])[::-1]
+
         ratio = np.ones(shape=(1, Parameters.NO_COUNTY, 1))
         kernel_dose_1 = np.multiply(raw_kernel_dose_1.reshape(date, 1, 16), ratio)
         kernel_dose_2 = np.multiply(raw_kernel_dose_2.reshape(date, 1, 16), ratio)
         kernel_dose_3 = np.multiply(raw_kernel_dose_3.reshape(date, 1, 16), ratio)
         kernel_infection = np.multiply(raw_kernel_infection.reshape(date, 1, 16), ratio)
+
+        kernel_remove_dose_1 = np.multiply(raw_kernel_dose_1_rmv.reshape(date, 1, 16), ratio)
+        kernel_remove_dose_2 = np.multiply(raw_kernel_dose_2_rmv.reshape(date, 1, 16), ratio)
 
         raw_sum = np.sum(today_incidence, axis=0)
 
@@ -103,13 +109,13 @@ class Model:
         immunity_dose2 = np.sum(np.multiply(dose2, kernel_dose_2), axis=0)
         immunity_dose3 = np.sum(np.multiply(dose3, kernel_dose_3), axis=0)
 
-        immunity_dose1_rmv = np.sum(np.multiply(dose2, kernel_dose_1), axis=0)
-        immunity_dose2_rmv = np.sum(np.multiply(dose3, kernel_dose_2), axis=0)
+        immunity_dose1_rmv = np.sum(np.multiply(dose2, kernel_remove_dose_1), axis=0)
+        immunity_dose2_rmv = np.sum(np.multiply(dose3, kernel_remove_dose_2), axis=0)
 
         infection_immunized = np.sum(np.multiply(today_incidence, kernel_infection), axis=0)
 
-        # vaccine_immunity = immunity_dose1 + immunity_dose2 + immunity_dose3 - immunity_dose1_rmv - immunity_dose2_rmv
-        vaccine_immunity = immunity_dose1 + immunity_dose2 + immunity_dose3
+        # vaccine_immunity = immunity_dose1 + immunity_dose2 + immunity_dose3
+        vaccine_immunity = immunity_dose1 + immunity_dose2 + immunity_dose3 - immunity_dose1_rmv - immunity_dose2_rmv
 
         infection_immunity = infection_immunized / today_population
         vaccine_immunized = vaccine_immunity * today_population
@@ -168,13 +174,7 @@ class Model:
 
             immunity = np.ones(shape=(16,)) - immunity_level
 
-            if c == 0:
-                print('Coefficient', immunity)
-                print('RAW_IMMUNITY', immunity_level)
-                print('Mobility', self.dependency.mobility[self.date])
-
             clinical_infectious = np.sum(self._model_data.time_series_clinical_cases[c][date - 2:date], axis=0)
-            # sub_clinical_infectious = np.sum(self._model_data.time_series_clinical_cases[c][date - 3:date], axis=0) ?
             sub_clinical_infectious = np.sum(self._model_data.time_series_clinical_cases[c][date - 2:date], axis=0)
             exposed_infectious = np.sum(self._model_data.time_series_exposed[c][date - 3:date], axis=0)
 
@@ -187,7 +187,8 @@ class Model:
             else:
                 type = 1
 
-            rslt = self._get_new_cases(tot_infectiouesness, contact_type=type, contact_pattern=time_step) * immunity
+            rslt = self._get_new_cases(tot_infectiouesness, contact_type=type, contact_pattern=time_step) * \
+                   np.clip(immunity, a_min=0, a_max=1)
             # print(rslt)
             if time_step == 'day':
                 self._model_data.time_series_exposed[c][date] = rslt
@@ -320,8 +321,10 @@ class Model:
         preset = Parameters.MATRIX_PRESETS[contact_pattern]
         matrix = np.zeros(shape=(16, 16))
         for j in range(4):
-            matrix = np.add(matrix, preset[j] * matrices[contact_type][j]) * self.dependency.mobility[self.date][j]
-        return matrix * self.infectiousness
+            # print(Parameters.MATRIX_CONTACT_TYPE[j], self.dependency.mobility[self.date][j])
+            matrix = np.add(matrix, preset[j] * matrices[contact_type][j] * self.dependency.mobility[self.date][j])
+        # return matrix * self.infectiousness
+        return matrix.T * self.infectiousness
 
     def _initialize_dependencies(self):
         self.dependency = Dependency.Dependency()

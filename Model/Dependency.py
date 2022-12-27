@@ -164,7 +164,7 @@ class Dependency:
             start = count * 365 + summer_break_start
             end = min(count * 365 + summer_break_end, 3000)
             # print(start, end)
-            school[start:end] = - 0.65
+            school[start:end] = - 0.75
             pass
 
         count = 0
@@ -174,7 +174,7 @@ class Dependency:
             start = count * 365 + christmas_start
             end = min(count * 365 + christmas_end, 3000)
             # print(start, end)
-            school[start:end] = - 0.65
+            school[start:end] = - 0.75
             pass
 
         school = np.reshape(cv2.GaussianBlur(school.reshape(3000, 1), (7, 7), 0), newshape=(3000,)) \
