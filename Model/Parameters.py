@@ -16,6 +16,13 @@ import cv2
 
 ver = '1.0'
 
+def get_seasonality(factor=0.1, length=2000):
+    raw = np.linspace(0, 2499, 2500)
+    shift = 365 + (OUTBREAK_FIRST_DAY - datetime.datetime(2020, 2, 14)).days
+    raw = raw * 2 * math.pi / 360
+    kernel = np.cos(raw)[shift:shift+2000]
+    rslt = kernel * factor + np.ones(shape=kernel.shape)
+    return rslt
 
 def log_fit(x, a=0, b=0, c=0):
     return a * np.exp(-b * x) + c
@@ -55,7 +62,7 @@ INFECTION_IMMUNITY = np.ones(shape=TWO_DOSE_EFFICACY.shape) - \
 TWO_DOSE_EFFICACY_RMV = np.concatenate([TWO_DOSE_EFFICACY[60:],
                                         np.zeros(shape=(60, 16))], axis=0)
 
-TWO_DOSE_EFFICACY_RMV = np.concatenate(0.8 * [TWO_DOSE_EFFICACY[60:],
+ONE_DOSE_EFFICACY_RMV = np.concatenate([0.8 * TWO_DOSE_EFFICACY[60:],
                                         np.zeros(shape=(60, 16))], axis=0)
 
 INFECTION_IMMUNITY = np.ones(shape=THREE_DOSE_EFFICACY.shape) - \
@@ -178,10 +185,6 @@ AGE_BANDS = ['0-4yrs', '5-9yrs', '10-14yrs', '15-19yrs', '20-24yrs', '25-29yrs',
              '45-49yrs', '50-54yrs', '55-59yrs', '60-64yrs', '65-69yrs', '70-74yrs', '75+yrs']
 
 """
-    Convolution kernels
-"""
-
-"""
     Convolutional kernels
 """
 
@@ -228,6 +231,8 @@ VACCINE_EFFICACY_KERNEL_DOSE2 = get_immunity_kernel(dose=2)
 VACCINE_EFFICACY_KERNEL_DOSE3 = get_immunity_kernel(dose=3)
 
 INFECTION_EFFICACY_KERNEL = get_immunity_kernel(dose=0)
+
+SEASONALITY = get_seasonality(factor=0.1)
 
 if __name__ == '__main__':
     plt.plot(get_immunity_kernel(dose=0))
