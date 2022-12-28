@@ -42,7 +42,6 @@ Currently working on the calibration and optimization of the model.
 ### Vaccine effectiveness
 We estiamted the vaccine effectiveness using the vaccination effectiveness derived [Andrews et al.](), [Gold](),
 [CDC]()
->>>>>>> Stashed changes
 
 同时，模型目前没有涵盖population mobility，day/night switch 和commutation。
 
