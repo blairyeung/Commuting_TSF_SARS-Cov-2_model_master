@@ -33,23 +33,36 @@ def get_immunity_kernel(dose=0, length=2000):
         return np.ones(shape=(2000, 16))
     return np.ones(shape=(2000, 16))
 
+def get_seasonality(factor=0.2, length=2000):
+    raw = np.linspace(0, 2499, length+500)
+    shift = 365 + (OUTBREAK_FIRST_DAY - datetime.datetime(2020, 2, 14)).days
+    raw = raw * 2 * math.pi / 360
+    kernel = np.cos(raw)[shift:shift + length]
+    rslt = kernel * factor + np.ones(shape=kernel.shape)
+    return rslt
 
 DEPENDENCY_PATH = os.getcwd()[:-5] + 'Model Dependencies/'
 
 # TWO_DOSE_EFFICACY = pd.read_csv(DEPENDENCY_PATH + 'two_dose.csv', delimiter=',').to_numpy().T[1:17].T
 # THREE_DOSE_EFFICACY = pd.read_csv(DEPENDENCY_PATH + 'three_dose.csv', delimiter=',').to_numpy().T[1:17].T
 
-TWO_DOSE_EFFICACY = np.multiply(log_fit(np.linspace(0, 1999, 2000), a=62.715, b=0.004, c=10).reshape(2000, 1),
+TWO_DOSE_EFFICACY = np.multiply(log_fit(np.linspace(0, 1999, 2000), a=60.241, b=0.004, c=13.873).reshape(2000, 1),
                                 np.ones(shape=(16, 1)).T) / 100
 
-THREE_DOSE_EFFICACY = np.multiply(log_fit(np.linspace(0, 1999, 2000), a=93.327, b=0.003, c=0).reshape(2000, 1),
+THREE_DOSE_EFFICACY = np.multiply(log_fit(np.linspace(0, 1999, 2000), a=73.576, b=0.005, c=20).reshape(2000, 1),
                                 np.ones(shape=(16, 1)).T) / 100
 
-# INFECTION_IMMUNITY = np.multiply(log_fit(np.linspace(0, 1999, 2000), a=100, b=0.002, c=0).reshape(2000, 1),
-#                                 np.ones(shape=(16, 1)).T) / 100
+ONE_DOSE_EFFICACY_RMV = np.concatenate([0.8 * TWO_DOSE_EFFICACY[60:],
+                                        np.zeros(shape=(60, 16))], axis=0)
 
-INFECTION_IMMUNITY = np.ones(shape=TWO_DOSE_EFFICACY.shape) - \
-                     (np.ones(shape=TWO_DOSE_EFFICACY.shape) - TWO_DOSE_EFFICACY) * 0.154
+TWO_DOSE_EFFICACY_RMV = np.concatenate([TWO_DOSE_EFFICACY[60:],
+                                        np.zeros(shape=(60, 16))], axis=0)
+
+
+INFECTION_IMMUNITY = np.multiply(log_fit(np.linspace(0, 1999, 2000), a=100, b=0.002, c=0).reshape(2000, 1),
+                                np.ones(shape=(16, 1)).T) / 100
+
+# INFECTION_IMMUNITY = THREE_DOSE_EFFICACY * 1.2
 INFECTIOUSNESS = 0.08
 
 """
@@ -59,9 +72,17 @@ MATRIX_SIZE = 16
 MATRIX_CATEGORIES = ['urban', 'rural']
 MATRIX_CONTACT_TYPE = ['home', 'school', 'work', 'others']
 MATRIX_COUNTRY_ISO = 'CA'
-MATRIX_PRESETS = {'day': np.array([0.9, 1.0, 0.2, 0.8]),
-                  'night': (np.ones(shape=(4,)) - np.array([0.9, 1.0, 0.2, 0.8]))
+DAY_PRESET = np.array([0.2, 1.0, 0.8, 0.6])
+NIGHT_PRESET = np.ones(shape=(4, )) - DAY_PRESET
+
+MATRIX_PRESETS = {'day': DAY_PRESET,
+                  'night': NIGHT_PRESET
                   }
+
+
+# MATRIX_PRESETS = {'day': np.array([0, 1.0, 0, 0]),
+#                   'night': np.zeros(shape=(4, ))
+#                   }
 
 """
     Geo constants
@@ -135,11 +156,17 @@ SUSC_RATIO = np.array([3.991327254652800027e-01, 3.948075309394725174e-01, 4.022
 
 CLINICAL_RATIO = np.array([0.2865309, 0.26753682, 0.23495708, 0.23019938, 0.25561971, 0.28454104,
                            0.31587461, 0.34737841, 0.38386853, 0.42265894, 0.47025061, 0.52584302,
-                           0.59291004, 0.64122657, 0.67295434, 0.71677774])
+                           0.59291004, 0.64122657, 0.67295434, 0.71677774]) * 0.8
 
 SUBCLINICAL_RATIO = np.ones(shape=(16,), dtype=float) - CLINICAL_RATIO
 
+OMICRON_CLINICAL_RATIO = CLINICAL_RATIO * 0.4
+
 REVERSE_CLINICAL_BY_AGE = np.ones(shape=CLINICAL_RATIO.shape) / CLINICAL_RATIO
+
+OMICRON_SUBCLINICAL_RATIO = np.ones(shape=(16,), dtype=float) - OMICRON_CLINICAL_RATIO
+
+OMICRON_REVERSE_CLINICAL_BY_AGE = np.ones(shape=OMICRON_SUBCLINICAL_RATIO.shape) / OMICRON_CLINICAL_RATIO
 
 # Work force
 LABOUR_FORCE_BY_AGE = np.array([0, 0, 0.010693183, 0.032079549, 0.083009492, 0.106146399, 0.106351741,
@@ -207,6 +234,8 @@ VACCINE_EFFICACY_KERNEL_DOSE2 = get_immunity_kernel(dose=2)
 VACCINE_EFFICACY_KERNEL_DOSE3 = get_immunity_kernel(dose=3)
 
 INFECTION_EFFICACY_KERNEL = get_immunity_kernel(dose=0)
+
+SEASONALITY = get_seasonality(factor=0.1)
 
 if __name__ == '__main__':
     plt.plot(get_immunity_kernel(dose=0))

@@ -154,9 +154,9 @@ class Dependency:
 
         count = 0
 
-        work = np.mean(self.raw_mobility.T[3:5], axis=0).T
-        residential = self.raw_mobility.T[5]
-        other = np.mean(self.raw_mobility.T[0:2], axis=0).T
+        work = self.raw_mobility.T[3]
+        residential = self.raw_mobility.T[4]
+        other = (self.raw_mobility.T[0] * 0.345 + self.raw_mobility.T[1] * 0.21 + self.raw_mobility.T[3] * 0.445).T
         school = np.zeros(shape=(3000,))
 
         while count * 365 + summer_break_start < 3000:
@@ -164,7 +164,7 @@ class Dependency:
             start = count * 365 + summer_break_start
             end = min(count * 365 + summer_break_end, 3000)
             # print(start, end)
-            school[start:end] = - 0.65
+            school[start:end] = - 0.75
             pass
 
         count = 0
@@ -174,7 +174,7 @@ class Dependency:
             start = count * 365 + christmas_start
             end = min(count * 365 + christmas_end, 3000)
             # print(start, end)
-            school[start:end] = - 0.65
+            school[start:end] = - 0.75
             pass
 
         school = np.reshape(cv2.GaussianBlur(school.reshape(3000, 1), (7, 7), 0), newshape=(3000,)) \
