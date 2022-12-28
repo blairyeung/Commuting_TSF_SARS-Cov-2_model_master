@@ -33,6 +33,13 @@ def get_immunity_kernel(dose=0, length=2000):
         return np.ones(shape=(2000, 16))
     return np.ones(shape=(2000, 16))
 
+def get_seasonality(factor=0.2, length=2000):
+    raw = np.linspace(0, 2499, length+500)
+    shift = (OUTBREAK_FIRST_DAY - datetime.datetime(2020, 1, 1)).days
+    raw = raw * 2 * math.pi / 360
+    kernel = np.cos(raw)[shift:shift + length]
+    rslt = kernel * factor + np.ones(shape=kernel.shape)
+    return rslt
 
 DEPENDENCY_PATH = os.getcwd()[:-5] + 'Model Dependencies/'
 
@@ -71,6 +78,7 @@ NIGHT_PRESET = np.ones(shape=(4, )) - DAY_PRESET
 MATRIX_PRESETS = {'day': DAY_PRESET,
                   'night': NIGHT_PRESET
                   }
+
 
 # MATRIX_PRESETS = {'day': np.array([0, 1.0, 0, 0]),
 #                   'night': np.zeros(shape=(4, ))
@@ -226,6 +234,8 @@ VACCINE_EFFICACY_KERNEL_DOSE2 = get_immunity_kernel(dose=2)
 VACCINE_EFFICACY_KERNEL_DOSE3 = get_immunity_kernel(dose=3)
 
 INFECTION_EFFICACY_KERNEL = get_immunity_kernel(dose=0)
+
+SEASONALITY = get_seasonality(factor=0.1)
 
 if __name__ == '__main__':
     plt.plot(get_immunity_kernel(dose=0))

@@ -154,9 +154,9 @@ class Dependency:
 
         count = 0
 
-        work = np.mean(self.raw_mobility.T[3:5], axis=0).T
-        residential = self.raw_mobility.T[5]
-        other = np.mean(self.raw_mobility.T[0:2], axis=0).T
+        work = self.raw_mobility.T[3]
+        residential = self.raw_mobility.T[4]
+        other = (self.raw_mobility.T[0] * 0.345 + self.raw_mobility.T[1] * 0.21 + self.raw_mobility.T[3] * 0.445).T
         school = np.zeros(shape=(3000,))
 
         while count * 365 + summer_break_start < 3000:

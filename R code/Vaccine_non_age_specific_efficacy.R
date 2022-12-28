@@ -16,3 +16,5 @@ p <- ggplot(df) + ylab('Effectiveness') + xlab('Days since vaccination') +
 
 p
 
+ggsave("Three_paper_avg.jpg", width = 8, height = 4, dpi=600)
+

@@ -324,6 +324,7 @@ class Model:
             # print(Parameters.MATRIX_CONTACT_TYPE[j], self.dependency.mobility[self.date][j])
             matrix = np.add(matrix, preset[j] * matrices[contact_type][j] * self.dependency.mobility[self.date][j])
         # return matrix * self.infectiousness
+        matrix = matrix * Parameters.SEASONALITY[self.date]
         return matrix.T * self.infectiousness
 
     def _initialize_dependencies(self):

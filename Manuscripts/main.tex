@@ -139,23 +139,7 @@
 \mainfigure $ \ \ $ Pending main figure, need to be add a major figure for this section\\
 \suppfigure $ \ \ $ Pending supplementary figure, need to be add a supplementary figure in the supplementary material section for this section\\
 
-\mainfigure Essentially, the model takes in
-\begin{enumerate}
-    \item \important{PAST} Time-series data of the no. cases in Ontario in 26 PHUs
-    \item \important{PAST} Time-series data of the ratio of 1st, 2nd, and 3rd dose vaccination in Ontario
-    \item Labour force data and the commute matrix in Ontario
-    \item Contact Matrix and CoMix
-    \item \important{PREDICTED} Google mobility data in Ontario \emphasize{(Generated from NN)}
-    \item Epidemiological parameters
-    \item Vaccine parameters and time-series data of the \important{PREDICTED} immunity waning effects
-    \item Whether we use machine learning to address the
-\end{enumerate}
-and outputs
-\begin{itemize}
-    \item no. cases in each district
-    \item no. severe cases (ICU occupancy) in each district
-    \item no. deaths in each district
-\end{itemize}
+\newpage
 
 \section{Supplementary analysis}
 
@@ -167,7 +151,7 @@ and outputs
 
 \begin{figure}[h]
     \includegraphics*[width=\textwidth]{Three_paper_avg.jpg}
-    \textbf{Figure S1:} Effectiveness of 2 nad 3 doses.
+    \textbf{Figure S1:} Estimating the effectiveness of 2 and 3 doses of vaccination against clinical infection of the omicron variant of SARS-Cov-2.
 \end{figure}
 
 \newpage
@@ -261,7 +245,7 @@ Ontario has announced its plan for third boost dose. $\cdots$ We also
 
 \begin{center}
     \begin{table}[h]
-    \caption{Convolutional kernels in the model as probability distributions}
+    \caption{Epidemiological convolutional kernels in the model as probability distributions}
     \centering
 \begin{tabular}[H]{p{2cm}p{6cm}p{4cm}p{3cm}}
      \textbf{Parameter}& \textbf{Description}  & \textbf{Value}& \textbf{Reference} \\

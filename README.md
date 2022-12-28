@@ -1,76 +1,51 @@
-# Commuting_TSF_SARS-Cov-2_model_master
-***加了TODO的是还没做的，没加的就是做好了的***
-# TODOs:
+# Forecasting the transmission of SARS-CoV-2 in Ontario using inter and intra-county population mobility: a mathematical modelling study
 
-目前模型已经可以正常运行，但还需要疫苗/感染有效率数据以计算免疫率。
+Liwei Yang<sup>*1, 2</sup> ([blairyeung](https://github.com/blairyeung)), Yuhao Yang<sup>1</sup>, 
+Muxin Tian <sup>1</sup> ([realtmx](https://github.com/realtmxi))
 
-同时，模型目前没有涵盖population mobility，day/night switch 和commutation。
+ <sup>1</sup> Department of computer science, University of Toronto, 40 St George St, Toronto, M5S 2E4, Canada
+
+ <sup>2</sup> Department of Cell & Systems Biology, University of Toronto, 25 Harbord St, Toronto, M5S 3G5, Canada
+
+ <sup>*</sup> This is the corresponding [author](blair.yang@mail.utoronto.ca).
+
+## This is an ongoing project
+The model can run now! However, there are still some **features** not implemented yet and some **calibrations** to be done.
+
+## TODOs:
+### Data to be collected
+* Average delay from COVID-19 onset to `hospitalization` for the ***omicron variant*** of SARS-CoV-2. **Preferably** age-specific.
+* Average delay from COVID-19 onset to `admission of ICU` for the ***omicron variant*** of SARS-CoV-2. **Preferably** age-specific.
+* Specific dose administration count. (The current one contains 1, 2, 3 doses only. We may want to include 4, 5 dose.
+
+### Features to be implemented
+* Forecasting the `population mobility` using previous Google mobility.
+* Use the synthesized commutation matrix to compute the inflow and outflow `mobility of inter-county population`.
+* Use the inter-county population flow to estimate the inter-county flow of infected and immunized individuals.
+
+### Model fitting
+The model need to be fitted to the previous year's transmisison of COVID-19 before it is used for forecast. 
+
+Currently working on the calibration and optimization of the model.
+
+## Completed features:
+### Vaccine effectiveness
+We estiamted the vaccine effectiveness using the vaccination effectiveness derived [Andrews et al.](), [Gold](),
+[CDC]()
+
 
 ### Population mobility:
-模型已经可以读取过去的mobility数据。
-### Calibratino and vaccine efficacy
-调参应该要花很久 vaccine efficacy估计26号弄完。
-### Commutation:
-预计12.27日前完成
 
-# 1. Data collection 
-We use 16 age-bands for our model. For the data collected that does not match this specification, 
-we will use DOG to upsample/downsample it back to 16 age bands.
-## 1.1 常数项 （非时序类型数据）
-![img.png](img.png)
-### 1.1.0 加拿大每个年龄段的COVID确诊，住院，死亡比例
-* Shape : (16, ), dtype = float
-* Source: Ontario Public Health
-* **Statistics Canada. Table 17-10-0005-01  Population estimates on July 1st, by age and sex**
-### 1.1.1 每个年龄段新冠患者的无症状比例
-* Shape : (16, ), dtype = float
-* Source: Ontario Public Health
-### 1.1.2 每个年龄段新冠患者的住院比例 (need calibration)
-* Shape : (16, ), dtype = float
-* Source: Davies NG, Barnard RC, Jarvis CI, et al. Association of tiered restrictions
-and a second lockdown with COVID-19 deaths and hospital admissions in England:
-a modelling study. Lancet Infect Dis 2020; published online Dec 23. https://doi.org/10.1016/S1473-3099(20)30984-1.
-### 1.1.3每个年龄段新冠患者的死亡率
-* Shape : (16, ), dtype = float
-* Source:  Ontario Public Health
-### 1.1.5 ***TODO:*** 每个年龄段新冠疫苗接种者的疫苗有效率
-* Shape : (16, ), dtype = float
-* Source: https://www.bmj.com/content/379/bmj-2022-072141
+### Intra-county SEIR model for VOC B.1.1.529 of SARS-CoV-2
 
-## 1.2 时序数据
-### 1.2.1 每个公共卫生局，每个年龄段，在过去2年（至2020年2月15日）每天的新增新冠确诊，死亡数
-* Shape : (34, 925, 16), dtype = int \
-**34**: 34个共同卫生局 \
-**925**: 925天 \
-**16**: 16个年龄段
-* Source: https://data.ontario.ca/en/dataset?groups=2019-novel-coronavirus
-### 1.2.2 每个年龄段，在过去2年（至2020年2月15日）的每天新增新冠疫苗接种数量
-* Shape : (925, 16, 3), dtype = int \
-**925**: 925天 \
-**16**: 16个年龄段 \
-**3**: 疫苗的3针
-* Source: https://data.ontario.ca/en/dataset?groups=2019-novel-coronavirus
-### 1.2.3 每个类别，在过去两年（至2020年2月15日）的每天的google mobility
-* Shape : (925, 6), dtype = float \
-**925**: 925天 \
-**6**: 6个mobility种类（工作，通勤，娱乐，公园，商店，其他） 
-* Source:https://www.google.com/covid19/mobility/
-* ### 1.2.4 每个类别，在未来三年的每天的google mobility
-* Shape : (365 * 3, 6), dtype = float \
-**365 * 3**: 3年 \
-**6**: 6个mobility种类（工作，通勤，娱乐，公园，商店，其他） 
-* Source: 时间序列预测
 
-下面这三张截图是前supervisor Davies NG的类似论文中使用的参数。
-一些参数可以直接套用，但还有一些由于不是age-specific，需要我们再去自己查
-### **论文在这里**： https://doi.org/10.1016/S1473-3099(20)30984-1
+### Seasonality
+We modelled the seasonality of the transmissiblity of SARS-CoV-2 using a sinous funuction.
 
-![img.png](Images/img.png)
-![img_1.png](Images/img_1.png)
-![img_2.png](Images/img_2.png)
-# 2. 模型结构
-模型结构介绍: https://github.com/blairyeung/Commuting_TSF_SARS-Cov-2_model_master/blob/main/beamer.pdf \
-## 2.1 State转换
+## Model description
+The specific beamer file is [here](https://github.com/blairyeung/Commuting_TSF_SARS-Cov-2_model_master/blob/main/beamer.pdf). 
+
+## 2.1 Transition between states
 ![Figure_1.png](Images/Figure_1.png)
 **Algorithm 1:** Transition from exposed individuals to infected individuals
 ![img_4.png](Images/img_4.png)
