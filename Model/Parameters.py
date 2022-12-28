@@ -35,7 +35,7 @@ def get_immunity_kernel(dose=0, length=2000):
 
 def get_seasonality(factor=0.2, length=2000):
     raw = np.linspace(0, 2499, length+500)
-    shift = (OUTBREAK_FIRST_DAY - datetime.datetime(2020, 1, 1)).days
+    shift = 365 + (OUTBREAK_FIRST_DAY - datetime.datetime(2020, 2, 14)).days
     raw = raw * 2 * math.pi / 360
     kernel = np.cos(raw)[shift:shift + length]
     rslt = kernel * factor + np.ones(shape=kernel.shape)
@@ -156,17 +156,17 @@ SUSC_RATIO = np.array([3.991327254652800027e-01, 3.948075309394725174e-01, 4.022
 
 CLINICAL_RATIO = np.array([0.2865309, 0.26753682, 0.23495708, 0.23019938, 0.25561971, 0.28454104,
                            0.31587461, 0.34737841, 0.38386853, 0.42265894, 0.47025061, 0.52584302,
-                           0.59291004, 0.64122657, 0.67295434, 0.71677774])
+                           0.59291004, 0.64122657, 0.67295434, 0.71677774]) * 0.8
 
 SUBCLINICAL_RATIO = np.ones(shape=(16,), dtype=float) - CLINICAL_RATIO
 
-OMICRON_CLINICAL_RATIO = CLINICAL_RATIO * 0.3
+OMICRON_CLINICAL_RATIO = CLINICAL_RATIO * 0.4
 
 REVERSE_CLINICAL_BY_AGE = np.ones(shape=CLINICAL_RATIO.shape) / CLINICAL_RATIO
 
 OMICRON_SUBCLINICAL_RATIO = np.ones(shape=(16,), dtype=float) - OMICRON_CLINICAL_RATIO
 
-OMICRON_REVERSE_CLINICAL_BY_AGE = np.ones(shape=OMICRON_SUBCLINICAL_RATIO.shape) / OMICRON_SUBCLINICAL_RATIO
+OMICRON_REVERSE_CLINICAL_BY_AGE = np.ones(shape=OMICRON_SUBCLINICAL_RATIO.shape) / OMICRON_CLINICAL_RATIO
 
 # Work force
 LABOUR_FORCE_BY_AGE = np.array([0, 0, 0.010693183, 0.032079549, 0.083009492, 0.106146399, 0.106351741,
