@@ -13,7 +13,7 @@ def blur(lst):
         :return:
     """
     raw = np.zeros(shape=(100, ))
-    print(lst)
+    # print(lst)
     raw[5:12] = lst[0]
     raw[12:18] = lst[1]
     raw[18:30] = lst[2]
