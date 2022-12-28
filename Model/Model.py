@@ -31,20 +31,26 @@ class Model:
         self.model_fitting = fitting
         return
 
-    def run_one_cycle(self, display_status=False):
+    def run_one_cycle(self, display_status=False, recompute_immunity=True):
         """
         Firstly, we convert the number of newly infected cases to active cases
         """
         self.date += 1
-        self._compute_immunity(self.date)
+
+        if recompute_immunity:
+            self._compute_immunity(self.date)
+
         self._model_transition(time_step='day')
 
-        self._compute_immunity(self.date)
+        if recompute_immunity:
+            self._compute_immunity(self.date)
+
         self._model_transition(time_step='night')
 
         if display_status:
             self.print_data(self.date)
             print(self.dependency.mobility[self.date])
+
         return
 
     def print_data(self, date):
@@ -156,13 +162,15 @@ class Model:
             self._infected_to_removed(self.date)
             self._infected_to_death(self.date)
 
-    def _get_new_cases(self, cases, contact_type=0, contact_pattern='day'):
+    def _get_new_cases(self, cases, contact_type=0, contact_pattern='day', immunity=np.ones(shape=(16, ))):
         susceptibility = Parameters.SUSC_RATIO
         matrix = self._synthesize_matrix(contact_type, contact_pattern)
-        rslt = np.matmul(matrix, cases) * susceptibility
+        rslt = np.matmul(matrix, cases) * susceptibility * np.clip(immunity, a_min=0, a_max=1) * self.infectiousness
         return rslt
 
     def _susceptible_to_exposed(self, date, time_step='day'):
+
+
         for c in range(Parameters.NO_COUNTY):
             immunity_level = self._model_data.time_series_immunity[c][date - 1]
 
@@ -183,12 +191,18 @@ class Model:
             county_data = self.dependency.county_data[c]
 
             if county_data[2] > 10000:
-                type = 0
+                county_type = 0
             else:
-                type = 1
+                county_type = 1
 
+            rslt = self._get_new_cases(tot_infectiouesness, contact_type=county_type, contact_pattern=time_step,
+                                       immunity=np.clip(immunity, a_min=0, a_max=1))
+
+<<<<<<< Updated upstream
             rslt = self._get_new_cases(tot_infectiouesness, contact_type=type, contact_pattern=time_step) * immunity
             # print(rslt)
+=======
+>>>>>>> Stashed changes
             if time_step == 'day':
                 self._model_data.time_series_exposed[c][date] = rslt
                 self._model_data.time_series_infected[c][date] = rslt
@@ -320,8 +334,16 @@ class Model:
         preset = Parameters.MATRIX_PRESETS[contact_pattern]
         matrix = np.zeros(shape=(16, 16))
         for j in range(4):
+<<<<<<< Updated upstream
             matrix = np.add(matrix, preset[j] * matrices[contact_type][j]) * self.dependency.mobility[self.date][j]
         return matrix * self.infectiousness
+=======
+            # print(Parameters.MATRIX_CONTACT_TYPE[j], self.dependency.mobility[self.date][j])
+            matrix = np.add(matrix, preset[j] * matrices[contact_type][j] * self.dependency.mobility[self.date][j])
+        # return matrix * self.infectiousness
+        matrix = matrix * Parameters.SEASONALITY[self.date]
+        return matrix.T
+>>>>>>> Stashed changes
 
     def _initialize_dependencies(self):
         self.dependency = Dependency.Dependency()

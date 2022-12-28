@@ -48,8 +48,21 @@ THREE_DOSE_EFFICACY = np.multiply(log_fit(np.linspace(0, 1999, 2000), a=93.327, 
 # INFECTION_IMMUNITY = np.multiply(log_fit(np.linspace(0, 1999, 2000), a=100, b=0.002, c=0).reshape(2000, 1),
 #                                 np.ones(shape=(16, 1)).T) / 100
 
+<<<<<<< Updated upstream
 INFECTION_IMMUNITY = np.ones(shape=TWO_DOSE_EFFICACY.shape) - \
                      (np.ones(shape=TWO_DOSE_EFFICACY.shape) - TWO_DOSE_EFFICACY) * 0.154
+=======
+TWO_DOSE_EFFICACY_RMV = np.concatenate([TWO_DOSE_EFFICACY[60:],
+                                        np.zeros(shape=(60, 16))], axis=0)
+
+INFECTION_IMMUNITY = np.ones(shape=THREE_DOSE_EFFICACY.shape) - \
+                     (np.ones(shape=THREE_DOSE_EFFICACY.shape) - THREE_DOSE_EFFICACY) * 0.5
+
+# INFECTION_IMMUNITY = np.multiply(log_fit(np.linspace(0, 1999, 2000), a=100, b=0.001, c=0).reshape(2000, 1),
+#                                 np.ones(shape=(16, 1)).T) / 100
+
+
+>>>>>>> Stashed changes
 INFECTIOUSNESS = 0.08
 
 """
@@ -141,6 +154,15 @@ SUBCLINICAL_RATIO = np.ones(shape=(16,), dtype=float) - CLINICAL_RATIO
 
 REVERSE_CLINICAL_BY_AGE = np.ones(shape=CLINICAL_RATIO.shape) / CLINICAL_RATIO
 
+<<<<<<< Updated upstream
+=======
+OMICRON_CLINICAL_RATIO = CLINICAL_RATIO * 0.8
+
+OMICRON_SUBCLINICAL_RATIO = np.ones(shape=(16,), dtype=float) - OMICRON_CLINICAL_RATIO
+
+OMICRON_REVERSE_CLINICAL_BY_AGE = np.ones(shape=OMICRON_SUBCLINICAL_RATIO.shape) / OMICRON_CLINICAL_RATIO
+
+>>>>>>> Stashed changes
 # Work force
 LABOUR_FORCE_BY_AGE = np.array([0, 0, 0.010693183, 0.032079549, 0.083009492, 0.106146399, 0.106351741,
                                 0.105920522, 0.103210008, 0.098220198, 0.10624907, 0.098138062, 0.065560558,

@@ -164,7 +164,11 @@ class Dependency:
             start = count * 365 + summer_break_start
             end = min(count * 365 + summer_break_end, 3000)
             # print(start, end)
+<<<<<<< Updated upstream
             school[start:end] = - 0.65
+=======
+            school[start:end] = - 0.6
+>>>>>>> Stashed changes
             pass
 
         count = 0
@@ -174,11 +178,15 @@ class Dependency:
             start = count * 365 + christmas_start
             end = min(count * 365 + christmas_end, 3000)
             # print(start, end)
+<<<<<<< Updated upstream
             school[start:end] = - 0.65
+=======
+            school[start:end] = - 0.6
+>>>>>>> Stashed changes
             pass
 
         school = np.reshape(cv2.GaussianBlur(school.reshape(3000, 1), (7, 7), 0), newshape=(3000,)) \
-                 - 0.2 * np.ones(shape=school.shape)
+                 - 0.3 * np.ones(shape=school.shape)
 
         conct = np.concatenate([residential.reshape(3000, 1), school.reshape(3000, 1),
                                 work.reshape(3000, 1), other.reshape(3000, 1)], axis=1)
