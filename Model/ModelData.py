@@ -83,6 +83,8 @@ class ModelData:
 
         # TODO: split it, to delta and omicron
 
+       #  omicron_dominance_date =
+
         non_omicron = (self.time_series_clinical_cases.transpose(1, 0, 2)[:700] *
                        Parameters.REVERSE_CLINICAL_BY_AGE.T).transpose(1, 0, 2)
 
@@ -94,7 +96,13 @@ class ModelData:
         # self.time_series_active_cases = np.multiply(self.time_series_clinical_cases,
         #                                             Parameters.REVERSE_CLINICAL_BY_AGE.T)
 
-        self.time_series_exposed = copy.deepcopy(self.time_series_active_cases)
+        self.time_series_exposed = np.zeros(shape=self.time_series_active_cases.shape).transpose(1, 0, 2)
+
+        shifted = np.concatenate([self.time_series_active_cases.transpose(1, 0, 2)[3:],
+                                  self.time_series_active_cases.transpose(1, 0, 2)[-1] *
+                                  np.ones(shape=(3, 1, 1))]).transpose(1, 0, 2)
+
+        self.time_series_exposed = shifted
 
         self.time_series_infected = copy.deepcopy(self.time_series_active_cases)
 

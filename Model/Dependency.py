@@ -182,6 +182,13 @@ class Dependency:
 
         conct = np.concatenate([residential.reshape(3000, 1), school.reshape(3000, 1),
                                 work.reshape(3000, 1), other.reshape(3000, 1)], axis=1)
+
+
+        mask_lift_date = (datetime.strptime('2020-07-01', '%Y-%m-%d') - Parameters.OUTBREAK_FIRST_DAY).days
+
+        unmodified = conct.T
+        unmodified[1][:mask_lift_date] = school[:mask_lift_date] * 0.6
+
         self.mobility = conct + np.ones(shape=conct.shape)
 
         # print(np.max(self.mobility), np.min(self.mobility))
