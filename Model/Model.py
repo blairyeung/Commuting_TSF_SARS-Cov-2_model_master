@@ -167,6 +167,13 @@ class Model:
             self._infected_to_removed(self.date)
             self._infected_to_death(self.date)
 
+    def _commuting_mix(self):
+        matrix = self.dependency.commute_matrix
+        inflow_sum = np.sum(matrix, axis=0)
+        outflow_sum = np.sum(matrix, axis=1)
+
+        return
+
     def _get_new_cases(self, cases, contact_type=0, contact_pattern='day', immunity=np.ones(shape=(16, ))):
         susceptibility = Parameters.SUSC_RATIO
         matrix = self._synthesize_matrix(contact_type, contact_pattern)
@@ -189,8 +196,12 @@ class Model:
 
             tot_infectiouesness = clinical_infectious + 0.5 * (sub_clinical_infectious + exposed_infectious)
 
-            infectious_by_county[c] = tot_infectiouesness 
+            infectious_by_county[c] = tot_infectiouesness
 
+        if time_step == 'day':
+            self._commuting_mix()
+
+        for c in range(Parameters.NO_COUNTY):
             county_data = self.dependency.county_data[c]
 
             if county_data[2] > 10000:
