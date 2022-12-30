@@ -1,11 +1,5 @@
-# Commuting_TSF_SARS-Cov-2_model_master
-***加了TODO的是还没做的，没加的就是做好了的***
-# TODOs:
-
-<<<<<<< Updated upstream
-目前模型已经可以正常运行，但还需要疫苗/感染有效率数据以计算免疫率。
-=======
-Liwei Yang<sup>*1, 2</sup> ([blairyeung](https://github.com/blairyeung)), Yuhao Yang<sup>1</sup>, 
+# Modelling the transmission of the omicron variant of SARS-CoV-2 in Ontario using inter and intra-county population mobility
+Liwei Yang<sup>*1, 2</sup> ([blairyeung](https://github.com/blairyeung)), Yuhao Yang<sup>1</sup> ([martinyang0416](https://github.com/martinyang0416)), 
 Muxin Tian <sup>1</sup> ([realtmx](https://github.com/realtmxi))
 
  <sup>1</sup> Department of computer science, University of Toronto, 40 St George St, Toronto, M5S 2E4, Canada
@@ -43,12 +37,11 @@ Currently working on the calibration and optimization of the model.
 We estiamted the vaccine effectiveness using the vaccination effectiveness derived [Andrews et al.](), [Gold](),
 [CDC]()
 
-同时，模型目前没有涵盖population mobility，day/night switch 和commutation。
+### Population mobility & seasonality
+The model can now accept and use population mobility & seasonality ot estimate 
 
-### Population mobility:
-模型已经可以读取过去的mobility数据。
-### Calibratino and vaccine efficacy
-调参应该要花很久 vaccine efficacy估计26号弄完。
+### Calibration and vaccine effectiveness
+We are currently working on the calibration of the mdoel.
 ### Commutation:
 预计12.27日前完成
 

@@ -121,6 +121,7 @@ class Dependency:
         min_date = (Ontario['date'].min() - Parameters.OUTBREAK_FIRST_DAY).days
 
         mobility = np.zeros(shape=(6, 3000))
+        blurred_mobility = np.zeros(shape=(6, 3000))
 
         retail = Ontario['retail_and_recreation_percent_change_from_baseline'].to_numpy()
         grocery = Ontario['grocery_and_pharmacy_percent_change_from_baseline'].to_numpy()
@@ -135,7 +136,27 @@ class Dependency:
         mobility[4][min_date:max_date + 1] = workplace
         mobility[5][min_date:max_date + 1] = residential
         mobility = mobility / 100
-        self.raw_mobility = mobility.T
+
+        retail_blurred = cv2.GaussianBlur(retail.reshape(retail.shape[0], 1), (15, 15), 0)
+        grocery_blurred = cv2.GaussianBlur(grocery.reshape(grocery.shape[0], 1), (15, 15), 0)
+        park_blurred = cv2.GaussianBlur(park.reshape(park.shape[0], 1), (15, 15), 0)
+        trainsit_blurred = cv2.GaussianBlur(trainsit.reshape(trainsit.shape[0], 1), (15, 15), 0)
+        workplace_blurred = cv2.GaussianBlur(workplace.reshape(workplace.shape[0], 1), (15, 15), 0)
+        residential_blurred = cv2.GaussianBlur(residential.reshape(residential.shape[0], 1), (15, 15), 0)
+
+        blurred_mobility[0][min_date:max_date + 1] = retail_blurred.flatten()
+        blurred_mobility[1][min_date:max_date + 1] = grocery_blurred.flatten()
+        blurred_mobility[2][min_date:max_date + 1] = park_blurred.flatten()
+        blurred_mobility[3][min_date:max_date + 1] = trainsit_blurred.flatten()
+        blurred_mobility[4][min_date:max_date + 1] = workplace_blurred.flatten()
+        blurred_mobility[5][min_date:max_date + 1] = residential_blurred.flatten()
+
+        blurred_mobility = blurred_mobility / 100
+
+        # self.raw_mobility = mobility.T
+        self.raw_mobility = blurred_mobility.T
+
+
         return
 
     def mobility_reshape(self):

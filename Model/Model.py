@@ -175,16 +175,12 @@ class Model:
 
     def _susceptible_to_exposed(self, date, time_step='day'):
 
+        infectious_by_county = np.zeros(shape=(Parameters.NO_COUNTY, 16))
 
         for c in range(Parameters.NO_COUNTY):
             immunity_level = self._model_data.time_series_immunity[c][date - 1]
 
             immunity = np.ones(shape=(16,)) - immunity_level
-
-            # if c == 0:
-            #     print('Coefficient', immunity)
-            #     print('RAW_IMMUNITY', immunity_level)
-            #     print('Mobility', self.dependency.mobility[self.date])
 
             clinical_infectious = np.sum(self._model_data.time_series_clinical_cases[c][date - 2:date], axis=0)
             sub_clinical_infectious = np.sum(self._model_data.time_series_clinical_cases[c][date - 2:date], axis=0)
@@ -192,6 +188,8 @@ class Model:
             exposed_infectious = np.sum(self._model_data.time_series_exposed[c][date - 3:date], axis=0)
 
             tot_infectiouesness = clinical_infectious + 0.5 * (sub_clinical_infectious + exposed_infectious)
+
+            infectious_by_county[c] = tot_infectiouesness 
 
             county_data = self.dependency.county_data[c]
 
@@ -372,6 +370,19 @@ class Model:
         self.save_data_by_phu(self.convert_data_to_phu(data=self._model_data.time_series_hospitalized), phus=phu,
                               tag='hospitalized', moving_avg=True)
         return
+
+    def save_provincial_data(self, data=None, tag='', moving_avg=False):
+        out_data = np.sum(data, axis=0)
+        if moving_avg:
+            county_data = Util.moving_average(county_data)
+            df = pd.DataFrame(county_data, columns=Parameters.AGE_BANDS)
+            dir_path = os.getcwd()[:-5] + \
+                       'model_output/' + \
+                       self.dependency.code_to_name[self.dependency.county_codes[c]]
+        df['date'] = [Parameters.OUTBREAK_FIRST_DAY + datetime.timedelta(days=j) for j in
+                          range(county_data.shape[0])]
+        return
+
 
     def save_data(self, data=None, tag='', moving_avg=False):
         for c in range(Parameters.NO_COUNTY):
