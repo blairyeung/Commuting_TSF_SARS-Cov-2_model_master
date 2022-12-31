@@ -1,3 +1,4 @@
+import datetime
 import os
 
 import numpy as np
@@ -167,24 +168,52 @@ class Model:
             self._infected_to_removed(self.date)
             self._infected_to_death(self.date)
 
-    def _commuting_mix(self):
-        matrix = self.dependency.commute_matrix
+    def _commuting_mix_forward(self, inf_by_county):
+        matrix = np.clip(self.dependency.commute_matrix, a_min=1, a_max=Parameters.ONT_POPULATOIN)
+
         inflow_sum = np.sum(matrix, axis=0)
         outflow_sum = np.sum(matrix, axis=1)
 
-        return
+        col_normed = matrix / np.sum(matrix, axis=0)
+        row_normed = (matrix.T / np.sum(matrix, axis=1)).T
 
-    def _get_new_cases(self, cases, contact_type=0, contact_pattern='day', immunity=np.ones(shape=(16, ))):
+        rslt = np.matmul(col_normed, inf_by_county)
+
+        return rslt
+
+    def _commuting_mix_backward(self, inf_by_county):
+        matrix = np.clip(self.dependency.commute_matrix, a_min=1, a_max=Parameters.ONT_POPULATOIN)
+
+        inflow_sum = np.sum(matrix, axis=0)
+        outflow_sum = np.sum(matrix, axis=1)
+
+        col_normed = matrix / np.sum(matrix, axis=0)
+        row_normed = (matrix.T / np.sum(matrix, axis=1)).T
+
+        rslt = np.matmul(row_normed, inf_by_county)
+
+        return rslt
+
+    def _get_new_cases(self, cases, contact_type=0, contact_pattern='day', work=False, immunity=np.ones(shape=(16, ))):
         susceptibility = Parameters.SUSC_RATIO
-        matrix = self._synthesize_matrix(contact_type, contact_pattern)
+        matrix = self._synthesize_matrix(contact_type, contact_pattern, work=work)
+
+        if work:
+            matrix = self._synthesize_working_matrix(contact_type)
+        else:
+            matrix = self._synthesize_matrix(contact_type, contact_pattern, work=work)
         rslt = np.matmul(matrix, cases) * susceptibility * np.clip(immunity, a_min=0, a_max=1) * self.infectiousness
         return rslt
 
     def _susceptible_to_exposed(self, date, time_step='day'):
 
         infectious_by_county = np.zeros(shape=(Parameters.NO_COUNTY, 16))
+        immunity_by_county = np.zeros(shape=(Parameters.NO_COUNTY, 16))
 
         for c in range(Parameters.NO_COUNTY):
+
+            # For non-working population, do local transmission here
+
             immunity_level = self._model_data.time_series_immunity[c][date - 1]
 
             immunity = np.ones(shape=(16,)) - immunity_level
@@ -197,11 +226,8 @@ class Model:
             tot_infectiouesness = clinical_infectious + 0.5 * (sub_clinical_infectious + exposed_infectious)
 
             infectious_by_county[c] = tot_infectiouesness
+            immunity_by_county[c] = immunity
 
-        if time_step == 'day':
-            self._commuting_mix()
-
-        for c in range(Parameters.NO_COUNTY):
             county_data = self.dependency.county_data[c]
 
             if county_data[2] > 10000:
@@ -210,7 +236,7 @@ class Model:
                 county_type = 1
 
             rslt = self._get_new_cases(tot_infectiouesness, contact_type=county_type, contact_pattern=time_step,
-                                       immunity=np.clip(immunity, a_min=0, a_max=1))
+                                       work=False, immunity=np.clip(immunity, a_min=0, a_max=1))
 
             if time_step == 'day':
                 self._model_data.time_series_exposed[c][date] = rslt
@@ -218,6 +244,23 @@ class Model:
             else:
                 self._model_data.time_series_exposed[c][date] += rslt
                 self._model_data.time_series_infected[c][date] += rslt
+
+        if time_step == 'day':
+            commuting_mix = self._commuting_mix_forward(infectious_by_county)
+            infected_by_county = np.zeros(shape=infectious_by_county.shape)
+            for c in range(Parameters.NO_COUNTY):
+                rslt = self._get_new_cases(commuting_mix[c], contact_type=county_type, contact_pattern=time_step,
+                                           work=True, immunity=np.clip(immunity, a_min=0, a_max=1))
+                infected_by_county[c] = rslt
+
+            reverse_mix = self._commuting_mix_backward(infected_by_county)
+
+            for c in range(Parameters.NO_COUNTY):
+                rslt = reverse_mix[c]
+                self._model_data.time_series_exposed[c][date] += rslt
+                self._model_data.time_series_infected[c][date] += rslt
+
+
 
     """
         Exposed to cases
@@ -338,14 +381,25 @@ class Model:
             rslt = np.sum(np.multiply(data, kernel), axis=0)
             self._model_data.time_series_recovered[c][date] += rslt
 
-    def _synthesize_matrix(self, contact_type=0, contact_pattern='day'):
+    def _synthesize_matrix(self, contact_type=0, contact_pattern='day', work=False):
         matrices = self.dependency.matrix_by_class
         preset = Parameters.MATRIX_PRESETS[contact_pattern]
         matrix = np.zeros(shape=(16, 16))
-        for j in range(4):
-            # print(Parameters.MATRIX_CONTACT_TYPE[j], self.dependency.mobility[self.date][j])
-            matrix = np.add(matrix, preset[j] * matrices[contact_type][j] * self.dependency.mobility[self.date][j])
-        # return matrix * self.infectiousness
+        if work:
+            for j in range(4):
+                matrix = np.add(matrix, preset[j] * matrices[contact_type][j] * self.dependency.mobility[self.date][j])
+
+        else:
+            for j in [0, 2, 3]:
+                matrix = np.add(matrix, preset[j] * matrices[contact_type][j] * self.dependency.mobility[self.date][j])
+
+        matrix = matrix * Parameters.SEASONALITY[self.date]
+        return matrix.T
+
+    def _synthesize_working_matrix(self, contact_type=0):
+        matrices = self.dependency.matrix_by_class
+        preset = Parameters.MATRIX_PRESETS['day']
+        matrix = preset[1] * matrices[contact_type][1] * self.dependency.mobility[self.date][1]
         matrix = matrix * Parameters.SEASONALITY[self.date]
         return matrix.T
 
@@ -385,7 +439,7 @@ class Model:
     def save_provincial_data(self, data=None, tag='', moving_avg=False):
         out_data = np.sum(data, axis=0)
         if moving_avg:
-            county_data = Util.moving_average(county_data)
+            county_data = Util.moving_average(data)
             df = pd.DataFrame(county_data, columns=Parameters.AGE_BANDS)
             dir_path = os.getcwd()[:-5] + \
                        'model_output/' + \
