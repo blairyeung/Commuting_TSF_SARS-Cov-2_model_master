@@ -26,7 +26,7 @@ class ModelData:
     time_series_deaths = None
     time_series_population = None
 
-    time_series_immunized = None
+    time_series_infection_immunity = None
     time_series_vaccinated = None
     time_series_vaccine_immunity = None
 
@@ -83,8 +83,6 @@ class ModelData:
 
         # TODO: split it, to delta and omicron
 
-       #  omicron_dominance_date =
-
         non_omicron = (self.time_series_clinical_cases.transpose(1, 0, 2)[:700] *
                        Parameters.REVERSE_CLINICAL_BY_AGE.T).transpose(1, 0, 2)
 
@@ -125,7 +123,7 @@ class ModelData:
         self.time_series_ICU = np.concatenate([self.dependency.date_to_ICU_by_county,
                                                         np.zeros(shape=(x, y, z))], axis=1)
 
-        # NOTE: Vaccination assumtpions, might need to change here.
+        # TODO: Vaccination assumptions
 
         vaccine_adjust = np.concatenate([np.zeros(shape=(y, 2, z)), 0.001 * Parameters.ONT_VACCINE_DISTRIBUTION * 16
                                          * np.ones(shape=(y, 1, 1))], axis=1)
@@ -135,8 +133,11 @@ class ModelData:
 
         self.time_series_vaccinated = self.time_series_vaccinated.transpose(1, 0, 2)
 
-        self.time_series_immunized = np.zeros(shape=(x, self.dependency.date_to_deaths_by_county.shape[1] + y,
-                                                     z), dtype=float)
+        self.time_series_infection_immunity = np.zeros(shape=(x, self.dependency.date_to_deaths_by_county.shape[1] + y,
+                                                    z), dtype=float)
+
+        self.time_series_vaccine_immunity = np.zeros(shape=(x, self.dependency.date_to_deaths_by_county.shape[1] + y,
+                                                    z), dtype=float)
 
         self.time_series_immunity = np.zeros(shape=(x, self.dependency.date_to_deaths_by_county.shape[1] + y,
                                                     z), dtype=float)

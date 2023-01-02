@@ -47,6 +47,25 @@ class Dependency:
     date_to_vaccines_by_age_un_reshaped = np.zeros((0, 3, 9))
     date_to_vaccines_by_age_un_differentaited = np.zeros((0, 3, 9))
 
+    phu_id_pairing = {2226: 'Algoma Public Health', 2227: 'Brant County Health Unit',
+                      2230: 'Durham Region Health Department', 2233: 'Grey Bruce Health Unit',
+                      2234: 'Haldimand-Norfolk Health Unit',
+                      2235: 'Haliburton, Kawartha, Pine Ridge District Health Unit ',
+                      2236: 'Halton Region Public Health', 2237: 'City of Hamilton Public Health Services',
+                      2238: 'Hastings Prince Edward Public Health', 2240: 'Chatham-Kent Public Health',
+                      2241: 'Kingston, Frontenac and Lennox & Addington Public Health',
+                      2242: 'Lambton Public Health', 2243: 'Leeds, Grenville & Lanark District Health Unit',
+                      2244: 'Middlesex-London Health Unit', 2246: 'Niagara Region Public Health',
+                      2247: 'North Bay Parry Sound District Health Unit', 2249: 'Northwestern Health Unit',
+                      2251: 'Ottawa Public Health', 2253: 'Peel Public Health',2255: 'Peterborough Public Health ',
+                      2256: 'Porcupine Health Unit', 2257: 'Renfrew County and District Health Unit',
+                      2258: 'Eastern Ontario Health Unit', 2260: 'Simcoe Muskoka District Health Unit',
+                      2261: 'Public Health Sudbury & Districts', 2262: 'Thunder Bay District Health Unit',
+                      2263: 'Timiskaming Health Unit', 2265: 'Region of Waterloo Public Health and Emergency Services',
+                      2266: 'Wellington-Dufferin-Guelph Public Health', 2268: 'Windsor-Essex County Health Unit',
+                      2270: 'York Region Public Health', 3895: 'Toronto Public Health',
+                      4913: 'Southwestern Public Health', 5183: 'Huron Perth Health Unit'}
+
     """
         County-specific data
     """

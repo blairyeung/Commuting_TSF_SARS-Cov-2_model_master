@@ -8,6 +8,11 @@ Muxin Tian <sup>1</sup> ([realtmx](https://github.com/realtmxi))
 
  <sup>*</sup> This is the corresponding [author](blair.yang@mail.utoronto.ca).
 
+![Figure 1.jpg](Manuscripts%2FFigure%201.jpg)
+### **Figure 1:** The convolutional model.
+
+
+
 ## This is an ongoing project
 The model can run now! However, there are still some **features** not implemented yet and some **calibrations** to be done.
 
