@@ -9,8 +9,57 @@ Muxin Tian <sup>1</sup> ([realtmx](https://github.com/realtmxi))
  <sup>*</sup> This is the corresponding [author](blair.yang@mail.utoronto.ca).
 
 ![Figure 1.jpg](Manuscripts%2FFigure%201.jpg)
-### **Figure 1:** The convolutional model.
+#### **Figure 1:** The convolutional model.
 
+## Input of the model
+### Model parameters not subject to fitting:
+#### Google population mobility index in Ontario
+![img_1.png](img_1.png)
+#### Figure 2: Google population mobility in Ontario.
+
+***Assumed scenarios:***
+```
+1. Constant (use the moving average of year 2022)
+2. Return to baseline (restore to baseline, four more assumptions)
+3. Time-series forecast
+```
+### Seasonality of the transmission activity in Ontario
+![img_2.png](img_2.png)
+#### 
+#### Figure 3: Seasonality of SARS-CoV-2 transmission activity
+***Assumed scenarios:***
+```
+1. 10% sensonality
+2. 20% sensonality
+3. 40% sensonality
+```
+### Vaccination and vaccine effectiveness
+![img_3.png](img_3.png)
+#### Figure 4: Vaccination status in Ontario. The actual data we used are specified to public health unit.
+
+* We used the phu-specific data to estimate the vaccine fraction of different ages bands.
+
+* We used the provincial dose administration data to estimate the vaccination level.
+
+* We then combined the two data to estimate the number of vaccine immunity for the counties.
+
+***Assumed scenarios:***
+```
+1. Future vaccination performed as the ending speed.
+2. No future vaccination
+3. 100 - 500 boost dose per day per 100,000 poppulation
+```
+
+![Three_paper_avg.jpg](Manuscripts%2FThree_paper_avg.jpg)
+#### Figure 5: Vaccine effectiveness against clinical infection.
+***Assumed scenarios:***
+```
+Unweighted average of multiple articles.
+```
+### Commutating matrix
+![comm_mat.jpg](comm_mat.jpg)
+#### Figure 6: Commuting matrix of Ontario, censused in 2015.
+### 
 
 
 ## This is an ongoing project

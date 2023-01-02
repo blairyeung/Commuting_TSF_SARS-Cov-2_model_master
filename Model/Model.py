@@ -150,8 +150,8 @@ class Model:
 
 
         data = self._model_data.time_series_immunity.transpose(1, 0, 2)
-        infection_data = self._model_data.time_series_immunity.transpose(1, 0, 2)
-        vaccine_data = self._model_data.time_series_immunity.transpose(1, 0, 2)
+        infection_data = self._model_data.time_series_infection_immunity.transpose(1, 0, 2)
+        vaccine_data = self._model_data.time_series_vaccine_immunity.transpose(1, 0, 2)
 
         data[date] = today_immunity
         infection_data[date] = infection_immunity
