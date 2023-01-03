@@ -16,59 +16,74 @@ import cv2
 
 ver = '1.0'
 
+
 def get_seasonality(factor=0.1, length=2000):
     raw = np.linspace(0, 2499, 2500)
     shift = 365 + (OUTBREAK_FIRST_DAY - datetime.datetime(2020, 2, 14)).days
     raw = raw * 2 * math.pi / 360
-    kernel = np.cos(raw)[shift:shift+2000]
+    kernel = np.cos(raw)[shift:shift + 2000]
     rslt = kernel * factor + np.ones(shape=kernel.shape)
     return rslt
+
+
+def get_log_effectiveness(a=0, b=0, c=0, length=2000):
+    return np.multiply(log_fit(np.linspace(0, length - 1, length), a=a, b=b, c=c).reshape(2000, 1),
+                       np.ones(shape=(16, 1)).T) / 100
+
 
 def log_fit(x, a=0, b=0, c=0):
     return a * np.exp(-b * x) + c
 
-def get_immunity_kernel(dose=0, length=2000):
-    if dose == 0:
-        return INFECTION_IMMUNITY
-    elif dose == 1:
-        return 0.8 * TWO_DOSE_EFFICACY
-    elif dose == 2:
-        return TWO_DOSE_EFFICACY
-    elif dose == 3:
-        return THREE_DOSE_EFFICACY
-    else:
-        return np.ones(shape=(2000, 16))
-    return np.ones(shape=(2000, 16))
 
+def get_immunity_kernel(dose=0, category='Transmission', length=2000):
+
+    pass
 
 DEPENDENCY_PATH = os.getcwd()[:-5] + 'Model Dependencies/'
+
+"""
+    Transmission effectiveness
+"""
 
 # TWO_DOSE_EFFICACY = pd.read_csv(DEPENDENCY_PATH + 'two_dose.csv', delimiter=',').to_numpy().T[1:17].T
 # THREE_DOSE_EFFICACY = pd.read_csv(DEPENDENCY_PATH + 'three_dose.csv', delimiter=',').to_numpy().T[1:17].T
 
-TWO_DOSE_EFFICACY = np.multiply(log_fit(np.linspace(0, 1999, 2000), a=62.715, b=0.004, c=10).reshape(2000, 1),
-                                np.ones(shape=(16, 1)).T) / 100
+ONE_DOSE_EFFICACY_TRANSMISSION = 0.8 * get_log_effectiveness(a=62.715, b=0.004, c=10, length=2000)
 
-THREE_DOSE_EFFICACY = np.multiply(log_fit(np.linspace(0, 1999, 2000), a=93.327, b=0.003, c=0).reshape(2000, 1),
-                                np.ones(shape=(16, 1)).T) / 100
+TWO_DOSE_EFFICACY_TRANSMISSION = get_log_effectiveness(a=62.715, b=0.004, c=10, length=2000)
 
-INFECTION_IMMUNITY = np.multiply(log_fit(np.linspace(0, 1999, 2000), a=100, b=0.0015, c=0).reshape(2000, 1),
-                                np.ones(shape=(16, 1)).T) / 100
+THREE_DOSE_EFFICACY_TRANSMISSION = get_log_effectiveness(a=93.327, b=0.003, c=0, length=2000)
 
-
-# INFECTION_IMMUNITY = np.ones(shape=TWO_DOSE_EFFICACY.shape) - \
-#                      (np.ones(shape=TWO_DOSE_EFFICACY.shape) - TWO_DOSE_EFFICACY) * 0.5
-
-TWO_DOSE_EFFICACY_RMV = np.concatenate([TWO_DOSE_EFFICACY[60:],
-                                        np.zeros(shape=(60, 16))], axis=0)
-
-ONE_DOSE_EFFICACY_RMV = np.concatenate([0.8 * TWO_DOSE_EFFICACY[60:],
-                                        np.zeros(shape=(60, 16))], axis=0)
+INFECTION_IMMUNITY_TRANSMISSION = get_log_effectiveness(a=1000, b=0.0015, c=0, length=2000)
 
 
-# INFECTION_IMMUNITY = np.multiply(log_fit(np.linspace(0, 1999, 2000), a=100, b=0.001, c=0).reshape(2000, 1),
-#                                 np.ones(shape=(16, 1)).T) / 100
+TWO_DOSE_EFFICACY_RMV_TRANSMISSION = np.concatenate([TWO_DOSE_EFFICACY_TRANSMISSION[60:],
+                                                     np.zeros(shape=(60, 16))], axis=0)
 
+ONE_DOSE_EFFICACY_RMV_TRANSMISSION = np.concatenate([0.8 * TWO_DOSE_EFFICACY_TRANSMISSION[60:],
+                                                     np.zeros(shape=(60, 16))], axis=0)
+
+"""
+    Clinical effectiveness
+"""
+
+TWO_DOSE_EFFICACY_CLINICAL = np.multiply(
+    log_fit(np.linspace(0, 1999, 2000), a=62.715, b=0.004, c=10).reshape(2000, 1),
+    np.ones(shape=(16, 1)).T) / 100
+
+THREE_DOSE_EFFICACY_CLINICAL = np.multiply(
+    log_fit(np.linspace(0, 1999, 2000), a=93.327, b=0.003, c=0).reshape(2000, 1),
+    np.ones(shape=(16, 1)).T) / 100
+
+INFECTION_IMMUNITY_TRANSMISSION = np.multiply(
+    log_fit(np.linspace(0, 1999, 2000), a=100, b=0.0015, c=0).reshape(2000, 1),
+    np.ones(shape=(16, 1)).T) / 100
+
+TWO_DOSE_EFFICACY_RMV_TRANSMISSION = np.concatenate([TWO_DOSE_EFFICACY_TRANSMISSION[60:],
+                                                     np.zeros(shape=(60, 16))], axis=0)
+
+ONE_DOSE_EFFICACY_RMV_TRANSMISSION = np.concatenate([0.8 * TWO_DOSE_EFFICACY_TRANSMISSION[60:],
+                                                     np.zeros(shape=(60, 16))], axis=0)
 
 INFECTIOUSNESS = 0.08
 
@@ -102,7 +117,6 @@ OUTBREAK_FIRST_DAY = datetime.datetime(2020, 1, 15)
     Ontario age-specific parameters Done!
 """
 
-
 ONT_VACCINE_DISTRIBUTION = np.array([0.00060537, 0.00458526, 0.01328221, 0.02727299, 0.04668258, 0.0514049, 0.05772092,
                                      0.05664295, 0.05666874, 0.05662532, 0.06529888, 0.07479382, 0.08567756, 0.07610751,
                                      0.06813767, 0.25849333])
@@ -111,7 +125,6 @@ ONT_POPULATOIN = 15109416
 
 ONT_AGE_BAND_POPULATION = np.array([714654, 769062, 803899, 849806, 1057366, 1125877, 1103728, 1042232, 953628,
                                     920118, 952509, 1037514, 1004860, 855432, 702717, 1216014])
-
 
 ICU_HOSP = 0.1540844459589232
 
@@ -172,7 +185,6 @@ OMICRON_REVERSE_CLINICAL_BY_AGE = np.ones(shape=OMICRON_SUBCLINICAL_RATIO.shape)
 LABOUR_FORCE_BY_AGE = np.array([[0, 0, 0, 0.1541253, 0.59703641, 0.79458234, 0.86543127, 0.87572028, 0.87543949,
                                  0.85482205, 0.72834824, 0.48597934, 0.27477541, 0, 0, 0]])
 
-
 """
     Age band names
 """
@@ -191,9 +203,9 @@ raw_age_df = pd.read_csv(os.getcwd()[:-5] + 'Model Dependencies/' + '1710000501-
 raw_age_dist = raw_age_df['Persons'].to_numpy()[1:].reshape(21, 1) * np.ones(shape=(1, 5))
 raw_age_dist = raw_age_dist.flatten() / 5
 raw_age_dist = np.reshape(np.array(cv2.GaussianBlur(raw_age_dist.reshape(105, 1), (9, 9), 0)),
-                                      newshape=(105,))
+                          newshape=(105,))
 
-RAW_AGE_DISTRIBUTION = np.zeros(shape=(100, ))
+RAW_AGE_DISTRIBUTION = np.zeros(shape=(100,))
 RAW_AGE_DISTRIBUTION[:100] = raw_age_dist[:100]
 RAW_AGE_DISTRIBUTION[99] = np.sum(raw_age_dist[100:])
 
