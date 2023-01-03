@@ -400,6 +400,35 @@ class Dependency:
 
         return
 
+    def read_vaccine_by_phu(self):
+        read_path = self.get_dependency_path() + 'vaccine_by_age_auto_update.csv'
+        vaccine_df = pd.read_csv(read_path)
+
+        vaccine_df['Percent_at_least_one_dose'] = vaccine_df['Percent_at_least_one_dose'].fillna(0)
+        vaccine_df['Percent_fully_vaccinated'] = vaccine_df['Percent_fully_vaccinated'].fillna(0)
+        vaccine_df['Percent_3doses'] = vaccine_df['Percent_3doses'].fillna(0)
+
+        vaccine_df['Date'] = pd.to_datetime(vaccine_df['Date'])
+
+        self.find_max_date()
+
+        self.date_to_vaccines_by_age = np.zeros((self.total_days, 3, 9))
+
+        for i in range(len(vaccine_df)):
+            row = vaccine_df.iloc[i]
+            after_outbreak = (row['Date'] - Parameters.OUTBREAK_FIRST_DAY).days
+            band = row['Agegroup']
+
+            if band in Parameters.VACCINE_AGE_BANDS:
+                self.date_to_vaccines_by_age[after_outbreak - 1][0][Parameters.VACCINE_AGE_BANDS.index(band)] = float(
+                    row['Percent_at_least_one_dose'])
+                self.date_to_vaccines_by_age[after_outbreak - 1][1][Parameters.VACCINE_AGE_BANDS.index(band)] = float(
+                    row['Percent_fully_vaccinated'])
+                self.date_to_vaccines_by_age[after_outbreak - 1][2][Parameters.VACCINE_AGE_BANDS.index(band)] = float(
+                    row['Percent_3doses'])
+
+        return
+
     def reshape_vaccine(self):
         """
         reshape the 10-years age band into 5-years age band
