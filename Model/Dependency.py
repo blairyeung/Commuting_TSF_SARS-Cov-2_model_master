@@ -461,7 +461,7 @@ class Dependency:
                 else:
                     pass
 
-            self.date_to_vaccines_by_phu[self.phu_id_pairing[group]] = phu_data
+            self.date_to_vaccines_by_phu[self.phu_id_pairing[g]] = phu_data
 
             # phu_vaccine = np.zeros(shape=(self.total_days, 3, 9))
             # for i in range(len(group)):
