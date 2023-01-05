@@ -53,7 +53,7 @@ class Dependency:
     date_to_vaccines_by_phu_un_differentaited = np.zeros((0, 3, 9))
 
     phu_id_pairing = {2226: 'Algoma Public Health', 2227: 'Brant County Health Unit',
-                      2230: 'Durham Region Health Department', 2233: 'Grey Bruce Health Unit',
+                      2230: 'Durham Region Health Department ', 2233: 'Grey Bruce Health Unit',
                       2234: 'Haldimand-Norfolk Health Unit',
                       2235: 'Haliburton, Kawartha, Pine Ridge District Health Unit ',
                       2236: 'Halton Region Public Health', 2237: 'City of Hamilton Public Health Services',
@@ -62,12 +62,12 @@ class Dependency:
                       2242: 'Lambton Public Health', 2243: 'Leeds, Grenville & Lanark District Health Unit',
                       2244: 'Middlesex-London Health Unit', 2246: 'Niagara Region Public Health',
                       2247: 'North Bay Parry Sound District Health Unit', 2249: 'Northwestern Health Unit',
-                      2251: 'Ottawa Public Health', 2253: 'Peel Public Health',2255: 'Peterborough Public Health ',
+                      2251: 'Ottawa Public Health', 2253: 'Peel Public Health', 2255: 'Peterborough Public Health ',
                       2256: 'Porcupine Health Unit', 2257: 'Renfrew County and District Health Unit',
-                      2258: 'Eastern Ontario Health Unit', 2260: 'Simcoe Muskoka District Health Unit',
+                      2258: 'Eastern Ontario Health Unit', 2260: 'Simcoe Muskoka District Health Unit ',
                       2261: 'Public Health Sudbury & Districts', 2262: 'Thunder Bay District Health Unit',
                       2263: 'Timiskaming Health Unit', 2265: 'Region of Waterloo Public Health and Emergency Services',
-                      2266: 'Wellington-Dufferin-Guelph Public Health', 2268: 'Windsor-Essex County Health Unit',
+                      2266: 'Wellington-Dufferin-Guelph Public Health', 2268: 'Windsor-Essex County Health Unit ',
                       2270: 'York Region Public Health', 3895: 'Toronto Public Health',
                       4913: 'Southwestern Public Health', 5183: 'Huron Perth Health Unit', 9999: 'Unknown'}
 
@@ -115,6 +115,7 @@ class Dependency:
         # self.read_vaccine()
         self.read_vaccine_by_phu()
         # self.reshape_vaccine()
+        self.reshape_vaccine_by_phu()
         """
             Do not differentiate cases
         """
@@ -182,7 +183,6 @@ class Dependency:
         # self.raw_mobility = mobility.T
         self.raw_mobility = blurred_mobility.T
 
-
         return
 
     def mobility_reshape(self):
@@ -229,7 +229,6 @@ class Dependency:
 
         conct = np.concatenate([residential.reshape(3000, 1), school.reshape(3000, 1),
                                 work.reshape(3000, 1), other.reshape(3000, 1)], axis=1)
-
 
         mask_lift_date = (datetime.strptime('2020-07-01', '%Y-%m-%d') - Parameters.OUTBREAK_FIRST_DAY).days
 
@@ -454,14 +453,13 @@ class Dependency:
                 all_dose_data_concat = np.concatenate([np.zeros(shape=(min_date, 3)), all_dose_data,
                                                        np.zeros(shape=(self.total_days - max_date, 3))], axis=0)
 
-
                 if age_group in Parameters.VACCINE_AGE_BANDS:
                     phu_data[Parameters.VACCINE_AGE_BANDS.index(age_group)] = all_dose_data_concat
 
                 else:
                     pass
 
-            self.date_to_vaccines_by_phu[self.phu_id_pairing[g]] = phu_data
+            self.date_to_vaccines_by_phu[self.phu_id_pairing[g]] = phu_data.transpose(1, 2, 0)
 
             # phu_vaccine = np.zeros(shape=(self.total_days, 3, 9))
             # for i in range(len(group)):
@@ -481,14 +479,38 @@ class Dependency:
 
         return
 
-    def reshape_vaccine(self):
+    # def reshape_vaccine(self):
+    #     """
+    #     reshape the 10-years age band into 5-years age band
+    #     :return:
+    #     """
+    #
+    #     # self.date_to_vaccines_by_age_un_reshaped = copy.deepcopy(self.date_to_vaccines_by_age)
+    #
+    #
+    #     reshaped = np.zeros((self.total_days, 3, 16))
+    #
+    #     for phu in self.date_to_vaccines_by_phu:
+    #         phu_data = self.date_to_vaccines_by_phu[phu]
+    #         for date in range(self.total_days):
+    #             for dose in [0, 1, 2]:
+    #                 lst = phu_data[date][dose]
+    #                 lst = Gaussian.age_dog_algo(lst)
+    #                 reshaped[date][dose] = lst
+    #
+    #         self.date_to_vaccines_by_age[phu] = reshaped
+    #
+    #     # self.date_to_vaccines_by_age_un_differentaited = copy.deepcopy(self.date_to_vaccines_by_age )
+    #
+    #     return
+
+    def reshape_vaccine_by_phu(self):
         """
-        reshape the 10-years age band into 5-years age band
-        :return:
+            reshape the 10-years age band into 5-years age band
+            :return:
         """
 
         # self.date_to_vaccines_by_age_un_reshaped = copy.deepcopy(self.date_to_vaccines_by_age)
-
 
         reshaped = np.zeros((self.total_days, 3, 16))
 
@@ -500,16 +522,17 @@ class Dependency:
                     lst = Gaussian.age_dog_algo(lst)
                     reshaped[date][dose] = lst
 
-            self.date_to_vaccines_by_age[phu] = reshaped
+            self.date_to_vaccines_by_phu[phu] = reshaped
 
-        # self.date_to_vaccines_by_age_un_differentaited = copy.deepcopy(self.date_to_vaccines_by_age )
+            # self.date_to_vaccines_by_age_un_differentaited = copy.deepcopy(self.date_to_vaccines_by_age )
 
         return
 
     def differentiate_by_phu(self):
         for phu in self.date_to_vaccines_by_phu:
-
             phu_data = self.date_to_vaccines_by_phu[phu]
+
+            # print(phu_data.shape)
 
             vaccine_differentiated = np.zeros((self.total_days, 3, 16))
 
@@ -523,88 +546,88 @@ class Dependency:
 
             vaccine_differentiated = np.diff(phu_data, axis=0)
 
+            # print(vaccine_differentiated.shape)
+            # print(phu_data.shape)
+
             phu_data = vaccine_differentiated
-
-            read_path = self.get_dependency_path() + 'vaccine_by_age_admin.csv'
-            vaccine_df_dose_admin = pd.read_csv(read_path)
-
-            vaccine_df_dose_admin = vaccine_df_dose_admin.fillna(0)
-
-            vaccine_df_dose_admin['report_date'] = pd.to_datetime(vaccine_df_dose_admin['report_date'])
-
-            for i in range(len(vaccine_df_dose_admin)):
-                row = vaccine_df_dose_admin.iloc[i]
-                after_outbreak = (row['report_date'] - Parameters.OUTBREAK_FIRST_DAY).days
-                more_dose = 0
-                if row['previous_day_3doses'] != 0:
-                    more_dose = row['previous_day_total_doses_administered'] - row['previous_day_at_least_one'] - \
-                                row['previous_day_fully_vaccinated'] - row['previous_day_3doses']
-                if np.sum(phu_data[after_outbreak - 1][2]) != 0:
-                    ratio = more_dose * phu_data[after_outbreak - 1][2] / \
-                            np.sum(phu_data[after_outbreak - 1][2])
-                else:
-                    ratio = more_dose * Parameters.ONT_AGE_BAND_POPULATION / Parameters.ONT_POPULATOIN
-
-                vaccine_raito = ratio / Parameters.ONT_AGE_BAND_POPULATION
-
-                phu_data[after_outbreak - 1][2] = phu_data[after_outbreak - 1][
-                                                                          2] \
-                                                                      + vaccine_raito
+            #
+            # read_path = self.get_dependency_path() + 'vaccine_by_age_admin.csv'
+            # vaccine_df_dose_admin = pd.read_csv(read_path)
+            #
+            # vaccine_df_dose_admin = vaccine_df_dose_admin.fillna(0)
+            #
+            # vaccine_df_dose_admin['report_date'] = pd.to_datetime(vaccine_df_dose_admin['report_date'])
+            #
+            # for i in range(len(vaccine_df_dose_admin)):
+            #     row = vaccine_df_dose_admin.iloc[i]
+            #     after_outbreak = (row['report_date'] - Parameters.OUTBREAK_FIRST_DAY).days
+            #     more_dose = 0
+            #     if row['previous_day_3doses'] != 0:
+            #         more_dose = row['previous_day_total_doses_administered'] - row['previous_day_at_least_one'] - \
+            #                     row['previous_day_fully_vaccinated'] - row['previous_day_3doses']
+            #     if np.sum(phu_data[after_outbreak - 1][2]) != 0:
+            #         ratio = more_dose * phu_data[after_outbreak - 1][2] / \
+            #                 np.sum(phu_data[after_outbreak - 1][2])
+            #     else:
+            #         ratio = more_dose * Parameters.ONT_AGE_BAND_POPULATION / Parameters.ONT_POPULATOIN
+            #
+            #     vaccine_raito = ratio / Parameters.ONT_AGE_BAND_POPULATION
+            #
+            #     phu_data[after_outbreak - 1][2] = phu_data[after_outbreak - 1][2] \
+            #                                                           + vaccine_raito
 
             phu_data = np.clip(phu_data, a_min=0, a_max=0.2)
             self.date_to_vaccines_by_phu[phu] = phu_data
 
-
-
-    # def differentiate(self):
-    #     """
-    #     Find the increment of a time-series data
-    #     :return:
-    #     """
-    #
-    #     vaccine_differentiated = np.zeros((self.total_days, 3, 16))
-    #
-    #     data = self.date_to_vaccines_by_age.transpose(1, 0, 2)
-    #     dose1 = np.clip((data[0] - data[1]), a_min=0, a_max=1)
-    #     dose2 = np.clip((data[1] - data[2]), a_min=0, a_max=1)
-    #
-    #     dose3 = data[2]
-    #
-    #     self.date_to_vaccines_by_age = np.array([dose1, dose2, dose3]).transpose(1, 0, 2)
-    #
-    #     for i in range(self.total_days - 1):
-    #         vaccine_differentiated[i + 1] = self.date_to_vaccines_by_age[i + 1] - self.date_to_vaccines_by_age[i]
-    #
-    #     self.date_to_vaccines_by_age = vaccine_differentiated
-    #
-    #     read_path = self.get_dependency_path() + 'vaccine_by_age_admin.csv'
-    #     vaccine_df_dose_admin = pd.read_csv(read_path)
-    #
-    #     vaccine_df_dose_admin = vaccine_df_dose_admin.fillna(0)
-    #
-    #     vaccine_df_dose_admin['report_date'] = pd.to_datetime(vaccine_df_dose_admin['report_date'])
-    #
-    #     for i in range(len(vaccine_df_dose_admin)):
-    #         row = vaccine_df_dose_admin.iloc[i]
-    #         after_outbreak = (row['report_date'] - Parameters.OUTBREAK_FIRST_DAY).days
-    #         more_dose = 0
-    #         if row['previous_day_3doses'] != 0:
-    #             more_dose = row['previous_day_total_doses_administered'] - row['previous_day_at_least_one'] - \
-    #                         row['previous_day_fully_vaccinated'] - row['previous_day_3doses']
-    #         if np.sum(self.date_to_vaccines_by_age[after_outbreak - 1][2]) != 0:
-    #             ratio = more_dose * self.date_to_vaccines_by_age[after_outbreak - 1][2] / \
-    #                     np.sum(self.date_to_vaccines_by_age[after_outbreak - 1][2])
-    #         else:
-    #             ratio = more_dose * Parameters.ONT_AGE_BAND_POPULATION / Parameters.ONT_POPULATOIN
-    #
-    #         vaccine_raito = ratio / Parameters.ONT_AGE_BAND_POPULATION
-    #
-    #         # print(self.date_to_vaccines_by_age[after_outbreak - 1][2])
-    #
-    #         self.date_to_vaccines_by_age[after_outbreak - 1][2] = self.date_to_vaccines_by_age[after_outbreak - 1][2] \
-    #                                                               + vaccine_raito
-    #
-    #     self.date_to_vaccines_by_age = np.clip(vaccine_differentiated, a_min=0, a_max=0.2)
+        # def differentiate(self):
+        #     """
+        #     Find the increment of a time-series data
+        #     :return:
+        #     """
+        #
+        #     vaccine_differentiated = np.zeros((self.total_days, 3, 16))
+        #
+        #     data = self.date_to_vaccines_by_age.transpose(1, 0, 2)
+        #     dose1 = np.clip((data[0] - data[1]), a_min=0, a_max=1)
+        #     dose2 = np.clip((data[1] - data[2]), a_min=0, a_max=1)
+        #
+        #     dose3 = data[2]
+        #
+        #     self.date_to_vaccines_by_age = np.array([dose1, dose2, dose3]).transpose(1, 0, 2)
+        #
+        #     for i in range(self.total_days - 1):
+        #         vaccine_differentiated[i + 1] = self.date_to_vaccines_by_age[i + 1] - self.date_to_vaccines_by_age[i]
+        #
+        #     self.date_to_vaccines_by_age = vaccine_differentiated
+        #
+        #     read_path = self.get_dependency_path() + 'vaccine_by_age_admin.csv'
+        #     vaccine_df_dose_admin = pd.read_csv(read_path)
+        #
+        #     vaccine_df_dose_admin = vaccine_df_dose_admin.fillna(0)
+        #
+        #     vaccine_df_dose_admin['report_date'] = pd.to_datetime(vaccine_df_dose_admin['report_date'])
+        #
+        #     for i in range(len(vaccine_df_dose_admin)):
+        #         row = vaccine_df_dose_admin.iloc[i]
+        #         after_outbreak = (row['report_date'] - Parameters.OUTBREAK_FIRST_DAY).days
+        #         more_dose = 0
+        #         if row['previous_day_3doses'] != 0:
+        #             more_dose = row['previous_day_total_doses_administered'] - row['previous_day_at_least_one'] - \
+        #                         row['previous_day_fully_vaccinated'] - row['previous_day_3doses']
+        #         if np.sum(self.date_to_vaccines_by_age[after_outbreak - 1][2]) != 0:
+        #             ratio = more_dose * self.date_to_vaccines_by_age[after_outbreak - 1][2] / \
+        #                     np.sum(self.date_to_vaccines_by_age[after_outbreak - 1][2])
+        #         else:
+        #             ratio = more_dose * Parameters.ONT_AGE_BAND_POPULATION / Parameters.ONT_POPULATOIN
+        #
+        #         vaccine_raito = ratio / Parameters.ONT_AGE_BAND_POPULATION
+        #
+        #         # print(self.date_to_vaccines_by_age[after_outbreak - 1][2])
+        #
+        #         self.date_to_vaccines_by_age[after_outbreak - 1][2] = self.date_to_vaccines_by_age[after_outbreak - 1][2] \
+        #                                                               + vaccine_raito
+        #
+        #     self.date_to_vaccines_by_age = np.clip(vaccine_differentiated, a_min=0, a_max=0.2)
 
         return
 
@@ -656,21 +679,18 @@ class Dependency:
         self.date_to_deaths_by_county = np.zeros(shape=(Parameters.NO_COUNTY, self.total_days, 16), dtype=float)
         self.date_to_vaccines_by_county = np.zeros(shape=(Parameters.NO_COUNTY, self.total_days, 3, 16), dtype=float)
 
-        # print(self.date_to_incidence_rate_by_phu.keys())
         for i in range(len(self.county_data)):
+
             county = self.county_data[i][0]
             district = self.county_data[i][1]
             population = self.county_data[i][2]
             phu = self.district_to_phu[district]
-
-            # print(population)
 
             incidences = self.date_to_incidence_rate_by_phu[phu].reshape(self.total_days, 1)
             cases_ratio = Parameters.ONT_CASE_DISTRIBUTION.reshape(16, 1)
             self.date_to_cases_by_county[i] = np.matmul(incidences, cases_ratio.T) * population / 100000.0
 
             hospitalizations = self.date_to_hospitalization_rate_by_phu[phu].reshape(self.total_days, 1)
-
             hospitalization_ratio = Parameters.ONT_HOSP_DISTRIBUTION.reshape(16, 1)
             self.date_to_hospitalizations_by_county[i] = np.matmul(hospitalizations, hospitalization_ratio.T) * \
                                                          population / 100000.0
@@ -689,9 +709,9 @@ class Dependency:
             deaths_ratio = Parameters.ONT_DEATH_DISTRIBUTION.reshape(16, 1)
             self.date_to_deaths_by_county[i] = np.matmul(deaths, deaths_ratio.T) * population / 100000.0
 
-            # This is wrong, and idk why
-
-            self.date_to_vaccines_by_county[i] = ((population) * self.date_to_vaccines_by_age)
+            vaccinated = self.date_to_vaccines_by_phu[phu]
+            self.date_to_vaccines_by_county[i] = population * np.concatenate([np.zeros(shape=(1, 3, 16)),
+                                                                              vaccinated], axis=0)
 
     def read_age(self):
         read_path = self.get_dependency_path() + '1710000501-eng.csv'
@@ -705,11 +725,5 @@ class Dependency:
 
 if __name__ == '__main__':
     dependency = Dependency()
-    reshaped_data = dependency.date_to_vaccines_by_age_un_differentaited.transpose(1, 0, 2)[0]
-    data = dependency.date_to_vaccines_by_age_un_reshaped.transpose(1, 0, 2)[0]
     print()
-    plt.plot(data)
-    plt.show()
-    plt.plot(reshaped_data)
-    plt.show()
     pass

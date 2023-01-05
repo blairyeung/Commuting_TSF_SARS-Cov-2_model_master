@@ -125,13 +125,12 @@ class ModelData:
 
         # TODO: Vaccination assumptions
 
-        vaccine_adjust = np.concatenate([np.zeros(shape=(y, 2, z)), 0.001 * Parameters.ONT_VACCINE_DISTRIBUTION * 16
-                                         * np.ones(shape=(y, 1, 1))], axis=1)
+        vaccine_adjust = np.concatenate([np.zeros(shape=(x, y, 2, z)), 0.001 * np.ones(shape=(x, y, 1, z))], axis=2)
 
-        self.time_series_vaccinated = np.concatenate([self.dependency.date_to_vaccines_by_age,
-                                                      vaccine_adjust], axis=0)
+        self.time_series_vaccinated = np.concatenate([self.dependency.date_to_vaccines_by_county,
+                                                      vaccine_adjust], axis=1)
 
-        self.time_series_vaccinated = self.time_series_vaccinated.transpose(1, 0, 2)
+        self.time_series_vaccinated = self.time_series_vaccinated.transpose(2, 0, 1, 3)
 
         self.time_series_infection_immunity = np.zeros(shape=(x, self.dependency.date_to_deaths_by_county.shape[1] + y,
                                                     z), dtype=float)
@@ -141,105 +140,105 @@ class ModelData:
 
         self.time_series_immunity = np.zeros(shape=(x, self.dependency.date_to_deaths_by_county.shape[1] + y,
                                                     z), dtype=float)
-
-        dose1 = (self.time_series_vaccinated[0])[:self.time_series_len]
-        dose2 = (self.time_series_vaccinated[1])[:self.time_series_len]
-        dose3 = (self.time_series_vaccinated[2])[:self.time_series_len]
-
-        dose1 = (np.ones(shape=(Parameters.NO_COUNTY, dose1.shape[0], dose1.shape[1])) * dose1).transpose(1, 0, 2)
-        dose2 = (np.ones(shape=(Parameters.NO_COUNTY, dose2.shape[0], dose2.shape[1])) * dose2).transpose(1, 0, 2)
-        dose3 = (np.ones(shape=(Parameters.NO_COUNTY, dose3.shape[0], dose3.shape[1])) * dose3).transpose(1, 0, 2)
-
-        county_population = np.array(self.dependency.index_to_population)
-        county_population = county_population.reshape(county_population.shape[0], 1)
-
-        age_population = self.dependency.population_by_age_band
-        age_population = age_population.reshape(age_population.shape[0], 1)
-
-        ratio = age_population / np.sum(age_population)
-
-        population = np.matmul(county_population, ratio.T)
-
-        today_population = np.ones(shape=(self.time_series_len, population.shape[0], population.shape[1])) * population
-
-        today_cases = self.time_series_infected.transpose(1, 0, 2)[:self.time_series_len]
-
-        today_incidence = today_cases / today_population
-
-        self.time_series_incidence = today_incidence.transpose(1, 0, 2)
-
-        raw_kernel_dose_1 = (Parameters.VACCINE_EFFICACY_KERNEL_DOSE1[:self.time_series_len])
-        raw_kernel_dose_2 = (Parameters.VACCINE_EFFICACY_KERNEL_DOSE2[:self.time_series_len])
-        raw_kernel_dose_3 = (Parameters.VACCINE_EFFICACY_KERNEL_DOSE3[:self.time_series_len])
-        raw_kernel_infection = (Parameters.INFECTION_EFFICACY_KERNEL[:self.time_series_len])
-
-        ratio = np.ones(shape=(1, Parameters.NO_COUNTY, 1))
-        kernel_dose_1 = np.multiply(raw_kernel_dose_1.reshape(self.time_series_len, 1, 16), ratio)
-        kernel_dose_2 = np.multiply(raw_kernel_dose_2.reshape(self.time_series_len, 1, 16), ratio)
-        kernel_dose_3 = np.multiply(raw_kernel_dose_3.reshape(self.time_series_len, 1, 16), ratio)
-        kernel_infection = np.multiply(raw_kernel_infection.reshape(self.time_series_len, 1, 16), ratio)
-
-
-        for date in range(self.time_series_len - self.forecast_days - self.prior_immunity,
-                          self.time_series_len - self.forecast_days):
-            dose1 = (self.time_series_vaccinated[0])[:date]
-            dose2 = (self.time_series_vaccinated[1])[:date]
-            dose3 = (self.time_series_vaccinated[2])[:date]
-
-            dose1 = (np.ones(shape=(Parameters.NO_COUNTY, dose1.shape[0], dose1.shape[1])) * dose1).transpose(1, 0, 2)
-            dose2 = (np.ones(shape=(Parameters.NO_COUNTY, dose2.shape[0], dose2.shape[1])) * dose2).transpose(1, 0, 2)
-            dose3 = (np.ones(shape=(Parameters.NO_COUNTY, dose3.shape[0], dose3.shape[1])) * dose3).transpose(1, 0, 2)
-
-            county_population = np.array(self.dependency.index_to_population)
-            county_population = county_population.reshape(county_population.shape[0], 1)
-
-            age_population = self.dependency.population_by_age_band
-            age_population = age_population.reshape(age_population.shape[0], 1)
-
-            ratio = age_population / np.sum(age_population)
-
-            population = np.matmul(county_population, ratio.T)
-
-            today_population = np.ones(
-                shape=(date, population.shape[0], population.shape[1])) * population
-
-            today_cases = self.time_series_infected.transpose(1, 0, 2)[:date]
-
-            today_incidence = today_cases / today_population
-
-            self.time_series_incidence = today_incidence.transpose(1, 0, 2)
-
-            raw_kernel_dose_1 = (Parameters.VACCINE_EFFICACY_KERNEL_DOSE1[:date])
-            raw_kernel_dose_2 = (Parameters.VACCINE_EFFICACY_KERNEL_DOSE2[:date])
-            raw_kernel_dose_3 = (Parameters.VACCINE_EFFICACY_KERNEL_DOSE3[:date])
-            raw_kernel_infection = (Parameters.INFECTION_EFFICACY_KERNEL[:date])
-
-            ratio = np.ones(shape=(1, Parameters.NO_COUNTY, 1))
-            kernel_dose_1 = np.multiply(raw_kernel_dose_1.reshape(date, 1, 16), ratio)
-            kernel_dose_2 = np.multiply(raw_kernel_dose_2.reshape(date, 1, 16), ratio)
-            kernel_dose_3 = np.multiply(raw_kernel_dose_3.reshape(date, 1, 16), ratio)
-            kernel_infection = np.multiply(raw_kernel_infection.reshape(date, 1, 16), ratio)
-
-            immunity_dose1 = np.multiply(dose1, kernel_dose_1)
-            immunity_dose2 = np.multiply(dose2, kernel_dose_2)
-            immunity_dose3 = np.multiply(dose3, kernel_dose_3)
-
-            infection_immunity = np.multiply(today_incidence, kernel_infection)
-            vaccine_immunity = immunity_dose1 + immunity_dose2 + immunity_dose3
-
-            vaccine_immunity[:][:][0] = 0
-
-            today_infection_immunity = np.sum(infection_immunity, axis=0)
-            today_vaccine_immunity = np.sum(vaccine_immunity, axis=0)
-
-
-            today_immunity = today_vaccine_immunity + (np.ones(shape=(Parameters.NO_COUNTY, 16)) -
-                                                       today_vaccine_immunity) \
-                             * today_infection_immunity
-
-            data = self.time_series_immunity.transpose(1, 0, 2)
-            data[date] = today_immunity
-            self.time_series_immunity = data.transpose(1, 0, 2)
-            print(date)
-
-
+        #
+        # dose1 = (self.time_series_vaccinated[0])[:self.time_series_len]
+        # dose2 = (self.time_series_vaccinated[1])[:self.time_series_len]
+        # dose3 = (self.time_series_vaccinated[2])[:self.time_series_len]
+        #
+        # dose1 = (np.ones(shape=(Parameters.NO_COUNTY, dose1.shape[0], dose1.shape[1])) * dose1).transpose(1, 0, 2)
+        # dose2 = (np.ones(shape=(Parameters.NO_COUNTY, dose2.shape[0], dose2.shape[1])) * dose2).transpose(1, 0, 2)
+        # dose3 = (np.ones(shape=(Parameters.NO_COUNTY, dose3.shape[0], dose3.shape[1])) * dose3).transpose(1, 0, 2)
+        #
+        # county_population = np.array(self.dependency.index_to_population)
+        # county_population = county_population.reshape(county_population.shape[0], 1)
+        #
+        # age_population = self.dependency.population_by_age_band
+        # age_population = age_population.reshape(age_population.shape[0], 1)
+        #
+        # ratio = age_population / np.sum(age_population)
+        #
+        # population = np.matmul(county_population, ratio.T)
+        #
+        # today_population = np.ones(shape=(self.time_series_len, population.shape[0], population.shape[1])) * population
+        #
+        # today_cases = self.time_series_infected.transpose(1, 0, 2)[:self.time_series_len]
+        #
+        # today_incidence = today_cases / today_population
+        #
+        # self.time_series_incidence = today_incidence.transpose(1, 0, 2)
+        #
+        # raw_kernel_dose_1 = (Parameters.VACCINE_EFFICACY_KERNEL_DOSE1[:self.time_series_len])
+        # raw_kernel_dose_2 = (Parameters.VACCINE_EFFICACY_KERNEL_DOSE2[:self.time_series_len])
+        # raw_kernel_dose_3 = (Parameters.VACCINE_EFFICACY_KERNEL_DOSE3[:self.time_series_len])
+        # raw_kernel_infection = (Parameters.INFECTION_EFFICACY_KERNEL[:self.time_series_len])
+        #
+        # ratio = np.ones(shape=(1, Parameters.NO_COUNTY, 1))
+        # kernel_dose_1 = np.multiply(raw_kernel_dose_1.reshape(self.time_series_len, 1, 16), ratio)
+        # kernel_dose_2 = np.multiply(raw_kernel_dose_2.reshape(self.time_series_len, 1, 16), ratio)
+        # kernel_dose_3 = np.multiply(raw_kernel_dose_3.reshape(self.time_series_len, 1, 16), ratio)
+        # kernel_infection = np.multiply(raw_kernel_infection.reshape(self.time_series_len, 1, 16), ratio)
+        #
+        #
+        # for date in range(self.time_series_len - self.forecast_days - self.prior_immunity,
+        #                   self.time_series_len - self.forecast_days):
+        #     dose1 = (self.time_series_vaccinated[0])[:date]
+        #     dose2 = (self.time_series_vaccinated[1])[:date]
+        #     dose3 = (self.time_series_vaccinated[2])[:date]
+        #
+        #     dose1 = (np.ones(shape=(Parameters.NO_COUNTY, dose1.shape[0], dose1.shape[1])) * dose1).transpose(1, 0, 2)
+        #     dose2 = (np.ones(shape=(Parameters.NO_COUNTY, dose2.shape[0], dose2.shape[1])) * dose2).transpose(1, 0, 2)
+        #     dose3 = (np.ones(shape=(Parameters.NO_COUNTY, dose3.shape[0], dose3.shape[1])) * dose3).transpose(1, 0, 2)
+        #
+        #     county_population = np.array(self.dependency.index_to_population)
+        #     county_population = county_population.reshape(county_population.shape[0], 1)
+        #
+        #     age_population = self.dependency.population_by_age_band
+        #     age_population = age_population.reshape(age_population.shape[0], 1)
+        #
+        #     ratio = age_population / np.sum(age_population)
+        #
+        #     population = np.matmul(county_population, ratio.T)
+        #
+        #     today_population = np.ones(
+        #         shape=(date, population.shape[0], population.shape[1])) * population
+        #
+        #     today_cases = self.time_series_infected.transpose(1, 0, 2)[:date]
+        #
+        #     today_incidence = today_cases / today_population
+        #
+        #     self.time_series_incidence = today_incidence.transpose(1, 0, 2)
+        #
+        #     raw_kernel_dose_1 = (Parameters.VACCINE_EFFICACY_KERNEL_DOSE1[:date])
+        #     raw_kernel_dose_2 = (Parameters.VACCINE_EFFICACY_KERNEL_DOSE2[:date])
+        #     raw_kernel_dose_3 = (Parameters.VACCINE_EFFICACY_KERNEL_DOSE3[:date])
+        #     raw_kernel_infection = (Parameters.INFECTION_EFFICACY_KERNEL[:date])
+        #
+        #     ratio = np.ones(shape=(1, Parameters.NO_COUNTY, 1))
+        #     kernel_dose_1 = np.multiply(raw_kernel_dose_1.reshape(date, 1, 16), ratio)
+        #     kernel_dose_2 = np.multiply(raw_kernel_dose_2.reshape(date, 1, 16), ratio)
+        #     kernel_dose_3 = np.multiply(raw_kernel_dose_3.reshape(date, 1, 16), ratio)
+        #     kernel_infection = np.multiply(raw_kernel_infection.reshape(date, 1, 16), ratio)
+        #
+        #     immunity_dose1 = np.multiply(dose1, kernel_dose_1)
+        #     immunity_dose2 = np.multiply(dose2, kernel_dose_2)
+        #     immunity_dose3 = np.multiply(dose3, kernel_dose_3)
+        #
+        #     infection_immunity = np.multiply(today_incidence, kernel_infection)
+        #     vaccine_immunity = immunity_dose1 + immunity_dose2 + immunity_dose3
+        #
+        #     vaccine_immunity[:][:][0] = 0
+        #
+        #     today_infection_immunity = np.sum(infection_immunity, axis=0)
+        #     today_vaccine_immunity = np.sum(vaccine_immunity, axis=0)
+        #
+        #
+        #     today_immunity = today_vaccine_immunity + (np.ones(shape=(Parameters.NO_COUNTY, 16)) -
+        #                                                today_vaccine_immunity) \
+        #                      * today_infection_immunity
+        #
+        #     data = self.time_series_immunity.transpose(1, 0, 2)
+        #     data[date] = today_immunity
+        #     self.time_series_immunity = data.transpose(1, 0, 2)
+        #     print(date)
+        #
+        #

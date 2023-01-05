@@ -36,8 +36,58 @@ def log_fit(x, a=0, b=0, c=0):
 
 
 def get_immunity_kernel(dose=0, category='Transmission', length=2000):
+    match category:
+        case 'Transmission':
+            match dose:
+                case 0:
+                    return INFECTION_IMMUNITY_TRANSMISSION
+                case 1:
+                    return ONE_DOSE_EFFICACY_TRANSMISSION
+                case 2:
+                    return TWO_DOSE_EFFICACY_TRANSMISSION
+                case 3:
+                    return THREE_DOSE_EFFICACY_TRANSMISSION
+                case _:
+                    return
+        case 'Clinical':
+            match dose:
+                case 0:
+                    return
+                case 1:
+                    return
+                case 2:
+                    return
+                case 3:
+                    return
+                case _:
+                    return
+        case 'Hospitalization':
+            match dose:
+                case 0:
+                    return
+                case 1:
+                    return
+                case 2:
+                    return
+                case 3:
+                    return
+                case _:
+                    return
+        case 'Death':
+            match dose:
+                case 0:
+                    return
+                case 1:
+                    return
+                case 2:
+                    return
+                case 3:
+                    return
+                case _:
+                    return
+        case _:
+            return
 
-    pass
 
 DEPENDENCY_PATH = os.getcwd()[:-5] + 'Model Dependencies/'
 
@@ -237,7 +287,7 @@ ICU2RMV_CONVOLUTION_KERNEL = normalize(lognorm.pdf(range(0, 40), s=1.25, loc=13.
 kernel_size_4 = np.linspace(0, 30, 30)
 CLI2DEA_CONVOLUTION_KERNEL = normalize(norm.pdf(kernel_size_4, loc=15, scale=2))
 
-VACCINE_EFFICACY_KERNEL_DOSE1 = get_immunity_kernel(dose=1)
+VACCINE_EFFICACY_KERNEL_DOSE1 = get_immunity_kernel(dose=1, category='Transmission')
 VACCINE_EFFICACY_KERNEL_DOSE2 = get_immunity_kernel(dose=2)
 VACCINE_EFFICACY_KERNEL_DOSE3 = get_immunity_kernel(dose=3)
 
