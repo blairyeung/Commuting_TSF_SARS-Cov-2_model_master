@@ -13,8 +13,11 @@ import Gaussian
 import Parameters
 import Util
 
+def log_fit(x, a=0, b=0):
+    return - a * np.exp(-b * x) + 0
 
 class Dependency:
+
     county_data = np.zeros((Parameters.NO_COUNTY, 3), dtype=int)
     commute_matrix = np.zeros((Parameters.NO_COUNTY, Parameters.NO_COUNTY), dtype=int)
 
@@ -176,6 +179,20 @@ class Dependency:
         blurred_mobility[3][min_date:max_date + 1] = trainsit_blurred.flatten()
         blurred_mobility[4][min_date:max_date + 1] = workplace_blurred.flatten()
         blurred_mobility[5][min_date:max_date + 1] = residential_blurred.flatten()
+
+        forecast_interval = np.linspace(0, 3000 - max_date - 1, 3000 - max_date).astype(int)
+
+        retail_param = [2.91110633e+01, 2.16706517e-02]
+        trainsit_param = [5.47809268e+01, 4.45390140e-03]
+        workplace_param = [2.46551438e+01, 3.50052645e-04]
+        residential_param = [-1.08190670e+01,  5.54319046e-03]
+
+        blurred_mobility[0][max_date:] = log_fit(forecast_interval, retail_param[0], retail_param[1])
+        blurred_mobility[3][max_date:] = log_fit(forecast_interval, trainsit_param[0], trainsit_param[1])
+        blurred_mobility[4][max_date:] = log_fit(forecast_interval, workplace_param[0], workplace_param[1])
+        blurred_mobility[5][max_date:] = log_fit(forecast_interval, residential_param[0], residential_param[1])
+
+        print(forecast_interval)
 
         blurred_mobility = blurred_mobility / 100
 
