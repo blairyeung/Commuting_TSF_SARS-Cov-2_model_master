@@ -48,7 +48,7 @@ class Dependency:
     # date_to_vaccines_by_age_un_reshaped = np.zeros((0, 3, 9))
     # date_to_vaccines_by_age_un_differentaited = np.zeros((0, 3, 9))
 
-    date_to_vaccines_by_phu = np.zeros((0, 3, 9))
+    date_to_vaccines_by_phu = dict()
 
     phu_id_pairing = {2226: 'Algoma Public Health', 2227: 'Brant County Health Unit',
                       2230: 'Durham Region Health Department ', 2233: 'Grey Bruce Health Unit',
@@ -111,17 +111,13 @@ class Dependency:
         self.read_age()
         self.read_cases()
         # self.read_vaccine()
+        # self.read_vaccine_by_phu()
         self.read_vaccine_by_phu()
         # self.reshape_vaccine()
         self.reshape_vaccine_by_phu()
         """
             Do not differentiate cases
         """
-        # self.differentiate()
-
-        for phu in self.date_to_vaccines_by_phu:
-            print(np.sum(self.date_to_vaccines_by_phu[phu]), 'HEre!?')
-
         self.differentiate_by_phu()
         self.code_district_linking()
         self.compute_phu_population()
@@ -222,7 +218,6 @@ class Dependency:
             count += 1
             start = count * 365 + christmas_start
             end = min(count * 365 + christmas_end, 3000)
-            # print(start, end)
             school[start:end] = - 0.65
             pass
 
@@ -379,105 +374,112 @@ class Dependency:
         file.close()
         return
 
-    # def read_vaccine(self):
-    #     read_path = self.get_dependency_path() + 'vaccine_by_age_auto_update.csv'
-    #     vaccine_df = pd.read_csv(read_path)
-    #
+
+    # def read_vaccine_by_phu(self):
+    #     path = path = self.get_dependency_path() + 'vaccines_by_age_phu.csv'
+    #     vaccine_df = pd.read_csv(path)
     #     vaccine_df['Percent_at_least_one_dose'] = vaccine_df['Percent_at_least_one_dose'].fillna(0)
     #     vaccine_df['Percent_fully_vaccinated'] = vaccine_df['Percent_fully_vaccinated'].fillna(0)
     #     vaccine_df['Percent_3doses'] = vaccine_df['Percent_3doses'].fillna(0)
-    #
     #     vaccine_df['Date'] = pd.to_datetime(vaccine_df['Date'])
-    #     vaccine_df['After outbreak'] = (vaccine_df['Date'] - Parameters.OUTBREAK_FIRST_DAY).days
+    #     # vaccine_df['After outbreak'] = (vaccine_df['Date'] - Parameters.OUTBREAK_FIRST_DAY).dt.days
+    #
+    #     vaccine_df['PHU name'] = vaccine_df['PHU ID']
+    #     grouped = vaccine_df.groupby('PHU ID')
     #
     #     self.find_max_date()
     #
-    #     self.date_to_vaccines_by_age = np.zeros((self.total_days, 3, 9))
+    #     self.date_to_vaccines_by_phu = dict()
     #
-    #     for i in range(len(vaccine_df)):
-    #         row = vaccine_df.iloc[i]
-    #         after_outbreak = (row['Date'] - Parameters.OUTBREAK_FIRST_DAY).days
-    #         band = row['Agegroup']
+    #     for g in grouped.groups:
+    #         # Group by age band
+    #         # Find the min time delta
+    #         # Convert to numpy
+    #         # transpose
+    #         group = grouped.get_group(g)
+    #         age_strat = group.groupby('Agegroup')
     #
-    #         if band in Parameters.VACCINE_AGE_BANDS:
-    #             self.date_to_vaccines_by_age[after_outbreak - 1][0][Parameters.VACCINE_AGE_BANDS.index(band)] = float(
-    #                 row['Percent_at_least_one_dose'])
-    #             self.date_to_vaccines_by_age[after_outbreak - 1][1][Parameters.VACCINE_AGE_BANDS.index(band)] = float(
-    #                 row['Percent_fully_vaccinated'])
-    #             self.date_to_vaccines_by_age[after_outbreak - 1][2][Parameters.VACCINE_AGE_BANDS.index(band)] = float(
-    #                 row['Percent_3doses'])
+    #         phu_data = np.zeros(shape=(len(Parameters.VACCINE_AGE_BANDS), self.total_days, 3))
+    #
+    #         for age_group in age_strat.groups:
+    #
+    #             age_group_data = age_strat.get_group(age_group)
+    #
+    #             min_date = (age_group_data['Date'].min() - Parameters.OUTBREAK_FIRST_DAY).days
+    #             max_date = (age_group_data['Date'].max() - Parameters.OUTBREAK_FIRST_DAY).days
+    #
+    #             first_dose = age_group_data['Percent_at_least_one_dose'].to_numpy()
+    #             second_dose = age_group_data['Percent_fully_vaccinated'].to_numpy()
+    #             third_dose = age_group_data['Percent_3doses'].to_numpy()
+    #
+    #             all_dose_data = np.concatenate([first_dose.reshape(first_dose.shape[0], 1),
+    #                                             second_dose.reshape(second_dose.shape[0], 1),
+    #                                             third_dose.reshape(third_dose.shape[0], 1)], axis=1)
+    #
+    #             # print(all_dose_data.shape)
+    #
+    #             all_dose_data_concat = np.concatenate([np.zeros(shape=(min_date, 3)), all_dose_data,
+    #                                                    np.zeros(shape=(self.total_days - max_date, 3))], axis=0)
+    #
+    #             if age_group in Parameters.VACCINE_AGE_BANDS:
+    #                 phu_data[Parameters.VACCINE_AGE_BANDS.index(age_group)] = all_dose_data_concat
+    #
+    #             else:
+    #                 pass
+    #
+    #         self.date_to_vaccines_by_phu[self.phu_id_pairing[g]] = phu_data.transpose(1, 2, 0)
     #
     #     return
 
     def read_vaccine_by_phu(self):
-        path = path = self.get_dependency_path() + 'vaccines_by_age_phu.csv'
+
+        age_bands = ['under 5', '5 - 11', '12 - 17', '18 - 29', '30 - 39', '40 - 49', '50 - 59', '60 - 69', '70 - 79',
+                     '80+']
+        vaccine_dose_descrpition = ['At least 1 dose coverage (%):', 'Completed primary series coverage (%):',
+                                    'Completed primary series and 1 booster dose coverage (%):',
+                                    'Completed primary series and 2 booster doses coverage (%):']
+
+        vaccine_dose_extra = ['Dose 5', 'Dose 6']
+
+        path = self.get_dependency_path() + 'All Covid-19 vaccine trends data.csv'
         vaccine_df = pd.read_csv(path)
-        vaccine_df['Percent_at_least_one_dose'] = vaccine_df['Percent_at_least_one_dose'].fillna(0)
-        vaccine_df['Percent_fully_vaccinated'] = vaccine_df['Percent_fully_vaccinated'].fillna(0)
-        vaccine_df['Percent_3doses'] = vaccine_df['Percent_3doses'].fillna(0)
         vaccine_df['Date'] = pd.to_datetime(vaccine_df['Date'])
-        # vaccine_df['After outbreak'] = (vaccine_df['Date'] - Parameters.OUTBREAK_FIRST_DAY).dt.days
+        vaccine_df.replace('At least 1 dose coverage (%): ', '')
 
-        vaccine_df['PHU name'] = vaccine_df['PHU ID']
-        grouped = vaccine_df.groupby('PHU ID')
-
-        self.find_max_date()
-
-        self.date_to_vaccines_by_phu = dict()
+        grouped = vaccine_df.groupby('Geographic area')
 
         for g in grouped.groups:
-            # Group by age band
-            # Find the min time delta
-            # Convert to numpy
-            # transpose
+            if g not in self.phu_to_district:
+                continue
+
+            population = self.population_by_phu[g]
+
+            data = np.zeros(shape=(len(vaccine_dose_descrpition), len(age_bands), self.total_days))
+            extra_dose_data = np.zeros(shape=(len(vaccine_dose_extra), len(age_bands), self.total_days))
+
             group = grouped.get_group(g)
-            age_strat = group.groupby('Agegroup')
 
-            phu_data = np.zeros(shape=(len(Parameters.VACCINE_AGE_BANDS), self.total_days, 3))
+            pre = (group['Date'].min() - Parameters.OUTBREAK_FIRST_DAY).days - 1
+            sur = self.total_days - (group['Date'].max() - Parameters.OUTBREAK_FIRST_DAY).days
 
-            for age_group in age_strat.groups:
+            for i in range(len(vaccine_dose_descrpition)):
+                for j in range(len(age_bands)):
+                    combined = vaccine_dose_descrpition[i] + ' ' + age_bands[j]
+                    if combined not in vaccine_df.keys():
+                        continue
+                    stratified_data = np.concatenate(
+                        [np.zeros(shape=pre, ), group[combined].to_numpy(), np.zeros(shape=sur, )])
+                    data[i][j] = stratified_data
 
-                age_group_data = age_strat.get_group(age_group)
+            for i in range(len(vaccine_dose_descrpition)):
+                stratified_data = np.concatenate(
+                    [np.zeros(shape=pre, ), group[vaccine_dose_extra[i]].to_numpy(), np.zeros(shape=sur, )])
+                extra_dose_data[i] = stratified_data / population
 
-                min_date = (age_group_data['Date'].min() - Parameters.OUTBREAK_FIRST_DAY).days
-                max_date = (age_group_data['Date'].max() - Parameters.OUTBREAK_FIRST_DAY).days
+            data = data.transpose(2, 0, 1)
+            extra_dose = np.prod([data, extra_dose_data], axis=0)
 
-                first_dose = age_group_data['Percent_at_least_one_dose'].to_numpy()
-                second_dose = age_group_data['Percent_fully_vaccinated'].to_numpy()
-                third_dose = age_group_data['Percent_3doses'].to_numpy()
-
-                all_dose_data = np.concatenate([first_dose.reshape(first_dose.shape[0], 1),
-                                                second_dose.reshape(second_dose.shape[0], 1),
-                                                third_dose.reshape(third_dose.shape[0], 1)], axis=1)
-
-                # print(all_dose_data.shape)
-
-                all_dose_data_concat = np.concatenate([np.zeros(shape=(min_date, 3)), all_dose_data,
-                                                       np.zeros(shape=(self.total_days - max_date, 3))], axis=0)
-
-                if age_group in Parameters.VACCINE_AGE_BANDS:
-                    phu_data[Parameters.VACCINE_AGE_BANDS.index(age_group)] = all_dose_data_concat
-
-                else:
-                    pass
-
-            self.date_to_vaccines_by_phu[self.phu_id_pairing[g]] = phu_data.transpose(1, 2, 0)
-
-            # phu_vaccine = np.zeros(shape=(self.total_days, 3, 9))
-            # for i in range(len(group)):
-            #     row = vaccine_df.iloc[i]
-            #     after_outbreak = (row['Date'] - Parameters.OUTBREAK_FIRST_DAY).days
-            #     band = row['Agegroup']
-            #
-            #     if band in Parameters.VACCINE_AGE_BANDS:
-            #         phu_vaccine[after_outbreak - 1][0][Parameters.VACCINE_AGE_BANDS.index(band)] = float(
-            #             row['Percent_at_least_one_dose'])
-            #         phu_vaccine[after_outbreak - 1][1][Parameters.VACCINE_AGE_BANDS.index(band)] = float(
-            #             row['Percent_fully_vaccinated'])
-            #         phu_vaccine[after_outbreak - 1][2][Parameters.VACCINE_AGE_BANDS.index(band)] = float(
-            #             row['Percent_3doses'])
-            #
-            # self.date_to_vaccines_by_phu[self.phu_id_pairing[g]] = phu_vaccine
+            self.date_to_vaccines_by_phu[g] = copy.deepcopy(data)
 
         return
 
@@ -486,7 +488,7 @@ class Dependency:
             reshape the 10-years age band into 5-years age band
         """
 
-        reshaped = np.zeros((self.total_days, 3, 16))
+        reshaped = np.zeros((self.total_days, 4, 16))
 
         for phu in self.date_to_vaccines_by_phu:
             phu_data = self.date_to_vaccines_by_phu[phu]
@@ -503,33 +505,26 @@ class Dependency:
         for phu in self.date_to_vaccines_by_phu:
             phu_data = self.date_to_vaccines_by_phu[phu]
 
-            print(phu)
-
-            print(np.sum(self.date_to_vaccines_by_phu[phu]), 'Why?')
-
-            # print(np.sum(phu_data), True)
-
-            # print(phu_data.shape)
-
             vaccine_differentiated = np.zeros((self.total_days, 3, 16))
 
             data = phu_data.transpose(1, 0, 2)
+
+            print(data.shape)
+
             dose1 = np.clip((data[0] - data[1]), a_min=0, a_max=1)
             dose2 = np.clip((data[1] - data[2]), a_min=0, a_max=1)
+            dose3 = np.clip((data[2] - data[3]), a_min=0, a_max=1)
+            dose4 = data[3]
 
-            dose3 = data[2]
-
-            phu_data = np.array([dose1, dose2, dose3]).transpose(1, 0, 2)
+            phu_data = np.array([dose1, dose2, dose3, dose4]).transpose(1, 0, 2)
 
             print(phu_data.shape)
 
-            # print(np.sum(phu_data))
 
             vaccine_differentiated = np.diff(phu_data, axis=0)
 
             phu_data = vaccine_differentiated
 
-            print(np.sum(phu_data))
 
             phu_data = np.clip(phu_data, a_min=0, a_max=0.2)
             self.date_to_vaccines_by_phu[phu] = phu_data
@@ -538,7 +533,7 @@ class Dependency:
 
     def find_max_date(self):
         case_path = self.get_dependency_path() + 'All case trends data.csv'
-        vaccine_path = self.get_dependency_path() + 'vaccines_by_age_phu.csv'
+        vaccine_path = self.get_dependency_path() + 'All Covid-19 vaccine trends data.csv'
 
         cases = pd.read_csv(case_path)
         vaccines = pd.read_csv(vaccine_path)
@@ -582,7 +577,7 @@ class Dependency:
                                                            dtype=float)
         self.date_to_ICU_by_county = np.zeros(shape=(Parameters.NO_COUNTY, self.total_days, 16), dtype=float)
         self.date_to_deaths_by_county = np.zeros(shape=(Parameters.NO_COUNTY, self.total_days, 16), dtype=float)
-        self.date_to_vaccines_by_county = np.zeros(shape=(Parameters.NO_COUNTY, self.total_days, 3, 16), dtype=float)
+        self.date_to_vaccines_by_county = np.zeros(shape=(Parameters.NO_COUNTY, self.total_days, 4, 16), dtype=float)
 
         for i in range(len(self.county_data)):
 
@@ -616,7 +611,9 @@ class Dependency:
 
             vaccinated = self.date_to_vaccines_by_phu[phu]
 
-            self.date_to_vaccines_by_county[i] = np.concatenate([np.zeros(shape=(1, 3, 16)),
+            print(vaccinated.shape)
+
+            self.date_to_vaccines_by_county[i] = np.concatenate([np.zeros(shape=(1, 4, 16)),
                                                                               vaccinated], axis=0)
 
     def read_age(self):
@@ -631,5 +628,4 @@ class Dependency:
 
 if __name__ == '__main__':
     dependency = Dependency()
-    print()
     pass
