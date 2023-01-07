@@ -104,14 +104,19 @@ TWO_DOSE_EFFICACY_TRANSMISSION = get_log_effectiveness(a=62.715, b=0.004, c=10, 
 
 THREE_DOSE_EFFICACY_TRANSMISSION = get_log_effectiveness(a=93.327, b=0.003, c=0, length=2000)
 
-INFECTION_IMMUNITY_TRANSMISSION = get_log_effectiveness(a=1000, b=0.0015, c=0, length=2000)
+FOURTH_DOSE_EFFICACY_TRANSMISSION = THREE_DOSE_EFFICACY_TRANSMISSION
 
+THREE_DOSE_EFFICACY_RMV_TRANSMISSION = np.concatenate([THREE_DOSE_EFFICACY_TRANSMISSION[60:],
+                                                     np.zeros(shape=(60, 16))], axis=0)
 
 TWO_DOSE_EFFICACY_RMV_TRANSMISSION = np.concatenate([TWO_DOSE_EFFICACY_TRANSMISSION[60:],
                                                      np.zeros(shape=(60, 16))], axis=0)
 
 ONE_DOSE_EFFICACY_RMV_TRANSMISSION = np.concatenate([0.8 * TWO_DOSE_EFFICACY_TRANSMISSION[60:],
                                                      np.zeros(shape=(60, 16))], axis=0)
+
+INFECTION_IMMUNITY_TRANSMISSION = get_log_effectiveness(a=1000, b=0.0015, c=0, length=2000)
+
 
 """
     Clinical effectiveness
@@ -290,6 +295,7 @@ CLI2DEA_CONVOLUTION_KERNEL = normalize(norm.pdf(kernel_size_4, loc=15, scale=2))
 VACCINE_EFFICACY_KERNEL_DOSE1 = get_immunity_kernel(dose=1, category='Transmission')
 VACCINE_EFFICACY_KERNEL_DOSE2 = get_immunity_kernel(dose=2)
 VACCINE_EFFICACY_KERNEL_DOSE3 = get_immunity_kernel(dose=3)
+VACCINE_EFFICACY_KERNEL_DOSE4 = get_immunity_kernel(dose=3)
 
 INFECTION_EFFICACY_KERNEL = get_immunity_kernel(dose=0)
 

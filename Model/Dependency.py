@@ -452,8 +452,6 @@ class Dependency:
             if g not in self.phu_to_district:
                 continue
 
-            population = self.population_by_phu[g]
-
             data = np.zeros(shape=(len(vaccine_dose_descrpition), len(age_bands), self.total_days))
             extra_dose_data = np.zeros(shape=(len(vaccine_dose_extra), len(age_bands), self.total_days))
 
@@ -471,13 +469,12 @@ class Dependency:
                         [np.zeros(shape=pre, ), group[combined].to_numpy(), np.zeros(shape=sur, )])
                     data[i][j] = stratified_data
 
-            for i in range(len(vaccine_dose_descrpition)):
+            for i in range(len(vaccine_dose_extra)):
                 stratified_data = np.concatenate(
                     [np.zeros(shape=pre, ), group[vaccine_dose_extra[i]].to_numpy(), np.zeros(shape=sur, )])
-                extra_dose_data[i] = stratified_data / population
+                extra_dose_data[i] = stratified_data
 
-            data = data.transpose(2, 0, 1)
-            extra_dose = np.prod([data, extra_dose_data], axis=0)
+            data = data.transpose(2, 0, 1) / 100
 
             self.date_to_vaccines_by_phu[g] = copy.deepcopy(data)
 
@@ -504,8 +501,6 @@ class Dependency:
     def differentiate_by_phu(self):
         for phu in self.date_to_vaccines_by_phu:
             phu_data = self.date_to_vaccines_by_phu[phu]
-
-            vaccine_differentiated = np.zeros((self.total_days, 3, 16))
 
             data = phu_data.transpose(1, 0, 2)
 

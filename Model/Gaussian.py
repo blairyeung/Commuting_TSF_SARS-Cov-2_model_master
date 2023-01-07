@@ -14,15 +14,16 @@ def blur(lst):
     """
     raw = np.zeros(shape=(100, ))
     # print(lst)
-    raw[5:12] = lst[0]
-    raw[12:18] = lst[1]
-    raw[18:30] = lst[2]
-    raw[30:40] = lst[3]
-    raw[40:50] = lst[4]
-    raw[50:60] = lst[5]
-    raw[60:70] = lst[6]
-    raw[70:80] = lst[7]
-    raw[80:] = lst[8]
+    raw[:5] = lst[0]
+    raw[5:12] = lst[1]
+    raw[12:18] = lst[2]
+    raw[18:30] = lst[3]
+    raw[30:40] = lst[4]
+    raw[40:50] = lst[5]
+    raw[50:60] = lst[6]
+    raw[60:70] = lst[7]
+    raw[70:80] = lst[8]
+    raw[80:] = lst[9]
 
     # raw = raw * Parameters.RAW_AGE_DISTRIBUTION / Parameters.ONT_POPULATOIN
 

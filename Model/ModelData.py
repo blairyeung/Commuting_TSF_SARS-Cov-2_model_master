@@ -125,7 +125,7 @@ class ModelData:
 
         # TODO: Vaccination assumptions
 
-        vaccine_adjust = np.concatenate([np.zeros(shape=(x, y, 2, z)), 0.001 * np.ones(shape=(x, y, 1, z))], axis=2)
+        vaccine_adjust = np.concatenate([np.zeros(shape=(x, y, 2, z)), 0.001 * np.ones(shape=(x, y, 2, z))], axis=2)
 
         print(np.max(self.dependency.date_to_vaccines_by_county))
 

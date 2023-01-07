@@ -75,19 +75,14 @@ class Model:
         dose1_raw = (self._model_data.time_series_vaccinated[0])[:, :date]
         dose2_raw = (self._model_data.time_series_vaccinated[1])[:, :date]
         dose3_raw = (self._model_data.time_series_vaccinated[2])[:, :date]
+        dose4_raw = (self._model_data.time_series_vaccinated[3])[:, :date]
 
         # Broadcast the data to the whole province
 
         dose1 = dose1_raw.transpose(1, 0, 2)
         dose2 = dose2_raw.transpose(1, 0, 2)
         dose3 = dose3_raw.transpose(1, 0, 2)
-
-        # dose1 = (np.ones(shape=(Parameters.NO_COUNTY, dose1_raw.shape[0],
-        #                         dose1_raw.shape[1])) * dose1_raw).transpose(1, 0, 2)
-        # dose2 = (np.ones(shape=(Parameters.NO_COUNTY, dose2_raw.shape[0],
-        #                         dose2_raw.shape[1])) * dose2_raw).transpose(1, 0, 2)
-        # dose3 = (np.ones(shape=(Parameters.NO_COUNTY, dose3_raw.shape[0],
-        #                         dose3_raw.shape[1])) * dose3_raw).transpose(1, 0, 2)
+        dose4 = dose4_raw.transpose(1, 0, 2)
 
         # Compute incidence rate
 
@@ -114,10 +109,12 @@ class Model:
         raw_kernel_dose_1 = (Parameters.VACCINE_EFFICACY_KERNEL_DOSE1[:date])[::-1]
         raw_kernel_dose_2 = (Parameters.VACCINE_EFFICACY_KERNEL_DOSE2[:date])[::-1]
         raw_kernel_dose_3 = (Parameters.VACCINE_EFFICACY_KERNEL_DOSE3[:date])[::-1]
+        raw_kernel_dose_4 = (Parameters.VACCINE_EFFICACY_KERNEL_DOSE4[:date])[::-1]
         raw_kernel_infection = (Parameters.INFECTION_EFFICACY_KERNEL[:date])[::-1]
 
         raw_kernel_dose_rmv_1 = (Parameters.ONE_DOSE_EFFICACY_RMV_TRANSMISSION[:date])[::-1]
         raw_kernel_dose_rmv_2 = (Parameters.TWO_DOSE_EFFICACY_RMV_TRANSMISSION[:date])[::-1]
+        raw_kernel_dose_rmv_3 = (Parameters.THREE_DOSE_EFFICACY_RMV_TRANSMISSION[:date])[::-1]
 
         # Reshape the convolutional kernels
 
@@ -125,22 +122,27 @@ class Model:
         kernel_dose_1 = np.multiply(raw_kernel_dose_1.reshape(date, 1, 16), ratio)
         kernel_dose_2 = np.multiply(raw_kernel_dose_2.reshape(date, 1, 16), ratio)
         kernel_dose_3 = np.multiply(raw_kernel_dose_3.reshape(date, 1, 16), ratio)
+        kernel_dose_4 = np.multiply(raw_kernel_dose_4.reshape(date, 1, 16), ratio)
         kernel_infection = np.multiply(raw_kernel_infection.reshape(date, 1, 16), ratio)
 
         kernel_dose_rmv_1 = np.multiply(raw_kernel_dose_rmv_1.reshape(date, 1, 16), ratio)
         kernel_dose_rmv_2 = np.multiply(raw_kernel_dose_rmv_2.reshape(date, 1, 16), ratio)
+        kernel_dose_rmv_3 = np.multiply(raw_kernel_dose_rmv_3.reshape(date, 1, 16), ratio)
 
         # Convolve at one specific data and get the immunity
 
         immunity_dose1 = np.sum(np.multiply(dose1, kernel_dose_1), axis=0)
         immunity_dose2 = np.sum(np.multiply(dose2, kernel_dose_2), axis=0)
         immunity_dose3 = np.sum(np.multiply(dose3, kernel_dose_3), axis=0)
+        immunity_dose4 = np.sum(np.multiply(dose4, kernel_dose_4), axis=0)
 
         immunity_dose1_rmv = np.sum(np.multiply(dose2, kernel_dose_rmv_1), axis=0)
         immunity_dose2_rmv = np.sum(np.multiply(dose3, kernel_dose_rmv_2), axis=0)
+        immunity_dose3_rmv = np.sum(np.multiply(dose4, kernel_dose_rmv_3), axis=0)
 
         infection_immunized = np.sum(np.multiply(today_incidence, kernel_infection), axis=0)
-        vaccine_immunity = immunity_dose1 + immunity_dose2 + immunity_dose3 - immunity_dose1_rmv - immunity_dose2_rmv
+        vaccine_immunity = immunity_dose1 + immunity_dose2 + immunity_dose3 + immunity_dose4 - \
+                           immunity_dose1_rmv - immunity_dose2_rmv - immunity_dose3_rmv
 
         infection_immunity = infection_immunized / today_population
         vaccine_immunized = vaccine_immunity * today_population
