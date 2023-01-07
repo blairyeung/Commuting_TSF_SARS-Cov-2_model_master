@@ -13,7 +13,7 @@ import Parameters
 
 class Model:
     dependency = None
-    _model_data = None
+    model_data = None
 
     date = 0
 
@@ -29,12 +29,13 @@ class Model:
     def __init__(self, forecast_days=1000, infectiousness=Parameters.INFECTIOUSNESS, prior_immunity=0, fitting=False,
                  enable_commute=True):
         self._initialize_dependencies()
-        self._model_data = ModelData(forecast_days, self.dependency, load_from_dependency=True,
+        self.model_data = ModelData(forecast_days, self.dependency, load_from_dependency=True,
                                      prior_immunity=prior_immunity)
         self.date = self.dependency.total_days - 1
         self.infectiousness = infectiousness
         self.model_fitting = fitting
         self.enable_commute = enable_commute
+        self._compute_immunity(self.date)
         return
 
     def run_one_cycle(self, display_status=False, recompute_immunity=True):
@@ -62,20 +63,20 @@ class Model:
 
     def print_data(self, date):
         print(date)
-        today_cases = self._model_data.time_series_active_cases.transpose(1, 0, 2)
+        today_cases = self.model_data.time_series_active_cases.transpose(1, 0, 2)
         print('Today_new_cases', np.sum(today_cases[date]))
-        print('Total cases', np.sum(self._model_data.time_series_active_cases))
-        print('Immunity', np.max(self._model_data.time_series_immunity.transpose(1, 0, 2)[date][0]))
+        print('Total cases', np.sum(self.model_data.time_series_active_cases))
+        print('Immunity', np.max(self.model_data.time_series_immunity.transpose(1, 0, 2)[date][0]))
 
     def _compute_immunity(self, date):
 
-        print(self._model_data.time_series_vaccinated.shape)
+        # print(self.model_data.time_series_vaccinated.shape)
 
         # Get the provincial vaccination data
-        dose1_raw = (self._model_data.time_series_vaccinated[0])[:, :date]
-        dose2_raw = (self._model_data.time_series_vaccinated[1])[:, :date]
-        dose3_raw = (self._model_data.time_series_vaccinated[2])[:, :date]
-        dose4_raw = (self._model_data.time_series_vaccinated[3])[:, :date]
+        dose1_raw = (self.model_data.time_series_vaccinated[0])[:, :date]
+        dose2_raw = (self.model_data.time_series_vaccinated[1])[:, :date]
+        dose3_raw = (self.model_data.time_series_vaccinated[2])[:, :date]
+        dose4_raw = (self.model_data.time_series_vaccinated[3])[:, :date]
 
         # Broadcast the data to the whole province
 
@@ -98,11 +99,11 @@ class Model:
 
         today_population = np.ones(shape=(population.shape[0], population.shape[1])) * population
 
-        today_cases = self._model_data.time_series_active_cases.transpose(1, 0, 2)[:date]
+        today_cases = self.model_data.time_series_active_cases.transpose(1, 0, 2)[:date]
 
         today_incidence = today_cases
 
-        self._model_data.time_series_incidence = today_incidence.transpose(1, 0, 2)
+        self.model_data.time_series_incidence = today_incidence.transpose(1, 0, 2)
 
         # Get the convolutional kernels
 
@@ -156,17 +157,17 @@ class Model:
         today_immunity = vaccine_immunity + (np.ones(shape=vaccine_immunity.shape) -
                                              vaccine_immunity) * infection_immunity
 
-        data = self._model_data.time_series_immunity.transpose(1, 0, 2)
-        infection_data = self._model_data.time_series_infection_immunity.transpose(1, 0, 2)
-        vaccine_data = self._model_data.time_series_vaccine_immunity.transpose(1, 0, 2)
+        data = self.model_data.time_series_immunity.transpose(1, 0, 2)
+        infection_data = self.model_data.time_series_infection_immunity.transpose(1, 0, 2)
+        vaccine_data = self.model_data.time_series_vaccine_immunity.transpose(1, 0, 2)
 
         data[date] = today_immunity
         infection_data[date] = infection_immunity
         vaccine_data[date] = vaccine_immunity
 
-        self._model_data.time_series_immunity = data.transpose(1, 0, 2)
-        self._model_data.time_series_infection_immunity = infection_data.transpose(1, 0, 2)
-        self._model_data.time_series_vaccine_immunity = vaccine_data.transpose(1, 0, 2)
+        self.model_data.time_series_immunity = data.transpose(1, 0, 2)
+        self.model_data.time_series_infection_immunity = infection_data.transpose(1, 0, 2)
+        self.model_data.time_series_vaccine_immunity = vaccine_data.transpose(1, 0, 2)
 
         return None
 
@@ -233,14 +234,14 @@ class Model:
 
             # For non-working population, do local transmission here
 
-            immunity_level = self._model_data.time_series_immunity[c][date - 1]
+            immunity_level = np.clip(self.model_data.time_series_immunity[c][date], a_min=0, a_max=1)
 
-            immunity = np.ones(shape=(16,)) - immunity_level
+            immunity = (np.ones(shape=(16,)) - immunity_level) ** 0.8
 
-            clinical_infectious = np.sum(self._model_data.time_series_clinical_cases[c][date - 2:date], axis=0)
-            sub_clinical_infectious = np.sum(self._model_data.time_series_clinical_cases[c][date - 2:date], axis=0)
+            clinical_infectious = np.sum(self.model_data.time_series_clinical_cases[c][date - 2:date], axis=0)
+            sub_clinical_infectious = np.sum(self.model_data.time_series_clinical_cases[c][date - 2:date], axis=0)
 
-            exposed_infectious = np.sum(self._model_data.time_series_exposed[c][date - 3:date], axis=0)
+            exposed_infectious = np.sum(self.model_data.time_series_exposed[c][date - 3:date], axis=0)
 
             tot_infectiouesness = clinical_infectious + 0.5 * (sub_clinical_infectious + exposed_infectious)
 
@@ -258,11 +259,11 @@ class Model:
                                        work=False, immunity=np.clip(immunity, a_min=0, a_max=1))
 
             if time_step == 'day':
-                self._model_data.time_series_exposed[c][date] = rslt
-                self._model_data.time_series_infected[c][date] = rslt
+                self.model_data.time_series_exposed[c][date] = rslt
+                self.model_data.time_series_infected[c][date] = rslt
             else:
-                self._model_data.time_series_exposed[c][date] += rslt
-                self._model_data.time_series_infected[c][date] += rslt
+                self.model_data.time_series_exposed[c][date] += rslt
+                self.model_data.time_series_infected[c][date] += rslt
 
         if time_step == 'day':
             commuting_mix = self._commuting_mix_forward(infectious_by_county)
@@ -276,8 +277,8 @@ class Model:
 
             for c in range(Parameters.NO_COUNTY):
                 rslt = reverse_mix[c]
-                self._model_data.time_series_exposed[c][date] += rslt
-                self._model_data.time_series_infected[c][date] += rslt
+                self.model_data.time_series_exposed[c][date] += rslt
+                self.model_data.time_series_infected[c][date] += rslt
 
     """
         Exposed to cases
@@ -290,16 +291,23 @@ class Model:
         for c in range(Parameters.NO_COUNTY):
             kernel = np.matmul(raw_kernel.reshape((raw_kernel.shape[0], 1)), np.ones(shape=(1, 16)))[::-1]
             kernel_size = kernel.shape[0]
-            county_data = self._model_data.time_series_exposed[c]
+            county_data = self.model_data.time_series_exposed[c]
             data = county_data[date - kernel_size:date]
+
+            clinical_immunity_level = np.clip(self.model_data.time_series_immunity[c][date], a_min=0, a_max=1)
+
+            clinical_immunity = (np.ones(shape=(16,)) - clinical_immunity_level) ** 0.2
+
+            clinical_ratio = Parameters.CLINICAL_RATIO * clinical_immunity
 
             rslt = np.sum(np.multiply(data, kernel), axis=0)
 
-            self._model_data.time_series_active_cases[c][date] = rslt
-            self._model_data.time_series_clinical_cases[c][date] = np.multiply(rslt,
-                                                                               Parameters.CLINICAL_RATIO)
-            self._model_data.time_series_sub_clinical_cases[c][date] = np.multiply(rslt,
-                                                                                   Parameters.SUBCLINICAL_RATIO)
+            self.model_data.time_series_active_cases[c][date] = rslt
+            self.model_data.time_series_clinical_cases[c][date] = np.multiply(rslt,
+                                                                               clinical_ratio)
+            self.model_data.time_series_sub_clinical_cases[c][date] = np.multiply(rslt,
+                                                                                   np.ones(shape=(16, ))
+                                                                                   - clinical_ratio)
 
     def _infected_to_hospitalized(self, date):
         ratio = Parameters.ONT_HOSP_RATIO.reshape(16, 1)
@@ -308,10 +316,10 @@ class Model:
         kernel_size = kernel.shape[0]
 
         for c in range(Parameters.NO_COUNTY):
-            county_data = self._model_data.time_series_clinical_cases[c]
+            county_data = self.model_data.time_series_clinical_cases[c]
             data = county_data[date - kernel_size:date]
             rslt = np.sum(np.multiply(data, kernel), axis=0)
-            self._model_data.time_series_hospitalized[c][date] = rslt
+            self.model_data.time_series_hospitalized[c][date] = rslt
 
     def _infected_to_death(self, date):
         ratio = Parameters.ONT_CFR.reshape(16, 1)
@@ -320,10 +328,10 @@ class Model:
         kernel_size = kernel.shape[0]
 
         for c in range(Parameters.NO_COUNTY):
-            county_data = self._model_data.time_series_clinical_cases[c]
+            county_data = self.model_data.time_series_clinical_cases[c]
             data = county_data[date - kernel_size:date]
             rslt = np.sum(np.multiply(data, kernel), axis=0)
-            self._model_data.time_series_deaths[c][date] = rslt
+            self.model_data.time_series_deaths[c][date] = rslt
 
         return
 
@@ -335,10 +343,10 @@ class Model:
         kernel_size = kernel.shape[0]
 
         for c in range(Parameters.NO_COUNTY):
-            county_data = self._model_data.time_series_clinical_cases[c]
+            county_data = self.model_data.time_series_clinical_cases[c]
             data = county_data[date - kernel_size:date]
             rslt = np.sum(np.multiply(data, kernel), axis=0)
-            self._model_data.time_series_ICU[c][date] = rslt
+            self.model_data.time_series_ICU[c][date] = rslt
 
     def _infected_to_removed(self, date):
         self._subclinical_to_removed(date)
@@ -354,10 +362,10 @@ class Model:
         kernel_size = kernel.shape[0]
 
         for c in range(Parameters.NO_COUNTY):
-            county_data = self._model_data.time_series_sub_clinical_cases[c]
+            county_data = self.model_data.time_series_sub_clinical_cases[c]
             data = county_data[date - kernel_size:date]
             rslt = np.sum(np.multiply(data, kernel), axis=0)
-            self._model_data.time_series_recovered[c][date] = rslt
+            self.model_data.time_series_recovered[c][date] = rslt
 
     def _clinical_to_removed(self, date):
         ratio = np.ones(shape=(16, 1))
@@ -367,10 +375,10 @@ class Model:
         kernel_size = kernel.shape[0]
 
         for c in range(Parameters.NO_COUNTY):
-            county_data = self._model_data.time_series_clinical_cases[c]
+            county_data = self.model_data.time_series_clinical_cases[c]
             data = county_data[date - kernel_size:date]
             rslt = np.sum(np.multiply(data, kernel), axis=0)
-            self._model_data.time_series_recovered[c][date] += rslt
+            self.model_data.time_series_recovered[c][date] += rslt
 
     def _hospitalized_to_removed(self, date):
         ratio = np.ones(shape=(16, 1))
@@ -380,10 +388,10 @@ class Model:
         kernel_size = kernel.shape[0]
 
         for c in range(Parameters.NO_COUNTY):
-            county_data = self._model_data.time_series_clinical_cases[c]
+            county_data = self.model_data.time_series_clinical_cases[c]
             data = county_data[date - kernel_size:date]
             rslt = np.sum(np.multiply(data, kernel), axis=0)
-            self._model_data.time_series_recovered[c][date] += rslt
+            self.model_data.time_series_recovered[c][date] += rslt
 
     def _icu_to_removed(self, date):
         ratio = np.ones(shape=(16, 1))
@@ -393,10 +401,10 @@ class Model:
         kernel_size = kernel.shape[0]
 
         for c in range(Parameters.NO_COUNTY):
-            county_data = self._model_data.time_series_clinical_cases[c]
+            county_data = self.model_data.time_series_clinical_cases[c]
             data = county_data[date - kernel_size:date]
             rslt = np.sum(np.multiply(data, kernel), axis=0)
-            self._model_data.time_series_recovered[c][date] += rslt
+            self.model_data.time_series_recovered[c][date] += rslt
 
     def _synthesize_matrix(self, contact_type=0, contact_pattern='day', work=False):
         matrices = self.dependency.matrix_by_class
@@ -425,30 +433,30 @@ class Model:
 
     def save_to_file(self):
 
-        self.save_provincial_data(data=self._model_data.time_series_immunity,
+        self.save_provincial_data(data=self.model_data.time_series_immunity,
                                   tag='immunity', moving_avg=True)
 
-        self.save_provincial_data(data=self._model_data.time_series_active_cases,
+        self.save_provincial_data(data=self.model_data.time_series_active_cases,
                                   tag='total_cases', moving_avg=True)
 
-        self.save_provincial_data(data=self._model_data.time_series_clinical_cases,
+        self.save_provincial_data(data=self.model_data.time_series_clinical_cases,
                                   tag='clinical_cases', moving_avg=True)
 
-        self.save_provincial_data(data=self._model_data.time_series_hospitalized,
+        self.save_provincial_data(data=self.model_data.time_series_hospitalized,
                                   tag='hospitalized', moving_avg=True)
 
         phu = self.phu_ordering()
 
-        self.save_data_by_phu(self.convert_data_to_phu(data=self._model_data.time_series_immunity), phus=phu,
+        self.save_data_by_phu(self.convert_data_to_phu(data=self.model_data.time_series_immunity), phus=phu,
                               tag='immunity', moving_avg=True)
 
-        self.save_data_by_phu(self.convert_data_to_phu(data=self._model_data.time_series_active_cases), phus=phu,
+        self.save_data_by_phu(self.convert_data_to_phu(data=self.model_data.time_series_active_cases), phus=phu,
                               tag='total_cases', moving_avg=True)
 
-        self.save_data_by_phu(self.convert_data_to_phu(data=self._model_data.time_series_clinical_cases), phus=phu,
+        self.save_data_by_phu(self.convert_data_to_phu(data=self.model_data.time_series_clinical_cases), phus=phu,
                               tag='clinical_cases', moving_avg=True)
 
-        self.save_data_by_phu(self.convert_data_to_phu(data=self._model_data.time_series_hospitalized), phus=phu,
+        self.save_data_by_phu(self.convert_data_to_phu(data=self.model_data.time_series_hospitalized), phus=phu,
                               tag='hospitalized', moving_avg=True)
         return
 
@@ -552,7 +560,7 @@ if __name__ == '__main__':
         m.run_one_cycle(display_status=True)
         pass
 
-    plt.plot(m._model_data.time_series_vaccinated[0])
+    plt.plot(m.model_data.time_series_vaccinated[0])
     plt.show()
     print('Model run done')
     m.save_to_file()
