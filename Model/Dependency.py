@@ -140,6 +140,7 @@ class Dependency:
 
         df['date'] = pd.to_datetime(df['date'])
 
+
         groups = df.groupby('iso_3166_2_code')
         Ontario = groups.get_group('CA-ON')
         max_date = (Ontario['date'].max() - Parameters.OUTBREAK_FIRST_DAY).days
@@ -178,8 +179,9 @@ class Dependency:
 
         blurred_mobility = blurred_mobility / 100
 
-        # self.raw_mobility = mobility.T
         self.raw_mobility = blurred_mobility.T
+
+        print(blurred_mobility.shape)
 
         return
 
@@ -199,9 +201,10 @@ class Dependency:
 
         count = 0
 
-        work = np.mean(self.raw_mobility.T[3:5], axis=0).T
+        #Change according to paper!
+        work = self.raw_mobility.T[4]
         residential = self.raw_mobility.T[5]
-        other = np.mean(self.raw_mobility.T[0:2], axis=0).T
+        other = (0.445 * self.raw_mobility.T[3] + 0.345 * self.raw_mobility.T[0] + 0.21 * self.raw_mobility.T[1]).T
         school = np.zeros(shape=(3000,))
 
         while count * 365 + summer_break_start < 3000:
