@@ -13,11 +13,12 @@ import Gaussian
 import Parameters
 import Util
 
+
 def log_fit(x, a=0, b=0):
     return - a * np.exp(-b * x) + 0
 
-class Dependency:
 
+class Dependency:
     county_data = np.zeros((Parameters.NO_COUNTY, 3), dtype=int)
     commute_matrix = np.zeros((Parameters.NO_COUNTY, Parameters.NO_COUNTY), dtype=int)
 
@@ -52,6 +53,7 @@ class Dependency:
     # date_to_vaccines_by_age_un_differentaited = np.zeros((0, 3, 9))
 
     date_to_vaccines_by_phu = dict()
+    date_to_extra_dose_by_phu = dict()
 
     phu_id_pairing = {2226: 'Algoma Public Health', 2227: 'Brant County Health Unit',
                       2230: 'Durham Region Health Department ', 2233: 'Grey Bruce Health Unit',
@@ -110,20 +112,17 @@ class Dependency:
         self.read_matrix()
         self.read_county_data()
         self.read_phu()
+        self.code_district_linking()
+        self.compute_phu_population()
         self.read_commute_matrix()
         self.read_age()
         self.read_cases()
-        # self.read_vaccine()
-        # self.read_vaccine_by_phu()
         self.read_vaccine_by_phu()
-        # self.reshape_vaccine()
         self.reshape_vaccine_by_phu()
         """
             Do not differentiate cases
         """
         self.differentiate_by_phu()
-        self.code_district_linking()
-        self.compute_phu_population()
         self.distribute_to_counties()
         self.read_age()
         self.read_mobility()
@@ -142,7 +141,6 @@ class Dependency:
         df = pd.concat([df1, df2, df3])
 
         df['date'] = pd.to_datetime(df['date'])
-
 
         groups = df.groupby('iso_3166_2_code')
         Ontario = groups.get_group('CA-ON')
@@ -185,20 +183,16 @@ class Dependency:
         retail_param = [2.91110633e+01, 2.16706517e-02]
         trainsit_param = [5.47809268e+01, 4.45390140e-03]
         workplace_param = [2.46551438e+01, 3.50052645e-04]
-        residential_param = [-1.08190670e+01,  5.54319046e-03]
+        residential_param = [-1.08190670e+01, 5.54319046e-03]
 
         blurred_mobility[0][max_date:] = log_fit(forecast_interval, retail_param[0], retail_param[1])
         blurred_mobility[3][max_date:] = log_fit(forecast_interval, trainsit_param[0], trainsit_param[1])
         blurred_mobility[4][max_date:] = log_fit(forecast_interval, workplace_param[0], workplace_param[1])
         blurred_mobility[5][max_date:] = log_fit(forecast_interval, residential_param[0], residential_param[1])
 
-        print(forecast_interval)
-
         blurred_mobility = blurred_mobility / 100
 
         self.raw_mobility = blurred_mobility.T
-
-        print(blurred_mobility.shape)
 
         return
 
@@ -218,7 +212,7 @@ class Dependency:
 
         count = 0
 
-        #Change according to paper!
+        # Change according to paper!
         work = self.raw_mobility.T[4]
         residential = self.raw_mobility.T[5]
         other = (0.445 * self.raw_mobility.T[3] + 0.345 * self.raw_mobility.T[0] + 0.21 * self.raw_mobility.T[1]).T
@@ -228,7 +222,6 @@ class Dependency:
             count += 1
             start = count * 365 + summer_break_start
             end = min(count * 365 + summer_break_end, 3000)
-            # print(start, end)
             school[start:end] = - 0.65
             pass
 
@@ -253,9 +246,6 @@ class Dependency:
         unmodified[1][:mask_lift_date] = school[:mask_lift_date] * 0.6
 
         self.mobility = conct + np.ones(shape=conct.shape)
-
-        # print(np.max(self.mobility), np.min(self.mobility))
-        # print(np.max(self.raw_mobility), np.min(self.raw_mobility))
 
         return
 
@@ -394,7 +384,6 @@ class Dependency:
         file.close()
         return
 
-
     # def read_vaccine_by_phu(self):
     #     path = path = self.get_dependency_path() + 'vaccines_by_age_phu.csv'
     #     vaccine_df = pd.read_csv(path)
@@ -459,7 +448,7 @@ class Dependency:
                                     'Completed primary series and 1 booster dose coverage (%):',
                                     'Completed primary series and 2 booster doses coverage (%):']
 
-        vaccine_dose_extra = ['Dose 5', 'Dose 6']
+        vaccine_dose_extra = ['Dose 4', 'Dose 5', 'Dose 6']
 
         path = self.get_dependency_path() + 'All Covid-19 vaccine trends data.csv'
         vaccine_df = pd.read_csv(path)
@@ -472,8 +461,10 @@ class Dependency:
             if g not in self.phu_to_district:
                 continue
 
+            population = self.population_by_phu[g]
+
             data = np.zeros(shape=(len(vaccine_dose_descrpition), len(age_bands), self.total_days))
-            extra_dose_data = np.zeros(shape=(len(vaccine_dose_extra), len(age_bands), self.total_days))
+            extra_dose_data = np.zeros(shape=(len(vaccine_dose_extra), self.total_days))
 
             group = grouped.get_group(g)
 
@@ -490,13 +481,15 @@ class Dependency:
                     data[i][j] = stratified_data
 
             for i in range(len(vaccine_dose_extra)):
-                stratified_data = np.concatenate(
-                    [np.zeros(shape=pre, ), group[vaccine_dose_extra[i]].to_numpy(), np.zeros(shape=sur, )])
+                stratified_data = np.concatenate([np.zeros(shape=pre, ),
+                                                  group[vaccine_dose_extra[i]].to_numpy(),
+                                                  np.zeros(shape=sur, )]) / population
                 extra_dose_data[i] = stratified_data
 
             data = data.transpose(2, 0, 1) / 100
 
             self.date_to_vaccines_by_phu[g] = copy.deepcopy(data)
+            self.date_to_extra_dose_by_phu[g] = copy.deepcopy(extra_dose_data)
 
         return
 
@@ -510,7 +503,7 @@ class Dependency:
         for phu in self.date_to_vaccines_by_phu:
             phu_data = self.date_to_vaccines_by_phu[phu]
             for date in range(self.total_days):
-                for dose in [0, 1, 2]:
+                for dose in [0, 1, 2, 3]:
                     lst = phu_data[date][dose]
                     lst = Gaussian.age_dog_algo(lst)
                     reshaped[date][dose] = lst
@@ -521,25 +514,41 @@ class Dependency:
     def differentiate_by_phu(self):
         for phu in self.date_to_vaccines_by_phu:
             phu_data = self.date_to_vaccines_by_phu[phu]
+            extra_dose_data = self.date_to_extra_dose_by_phu[phu]
 
             data = phu_data.transpose(1, 0, 2)
 
-            print(data.shape)
+            # dose1 = np.clip((data[0] - data[1]), a_min=0, a_max=1)
+            # dose2 = np.clip((data[1] - data[2]), a_min=0, a_max=1)
+            # dose3 = np.clip((data[2] - data[3]), a_min=0, a_max=1)
 
-            dose1 = np.clip((data[0] - data[1]), a_min=0, a_max=1)
-            dose2 = np.clip((data[1] - data[2]), a_min=0, a_max=1)
-            dose3 = np.clip((data[2] - data[3]), a_min=0, a_max=1)
+            dose1 = data[0]
+            dose2 = data[1]
+            dose3 = data[2]
             dose4 = data[3]
+            extra_dose = np.sum(extra_dose_data, axis=0)
+
+            four_dose = extra_dose_data[0]
+            total_dose = np.sum(extra_dose_data, axis=0)
+
+            ratio = np.divide(total_dose, four_dose, out=np.zeros_like(total_dose), where=four_dose != 0)
+
 
             phu_data = np.array([dose1, dose2, dose3, dose4]).transpose(1, 0, 2)
 
-            print(phu_data.shape)
-
-
             vaccine_differentiated = np.diff(phu_data, axis=0)
 
-            phu_data = vaccine_differentiated
+            dose4_data = vaccine_differentiated.transpose(1, 0, 2)[3]
 
+            multiplied_data = dose4_data.T * ratio[1:]
+
+            buffer = vaccine_differentiated.transpose(1, 0, 2)
+
+            buffer[3] = multiplied_data.T
+
+            vaccine_differentiated = buffer.transpose(1, 0, 2)
+
+            phu_data = vaccine_differentiated
 
             phu_data = np.clip(phu_data, a_min=0, a_max=0.2)
             self.date_to_vaccines_by_phu[phu] = phu_data
@@ -595,7 +604,6 @@ class Dependency:
         self.date_to_vaccines_by_county = np.zeros(shape=(Parameters.NO_COUNTY, self.total_days, 4, 16), dtype=float)
 
         for i in range(len(self.county_data)):
-
             county = self.county_data[i][0]
             district = self.county_data[i][1]
             population = self.county_data[i][2]
@@ -626,10 +634,8 @@ class Dependency:
 
             vaccinated = self.date_to_vaccines_by_phu[phu]
 
-            print(vaccinated.shape)
-
             self.date_to_vaccines_by_county[i] = np.concatenate([np.zeros(shape=(1, 4, 16)),
-                                                                              vaccinated], axis=0)
+                                                                 vaccinated], axis=0)
 
     def read_age(self):
         read_path = self.get_dependency_path() + '1710000501-eng.csv'
