@@ -279,7 +279,9 @@ CLI2REC_CONVOLUTION_KERNEL = normalize(gamma.pdf(kernel_size_2, a=1.6, scale=4))
 
 kernel_size_3 = np.linspace(0, 15, 15)
 
-INF2HOS_CONVOLUTION_KERNEL = normalize(norm.pdf(kernel_size_3, loc=7.5, scale=1))
+INF2HOS_CONVOLUTION_KERNEL = normalize(norm.pdf(kernel_size_3, loc=9.94, scale=1.76))
+INF2DEA_CONVOLUTION_KERNEL = normalize(norm.pdf(kernel_size_3, loc=14.13, scale=1))
+
 HOS2ICU_CONVOLUTION_KERNEL = normalize(norm.pdf(kernel_size_3, loc=11.1, scale=1))
 HOS2DEA_CONVOLUTION_KERNEL = normalize(norm.pdf(kernel_size_3, loc=7.5, scale=math.sqrt(5)))
 HOS2RMV_CONVOLUTION_KERNEL = normalize(lognorm.pdf(range(0, 40), s=1.2, loc=11.08))
