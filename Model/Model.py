@@ -321,6 +321,20 @@ class Model:
             rslt = np.sum(np.multiply(data, kernel), axis=0)
             self.model_data.time_series_hospitalized[c][date] = rslt
 
+    def _infected_to_icu(self, date):
+        ratio = Parameters.ONT_ICU_RATIO.reshape(16, 1)
+        raw_kernel = Parameters.CLI2ICU_CONVOLUTION_KERNEL
+        kernel = np.matmul(raw_kernel.reshape((raw_kernel.shape[0], 1)), ratio.T)[::-1]
+
+        kernel_size = kernel.shape[0]
+
+        for c in range(Parameters.NO_COUNTY):
+            county_data = self.model_data.time_series_clinical_cases[c]
+            data = county_data[date - kernel_size:date]
+            rslt = np.sum(np.multiply(data, kernel), axis=0)
+            self.model_data.time_series_ICU[c][date] = rslt
+
+
     def _infected_to_death(self, date):
         ratio = Parameters.ONT_CFR.reshape(16, 1)
         raw_kernel = Parameters.CLI2DEA_CONVOLUTION_KERNEL
@@ -334,19 +348,6 @@ class Model:
             self.model_data.time_series_deaths[c][date] = rslt
 
         return
-
-    def _infected_to_icu(self, date):
-        ratio = Parameters.ONT_ICU_RATIO.reshape(16, 1)
-        raw_kernel = Parameters.CLI2ICU_CONVOLUTION_KERNEL
-        kernel = np.matmul(raw_kernel.reshape((raw_kernel.shape[0], 1)), ratio.T)[::-1]
-
-        kernel_size = kernel.shape[0]
-
-        for c in range(Parameters.NO_COUNTY):
-            county_data = self.model_data.time_series_clinical_cases[c]
-            data = county_data[date - kernel_size:date]
-            rslt = np.sum(np.multiply(data, kernel), axis=0)
-            self.model_data.time_series_ICU[c][date] = rslt
 
     def _infected_to_removed(self, date):
         self._subclinical_to_removed(date)
