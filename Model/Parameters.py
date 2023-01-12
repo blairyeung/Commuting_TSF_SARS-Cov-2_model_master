@@ -279,20 +279,21 @@ CLI2REC_CONVOLUTION_KERNEL = normalize(gamma.pdf(kernel_size_2, a=1.6, scale=4))
 
 kernel_size_3 = np.linspace(0, 15, 15)
 
-INF2HOS_CONVOLUTION_KERNEL = normalize(norm.pdf(kernel_size_3, loc=9.94, scale=1.76))
 INF2DEA_CONVOLUTION_KERNEL = normalize(norm.pdf(kernel_size_3, loc=14.13, scale=1))
 
-HOS2ICU_CONVOLUTION_KERNEL = normalize(norm.pdf(kernel_size_3, loc=11.1, scale=1))
-HOS2DEA_CONVOLUTION_KERNEL = normalize(norm.pdf(kernel_size_3, loc=7.5, scale=math.sqrt(5)))
-HOS2RMV_CONVOLUTION_KERNEL = normalize(lognorm.pdf(range(0, 40), s=1.2, loc=11.08))
-ICU2RMV_CONVOLUTION_KERNEL = normalize(lognorm.pdf(range(0, 40), s=1.25, loc=13.33))
+# HOS2ICU_CONVOLUTION_KERNEL = normalize(norm.pdf(kernel_size_3, loc=11.1, scale=1))
+# HOS2DEA_CONVOLUTION_KERNEL = normalize(norm.pdf(kernel_size_3, loc=7.5, scale=math.sqrt(5)))
+# HOS2RMV_CONVOLUTION_KERNEL = normalize(lognorm.pdf(range(0, 40), s=1.2, loc=11.08))
+# ICU2RMV_CONVOLUTION_KERNEL = normalize(lognorm.pdf(range(0, 40), s=1.25, loc=13.33))
 
 """ 
     These kernels are for hospitalization, ICU, and deaths
 """
 
 kernel_size_4 = np.linspace(0, 30, 30)
-CLI2DEA_CONVOLUTION_KERNEL = normalize(norm.pdf(kernel_size_4, loc=15, scale=2))
+CLI2HOS_CONVOLUTION_KERNEL = normalize(norm.pdf(kernel_size_3, loc=9.86, scale=1.73))
+CLI2ICU_CONVOLUTION_KERNEL = normalize(norm.pdf(kernel_size_3, loc=11, scale=1.76))
+CLI2DEA_CONVOLUTION_KERNEL = normalize(norm.pdf(kernel_size_4, loc=14.13, scale=1))
 
 VACCINE_EFFICACY_KERNEL_DOSE1 = get_immunity_kernel(dose=1, category='Transmission')
 VACCINE_EFFICACY_KERNEL_DOSE2 = get_immunity_kernel(dose=2)

@@ -621,7 +621,7 @@ class Dependency:
             # THESE ARE INCORRECT!!!!!!!
 
             ICU = np.convolve(hospitalizations.reshape(self.total_days),
-                              Parameters.HOS2ICU_CONVOLUTION_KERNEL, mode='same').reshape(self.total_days, 1) * \
+                              Parameters.CLI2ICU_CONVOLUTION_KERNEL, mode='same').reshape(self.total_days, 1) * \
                   Parameters.ICU_HOSP
 
             ICU_ratio = Parameters.ONT_ICU_RATIO.reshape(16, 1)

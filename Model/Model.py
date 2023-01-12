@@ -311,7 +311,7 @@ class Model:
 
     def _infected_to_hospitalized(self, date):
         ratio = Parameters.ONT_HOSP_RATIO.reshape(16, 1)
-        raw_kernel = Parameters.INF2HOS_CONVOLUTION_KERNEL
+        raw_kernel = Parameters.CLI2HOS_CONVOLUTION_KERNEL
         kernel = np.matmul(raw_kernel.reshape((raw_kernel.shape[0], 1)), ratio.T)[::-1]
         kernel_size = kernel.shape[0]
 
@@ -337,7 +337,7 @@ class Model:
 
     def _infected_to_icu(self, date):
         ratio = Parameters.ONT_ICU_RATIO.reshape(16, 1)
-        raw_kernel = Parameters.HOS2ICU_CONVOLUTION_KERNEL
+        raw_kernel = Parameters.CLI2ICU_CONVOLUTION_KERNEL
         kernel = np.matmul(raw_kernel.reshape((raw_kernel.shape[0], 1)), ratio.T)[::-1]
 
         kernel_size = kernel.shape[0]
@@ -351,8 +351,8 @@ class Model:
     def _infected_to_removed(self, date):
         self._subclinical_to_removed(date)
         self._clinical_to_removed(date)
-        self._hospitalized_to_removed(date)
-        self._icu_to_removed(date)
+        # self._hospitalized_to_removed(date)
+        # self._icu_to_removed(date)
 
     def _subclinical_to_removed(self, date):
         ratio = np.ones(shape=(16, 1))
@@ -383,7 +383,7 @@ class Model:
     def _hospitalized_to_removed(self, date):
         ratio = np.ones(shape=(16, 1))
 
-        raw_kernel = Parameters.HOS2RMV_CONVOLUTION_KERNEL
+        raw_kernel = Parameters.CLI2REC_CONVOLUTION_KERNEL
         kernel = np.matmul(raw_kernel.reshape((raw_kernel.shape[0], 1)), ratio.T)[::-1]
         kernel_size = kernel.shape[0]
 
