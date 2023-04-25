@@ -1,6 +1,6 @@
 # Modelling the transmission of the omicron variant of SARS-CoV-2 in Ontario using inter and intra-county population mobility
 Liwei Yang<sup>*1, 2</sup> ([blairyeung](https://github.com/blairyeung)), Yuhao Yang<sup>1</sup> ([martinyang0416](https://github.com/martinyang0416)), 
-Muxin Tian <sup>1</sup> ([realtmx](https://github.com/realtmxi))
+Muxin Tian <sup>1</sup> ([realtmxi](https://github.com/realtmxi))
 
  <sup>1</sup> Department of computer science, University of Toronto, 40 St George St, Toronto, M5S 2E4, Canada
 
